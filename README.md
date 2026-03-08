@@ -53,6 +53,6 @@ Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-pyth
 - **What tools?** uv, basedpyright (strict), ruff, pytest, poethepoet
 - **Error handling?** `Result[T, E]` from rusty-results. Exceptions = bugs only.
 - **CLI?** typer (argparse only for stdlib-only scripts)
-- **GUI?** PySide6 + qasync
+- **GUI?** PySide6 + qasync (not QtAsyncio — still in technical preview)
 - **Text output?** Jinja2
 - **Tests?** E2e > unit. Real > mocked. Trustworthiness > coverage.

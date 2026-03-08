@@ -91,7 +91,7 @@ class WhisperModelWrapper:
 
 ---
 
-## Async Integration with qasync
+## Async Integration with qasync (over QtAsyncio, which is still in technical preview)
 
 ### Setup
 
