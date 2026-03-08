@@ -1,0 +1,2 @@
+- ban `object` too
+- for new greenfield qt projects - research patterns from scratch and re read the doc (are managers good?)
