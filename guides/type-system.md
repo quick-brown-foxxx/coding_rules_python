@@ -1,6 +1,6 @@
 # Type System Guide
 
-Detailed reference for Python type safety patterns. See [PHILOSOPHY.md](../PHILOSOPHY.md) section 2.
+Detailed reference for Python type safety patterns. See [PHILOSOPHY.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/PHILOSOPHY.md) section 2.
 
 ---
 

@@ -8,7 +8,7 @@ Personal Python development standards, templates, and AI skills.
 PHILOSOPHY.md          Core beliefs — every other doc inherits from this
 
 rules/                 Copy-paste rule files for projects
-  coding_rules.md        Full coding standards
+  coding_rules.md        Full coding standards.
   coding_rules_short.md  Condensed version for scripts
 
 templates/             Copy into new projects, fill TODOs

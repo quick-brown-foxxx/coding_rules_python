@@ -1,6 +1,6 @@
 # Testing Guide (Lightweight)
 
-Practical pytest setup for most projects. See [PHILOSOPHY.md](../PHILOSOPHY.md) section 5.
+Practical pytest setup for most projects. See [PHILOSOPHY.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/PHILOSOPHY.md) section 5.
 
 ---
 

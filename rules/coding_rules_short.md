@@ -1,6 +1,6 @@
 # Coding Rules (Short Version)
 
-For single-file scripts and small projects. See [full version](coding_rules.md) for details.
+For single-file scripts and small projects. See [full version](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/rules/coding_rules.md) for details.
 
 ---
 
