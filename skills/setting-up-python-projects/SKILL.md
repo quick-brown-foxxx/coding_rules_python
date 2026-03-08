@@ -139,9 +139,36 @@ if __name__ == "__main__":
 
 ---
 
-## Customization Points
+## Adapt to Tech Stack & Domain
 
-- **Qt app**: uncomment PySide6/qasync in pyproject.toml, add `ui/` directory
-- **CLI app**: uncomment typer in pyproject.toml, add `cli/` directory
-- **HTTP client**: uncomment httpx in pyproject.toml
-- **Wrapper enforcement**: add `[tool.ruff.lint.flake8-tidy-imports.banned-api]` section
+After scaffolding, **adapt everything to the specific project**. The templates are a starting point, not a straitjacket. `docs/PHILOSOPHY.md` is the only ruling constant — everything else bends to fit the project's tech stack, domain, and constraints.
+
+### What to adapt
+
+| Area | How to adapt |
+|------|--------------|
+| **Directory layout** | Add/remove/rename directories to match the domain. Not every project needs `cli/`, `ui/`, `wrappers/`, `shared/`. A data pipeline might need `pipelines/`, `schemas/`, `extractors/`. A web service might need `routes/`, `middleware/`, `repositories/`. |
+| **Dependencies** | Add domain-specific libraries. Remove unused template defaults. Research current best-in-class libraries for the domain (e.g. SQLAlchemy vs raw asyncpg, Pydantic vs attrs). |
+| **pyproject.toml** | Adjust ruff rules, pytest markers, basedpyright overrides for the domain. Some domains need relaxed rules (e.g. data science may need broader `type: ignore` for numpy interop). |
+| **AGENTS.md** | Fill TODO sections with project-specific architecture, key decisions, domain vocabulary, and workflows. This is the agent's primary orientation document — make it specific. |
+| **coding_rules.md** | Extend or override rules for the domain. Add domain-specific conventions (e.g. database migration rules, API versioning policy, data validation requirements). |
+| **Test structure** | Adjust to match what matters. A CLI tool needs heavy e2e tests. A library needs heavy unit tests. A web service needs API integration tests. |
+| **CI/CD** | Add domain-appropriate checks (e.g. migration consistency, API schema validation, container builds). |
+
+### Research before building
+
+When setting up a project in an unfamiliar domain or with unfamiliar libraries:
+
+1. **Research the domain's conventions** — look up how well-maintained projects in the same space are structured
+2. **Check library compatibility** — verify libraries work together and with basedpyright strict mode (some libraries have poor type stubs; plan wrappers early)
+3. **Identify domain-specific tooling** — some domains have their own linters, formatters, or validation tools that complement the base toolchain
+4. **Check for basedpyright known issues** — some libraries (numpy, pandas, SQLAlchemy) need specific configuration or stub packages to work cleanly in strict mode
+
+### Quick customization checklist
+
+- [ ] Directory layout matches the domain, not the generic template
+- [ ] Dependencies are domain-appropriate (researched, not guessed)
+- [ ] AGENTS.md describes *this* project, not a generic Python project
+- [ ] coding_rules.md has domain-specific additions if needed
+- [ ] Test structure reflects what matters most for this project
+- [ ] basedpyright config accounts for domain-specific library quirks
