@@ -58,4 +58,4 @@ class MyManager(QObject):
 
 ## Reference
 
-See `guides/qt-patterns.md` for full patterns including QAsyncSignalBridge implementation, system tray, keyboard shortcuts, lock manager, and testing with pytest-qt.
+See [guides/qt-patterns.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/guides/qt-patterns.md) for full patterns including QAsyncSignalBridge implementation, system tray, keyboard shortcuts, lock manager, and testing with pytest-qt.
