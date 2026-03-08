@@ -20,23 +20,15 @@ templates/             Copy into new projects, fill TODOs
   vscode_extensions.json Recommended extensions
 
 skills/                Claude Code skills (deploy to ~/.claude/skills/)
-  writing-python-code/          High-level routing skill
-  write-single-python-script/   PEP 722 single-file scripts
-  setup-python-project/         New project bootstrap
-  working-with-qt/              PySide6 desktop apps
-  python-error-handling/        Result pattern
-  python-testing-lightweight/   Standard pytest setup
-  python-testing-heavyweight/   Containerized testing
-  multi-ui-architecture/        GUI + CLI + API
+  writing-python-code/          Core Python: typing, errors, async, style, security
+  writing-python-scripts/       PEP 722 single-file scripts
+  setting-up-python-projects/   New project bootstrap
+  building-qt-apps/             PySide6 desktop apps
+  testing-python/               Pytest setup, fixtures, containerized testing
+  building-multi-ui-apps/       GUI + CLI + API architecture
 
-guides/                Detailed reference docs
-  type-system.md         Type safety patterns
-  async-patterns.md      Async + Qt integration
-  testing-lightweight.md Pytest setup & fixtures
-  testing-heavyweight.md Containers & mock servers
-  qt-patterns.md         Signals, wrappers, managers
-  project-layout.md      Full project vs single script
-  other-patterns.md      J2, platform abstraction, security, logging
+guides/                Project-specific personal notes
+  other-patterns.md      Localization, config merging + JSON schema validation
 ```
 
 ## How to Use
@@ -44,7 +36,7 @@ guides/                Detailed reference docs
 ### Starting a new project
 
 1. Read `PHILOSOPHY.md` for the mindset
-2. Decide: single script or full project? (see `guides/project-layout.md`)
+2. Decide: single script or full project? (see `writing-python-scripts` or `setting-up-python-projects` skills)
 3. Copy relevant files from `templates/` into your project
 4. Copy `rules/coding_rules.md` (or `_short`) into `docs/`
 5. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
@@ -52,7 +44,7 @@ guides/                Detailed reference docs
 
 ### For AI agents
 
-Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-python-code` skill routes to specific skills based on task type.
+Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-python-code` skill covers core standards; other skills cover specific domains.
 
 ### Quick reference
 
