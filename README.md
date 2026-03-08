@@ -27,7 +27,7 @@ skills/                Claude Code skills (deploy to ~/.claude/skills/)
   testing-python/               Pytest setup, fixtures, containerized testing
   building-multi-ui-apps/       GUI + CLI + API architecture
 
-guides/                Project-specific personal notes
+notes/                Project-specific personal notes
   other-patterns.md      Localization, config merging + JSON schema validation
 ```
 
