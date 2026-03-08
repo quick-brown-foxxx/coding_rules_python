@@ -46,9 +46,11 @@ project/
 │   ├── bootstrap.py          # Setup script
 │   └── check_type_ignore.py
 ├── docs/
-│   └── coding_rules.md       # Copy from rules/coding_rules.md
+│   ├── coding_rules.md       # Copy from rules/coding_rules.md
+│   └── PHILOSOPHY.md          # Copy from PHILOSOPHY.md
 ├── shared/                   # Cross-cutting (logging, shortcuts)
 ├── AGENTS.md                 # Copy from templates/AGENTS.md, customize
+├── CLAUDE.md                 # Symlink → AGENTS.md
 ├── pyproject.toml            # Copy from templates/pyproject.toml, customize
 ├── .pre-commit-config.yaml   # Copy from templates/pre-commit-config.yaml
 ├── .gitignore                # Copy from templates/gitignore
@@ -66,7 +68,7 @@ project/
    mkdir -p src/APPNAME tests/unit tests/integration tests/fixtures scripts docs .vscode
    ```
 
-2. **Copy template files:**
+2. **Copy template and reference files:**
    - `templates/pyproject.toml` → `pyproject.toml` (update `[project]` section)
    - `templates/AGENTS.md` → `AGENTS.md` (fill TODO sections)
    - `templates/pre-commit-config.yaml` → `.pre-commit-config.yaml`
@@ -74,6 +76,8 @@ project/
    - `templates/vscode_settings.json` → `.vscode/settings.json`
    - `templates/vscode_extensions.json` → `.vscode/extensions.json`
    - `rules/coding_rules.md` → `docs/coding_rules.md`
+   - `PHILOSOPHY.md` → `docs/PHILOSOPHY.md`
+   - Create symlink: `ln -s AGENTS.md CLAUDE.md`
 
 3. **Create entry points:**
    ```python

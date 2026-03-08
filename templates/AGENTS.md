@@ -4,9 +4,17 @@
 
 ---
 
+## Foundational Philosophy
+
+**YOU MUST read and internalize `docs/PHILOSOPHY.md` before writing any code.** It defines the non-negotiable principles (pit of success, explicitness through types, fail fast, Result-based errors, testing philosophy, architecture, tooling) that drive every decision in this project. All rules below are applications of those principles.
+
+@docs/PHILOSOPHY.md
+
+---
+
 ## Critical Reading Path
 
-1. **New context?** Review this document fully.
+1. **New context?** Review this document and `docs/PHILOSOPHY.md` fully.
 2. **Implementation phase?** Consult [coding_rules.md](docs/coding_rules.md) for detailed patterns.
 
 **Invariant:** Run `uv run poe lint_full` continuously during development, not just at finalization.
