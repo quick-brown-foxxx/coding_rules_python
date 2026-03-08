@@ -87,7 +87,7 @@ Use tools that enforce the philosophy automatically. Prefer tools that are fast,
 Standard tools for standard tasks:
 
 - **CLI**: typer for all projects with `uv`. argparse only for stdlib-only scripts without external deps.
-- **GUI**: PySide6 with qasync for async integration. Never block the event loop.
+- **GUI**: PySide6 with qasync for async integration (QtAsyncio is still in technical preview). Never block the event loop.
 - **Text generation** (HTML, configs, reports): Jinja2 templates. Separate data from presentation.
 - **HTTP**: httpx (async-capable). Logging: colorlog. Config: YAML + JSON Schema validation.
 - **Async**: for all I/O operations. `asyncio.create_subprocess_exec()` for subprocesses. Never `subprocess.run()` in async context. Never `time.sleep()` in event loops.
