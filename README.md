@@ -39,8 +39,10 @@ guides/                Project-specific personal notes
 2. Decide: single script or full project? (see `writing-python-scripts` or `setting-up-python-projects` skills)
 3. Copy relevant files from `templates/` into your project
 4. Copy `rules/coding_rules.md` (or `_short`) into `docs/`
-5. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
-6. Run `uv sync && uv run pre-commit install`
+5. Copy `PHILOSOPHY.md` into `docs/` (referenced by AGENTS.md)
+6. Create `CLAUDE.md` symlink → `AGENTS.md` (Claude Code reads CLAUDE.md; the `@docs/PHILOSOPHY.md` import in AGENTS.md auto-loads philosophy into context)
+7. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
+8. Run `uv sync && uv run pre-commit install`
 
 ### For AI agents
 
