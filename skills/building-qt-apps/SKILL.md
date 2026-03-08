@@ -1,6 +1,11 @@
-# Qt Patterns Guide
+---
+name: building-qt-apps
+description: "PySide6 desktop apps: Manager→Service→Wrapper architecture, qasync integration, signals, system tray, testing. Use when building or modifying Qt GUI applications."
+---
 
-PySide6 patterns for desktop applications. See [PHILOSOPHY.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/PHILOSOPHY.md) sections 6, 8.
+# Building Qt Apps
+
+Qt apps use PySide6 with qasync for async integration. Architecture follows Manager → Service → Wrapper layering. Never block the event loop.
 
 ---
 
@@ -12,7 +17,7 @@ PySide6 patterns for desktop applications. See [PHILOSOPHY.md](https://github.co
 
 ---
 
-## Architecture: Manager -> Service -> Wrapper
+## Architecture: Manager → Service → Wrapper
 
 ```
 UI Layer (MainWindow, Dialogs, TrayIcon)
@@ -93,6 +98,7 @@ class WhisperModelWrapper:
 ```python
 import asyncio
 import qasync
+from PySide6.QtWidgets import QApplication
 
 def main() -> int:
     app = QApplication(sys.argv)
@@ -107,9 +113,39 @@ def main() -> int:
 
 ### QAsyncSignalBridge
 
-See [async-patterns.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/guides/async-patterns.md) for full implementation.
+Bridge async coroutines to Qt signals:
+
+```python
+class QAsyncSignalBridge(QObject):
+    finished = Signal(object)
+    error = Signal(str)
+
+    def run_async(
+        self,
+        coro: Coroutine[object, None, T],
+        on_success: Callable[[T], None] | None = None,
+        on_error: Callable[[str], None] | None = None,
+    ) -> None:
+        async def _wrapped() -> None:
+            try:
+                result = await coro
+                if on_success:
+                    on_success(result)
+                else:
+                    self.finished.emit(result)
+            except Exception as e:
+                if on_error:
+                    on_error(str(e))
+                else:
+                    self.error.emit(str(e))
+
+        loop = asyncio.get_event_loop()
+        self._task = loop.create_task(_wrapped())
+```
 
 ### ThreadPoolExecutor for Blocking Libraries
+
+When a library only provides sync API:
 
 ```python
 class AsyncRecorder(QObject):
@@ -124,6 +160,18 @@ class AsyncRecorder(QObject):
         result = await loop.run_in_executor(self._executor, self._sync_record)
         self.recording_completed.emit(result)
 ```
+
+---
+
+## Key Rules
+
+1. **PySide6** (LGPL, no system deps) over PyQt
+2. **Never block event loop**: no `subprocess.run()`, no `time.sleep()`, no sync HTTP
+3. **qasync** bridges asyncio and Qt event loops
+4. **ThreadPoolExecutor** wraps blocking third-party APIs
+5. **Typed wrappers** around untyped libraries, enforced via ruff `banned-api`
+6. **Signals at class level**, not in `__init__`
+7. **camelCase for Qt event handlers** (ignore ruff N802), **snake_case for our slots**
 
 ---
 
@@ -149,7 +197,7 @@ class AudioManager(QObject):
 
 ## Naming Convention Exception
 
-Qt event handlers use `camelCase` per Qt convention. Ignore ruff `N802` for these:
+Qt event handlers use `camelCase` per Qt convention:
 
 ```toml
 [tool.ruff.lint]
@@ -167,9 +215,18 @@ class CustomWidget(QWidget):
 
 ---
 
-## System Tray Pattern
+## Declarative Label → Callback Pattern
+
+Whenever bootstrapping a fixed set of labeled actions — tray menus, button bars, context menus, toolbar items — avoid imperative `addAction`/`addButton` chains. Instead, declare all entries as data at the top of the setup method (where `self` is in scope for type-safe bound-method references) and drive the construction with a generic loop at the bottom.
+
+`"SEPARATOR"` is a `Literal` sentinel: basedpyright rejects any other string in that position, so both the sentinel and the callbacks are fully type-checked.
 
 ```python
+from typing import Callable, Final, Literal
+
+_SEPARATOR: Final = "SEPARATOR"
+_Entry = tuple[str, Callable[[], None]] | Literal["SEPARATOR"]
+
 class ApplicationTrayIcon(QSystemTrayIcon):
     def __init__(self) -> None:
         super().__init__()
@@ -177,12 +234,25 @@ class ApplicationTrayIcon(QSystemTrayIcon):
         self._setup_menu()
 
     def _setup_menu(self) -> None:
+        entries: list[_Entry] = [
+            ("Settings", self._open_settings),
+            _SEPARATOR,
+            ("Quit", QApplication.quit),
+        ]
+
         menu = QMenu()
-        menu.addAction("Settings", self._open_settings)
-        menu.addSeparator()
-        menu.addAction("Quit", QApplication.quit)
+        for entry in entries:
+            if entry is _SEPARATOR:
+                menu.addSeparator()
+            else:
+                label, cb = entry
+                menu.addAction(label, cb)
         self.setContextMenu(menu)
+
+    def _open_settings(self) -> None: ...
 ```
+
+`entries` is the single place to add, remove, or reorder items. The loop is generic boilerplate that never changes. Mistyping `self._poen_settings` is caught by basedpyright at check time — no runtime surprises. The same pattern applies to button bars, context menus, or any other label → callback mapping.
 
 ---
 
@@ -213,7 +283,6 @@ class LockManager:
 Customizable via TOML config:
 
 ```python
-# constants.py
 class ActionID(enum.Enum):
     NEW_PROFILE = "new_profile"
     START_PROFILE = "start_profile"
@@ -231,6 +300,30 @@ DEFAULT_SHORTCUTS = (
 ```
 
 User overrides stored in `~/.config/appname/shortcuts.toml`.
+
+---
+
+## Settings Management
+
+Type-safe QSettings wrapper:
+
+```python
+class Settings:
+    def __init__(self) -> None:
+        self._settings = QSettings(APP_NAME, APP_NAME)
+        self._init_defaults()
+
+    def get_str(self, key: str, default: str = "") -> str:
+        value = self._settings.value(key, default)
+        return str(value) if value is not None else default
+
+    def get_int(self, key: str, default: int = 0) -> int:
+        value = self._settings.value(key, default)
+        return int(value) if value is not None else default
+
+    def set(self, key: str, value: str | int | bool) -> None:
+        self._settings.setValue(key, value)
+```
 
 ---
 

@@ -1,2 +1,3 @@
 - ban `object` too
 - for new greenfield qt projects - research patterns from scratch and re read the doc (are managers good?)
+- add preference for literal strings instead of None, eg `str | "Error"` return type instead of `str | None`
