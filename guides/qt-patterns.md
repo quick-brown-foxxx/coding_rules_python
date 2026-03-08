@@ -1,6 +1,6 @@
 # Qt Patterns Guide
 
-PySide6 patterns for desktop applications. See [PHILOSOPHY.md](../PHILOSOPHY.md) sections 6, 8.
+PySide6 patterns for desktop applications. See [PHILOSOPHY.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/PHILOSOPHY.md) sections 6, 8.
 
 ---
 
@@ -107,7 +107,7 @@ def main() -> int:
 
 ### QAsyncSignalBridge
 
-See [async-patterns.md](async-patterns.md) for full implementation.
+See [async-patterns.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/guides/async-patterns.md) for full implementation.
 
 ### ThreadPoolExecutor for Blocking Libraries
 

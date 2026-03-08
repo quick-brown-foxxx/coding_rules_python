@@ -1,7 +1,9 @@
 # Coding Rules
 
-Universal Python coding standards. Copy into projects as `docs/coding_rules.md`.
-Inherits from [PHILOSOPHY.md](../PHILOSOPHY.md).
+Universal Python coding standards.
+Inherits from [PHILOSOPHY.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/PHILOSOPHY.md).
+
+For full guide, see [rules navigation doc](https://github.com/quick-brown-foxxx/coding_rules_python/README.md).
 
 ---
 

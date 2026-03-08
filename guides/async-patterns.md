@@ -1,6 +1,6 @@
 # Async Patterns Guide
 
-Async rules and integration patterns. See [PHILOSOPHY.md](../PHILOSOPHY.md) section 8.
+Async rules and integration patterns. See [PHILOSOPHY.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/PHILOSOPHY.md) section 8.
 
 ---
 
