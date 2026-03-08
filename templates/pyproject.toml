@@ -1,0 +1,138 @@
+# ============================================================================
+# Python Project Template - pyproject.toml
+# Copy to new projects and update [project] section
+# ============================================================================
+
+[project]
+name = "TODO_PROJECT_NAME"
+description = "TODO_DESCRIPTION"
+version = "0.1.0"
+license = { text = "GPL-3.0" }
+authors = [
+    { name = "@quick-brown-foxxx", email = "no@e.mail" },
+]
+requires-python = ">=3.14"
+dependencies = [
+    "rusty-results>=1.1.1",      # Result pattern for error handling
+    "colorlog>=6.10.1",          # Colored logging
+    # "httpx>=0.28.1",           # Async HTTP client (uncomment if needed)
+    # "python-dotenv>=1.0.1",    # Env vars from .env (uncomment if needed)
+    # "typer>=0.12.0",           # CLI framework (uncomment if needed)
+    # "pyside6>=6.10.1",         # Qt GUI (uncomment if needed)
+    # "qasync>=0.28.0",          # Qt + asyncio (uncomment if needed)
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "pytest-asyncio>=1.3.0",
+    "ruff>=0.14.6",
+    "basedpyright>=1.34.0",
+    "pre-commit",
+    "poethepoet",
+    # "pytest-qt>=4.5.0",          # Qt testing (uncomment if needed)
+    # "pytest-httpserver>=1.1.0",  # HTTP mock server (uncomment if needed)
+]
+
+# ============================================================================
+# Build System
+# ============================================================================
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/TODO_PACKAGE_NAME"]
+
+# ============================================================================
+# Type Checking - basedpyright (strict, no Any)
+# ============================================================================
+
+[tool.basedpyright]
+pythonPlatform = "Linux"
+pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "strict"
+reportAny = "error"
+reportImplicitStringConcatenation = "none"
+reportUnusedCallResult = "none"
+reportUnnecessaryIsInstance = "none"
+exclude = [
+    "**/__pycache__",
+    "**/node_modules",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "wrktrs",
+]
+
+# ============================================================================
+# Linting & Formatting - ruff
+# ============================================================================
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+extend-exclude = [
+    "venv", ".venv", "*.egg", "*.egg-info", "**/dist", "**/build",
+    "**/__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so", "wrktrs",
+    ".git", ".pytest_cache",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "E", "F", "W",   # pycodestyle + pyflakes
+    "I",              # isort
+    "N",              # naming
+    "UP",             # pyupgrade
+    "ASYNC",          # async best practices
+    "S",              # bandit security
+    "B",              # bugbear
+    "A",              # builtins
+    "C4",             # comprehensions
+    "SIM",            # simplify
+    "PT",             # pytest style
+    "PERF",           # performance
+    "RUF",            # ruff-specific
+]
+ignore = [
+    "S101",           # assert usage (needed in tests and preconditions)
+    "RUF001",         # ambiguous unicode (Russian text)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "PT018"]
+
+# Uncomment and customize for wrapper enforcement:
+# [tool.ruff.lint.flake8-tidy-imports.banned-api]
+# "some_lib" = { msg = "Use src/wrappers/some_wrapper instead" }
+
+# ============================================================================
+# Testing - pytest
+# ============================================================================
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+# markers = [
+#     "unit: unit tests",
+#     "integration: integration tests",
+# ]
+
+# ============================================================================
+# Task Runner - poethepoet
+# ============================================================================
+
+[tool.poe.tasks]
+test = "pytest"
+app = "python -m TODO_PACKAGE_NAME"
+
+[tool.poe.tasks.lint_full]
+shell = "basedpyright . && ruff check --fix . && ruff format ."

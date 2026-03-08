@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "ruff.enable": true,
+  "ruff.lint.enable": true,
+  "ruff.configurationPreference": "filesystemFirst",
+  "ruff.configuration": "./pyproject.toml",
+  "basedpyright.analysis.configFilePath": "./pyproject.toml",
+  "python.defaultInterpreterPath": "./.venv/bin/python"
+}
