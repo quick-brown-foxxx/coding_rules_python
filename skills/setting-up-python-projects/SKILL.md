@@ -7,7 +7,7 @@ description: "Bootstrap new Python projects: directory structure, pyproject.toml
 
 New projects start with the full safety net configured. Templates are in the repo: <https://github.com/quick-brown-foxxx/coding_rules_python/tree/master/templates>`.
 
-Make sure to read repo's readme and copy coding rules from `rules/coding_rules.md` to the project `docs/coding_rules.md`.
+Make sure to read repo's readme.
 
 ---
 
