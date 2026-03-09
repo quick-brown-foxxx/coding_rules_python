@@ -26,7 +26,7 @@ When writing new tests, plan before coding:
 1. List all potential test cases for the feature
 2. Categorize each as **critical**, **medium**, or **small** importance
 3. Discard small-importance cases — not worth the maintenance cost
-4. Write remaining cases to `docs/plans/test-cases-<feature>.md`
+4. Write remaining cases **in plain text** to `docs/plans/test-cases-<feature>.md`
 5. Only then write test code
 
 ---
