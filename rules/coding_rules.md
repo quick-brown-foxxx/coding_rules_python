@@ -149,7 +149,8 @@ def load_config(path: Path) -> Result[Config, str]:
   ```
 
 - **Custom error types** for complex domains (use dataclasses, not just strings)
-- **Never swallow errors.** No `except Exception: pass`. No ignoring Result errors.
+- **Never swallow errors.** No `except Exception: pass`.
+- **Never ignore Result returns.** Every `Result[T, E]` must be checked — at minimum log the error + show toast/alert in GUI or print to CLI.
 - **Cleanup on failure.** If a multi-step operation fails midway, clean up partial state.
 
 ### 2.4 Error Boundaries
@@ -168,6 +169,23 @@ def main() -> int:
         return 1
     return 0
 ```
+
+### 2.5 Async Task Boundaries
+
+Any coroutine launched via `asyncio.ensure_future()` or `create_task()` is a **fire-and-forget boundary**. If an exception escapes, nobody retrieves it and the UI gets stuck in an intermediate state (e.g. "processing" forever).
+
+**Mandatory pattern:** wrap the entire coroutine body in `try/except Exception` as a safety net:
+
+```python
+async def _do_work(self, path: Path) -> None:
+    try:
+        await self._do_work_inner(path)
+    except Exception as exc:
+        logger.exception("Unexpected error for %s", path)
+        self._set_error_state(path, f"Unexpected error: {exc}")
+```
+
+The inner method handles expected errors (Result checks, specific exceptions). The outer method guarantees the UI always transitions to a terminal state.
 
 ---
 

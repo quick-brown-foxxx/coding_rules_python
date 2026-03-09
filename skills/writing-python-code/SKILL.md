@@ -255,7 +255,7 @@ def load_config(path: Path) -> Result[Config, str]:
    - Component: each subsystem returns Result to caller
    - Global: UI/CLI top-level catches everything, shows user message
 
-3. **Never swallow errors** — no `except: pass`, no ignored Results
+3. **Never swallow errors** — no `except: pass`, no ignored Results. Every `Result[T, E]` must be checked — at minimum log the error + show toast/alert in GUI or print to CLI.
 
 4. **Cleanup on failure** — if multi-step operation fails midway, clean up partial state
 
@@ -269,6 +269,23 @@ def load_config(path: Path) -> Result[Config, str]:
    ```
 
 6. Handle received error values gracefully: show UI warning, or log, or do early return or propagate with context
+
+### Async Task Boundaries
+
+Any coroutine launched via `asyncio.ensure_future()` or `create_task()` is a **fire-and-forget boundary**. If an exception escapes, nobody retrieves it and the UI gets stuck in an intermediate state (e.g. "processing" forever).
+
+**Mandatory pattern:** wrap the entire coroutine body in `try/except Exception` as a safety net:
+
+```python
+async def _do_work(self, path: Path) -> None:
+    try:
+        await self._do_work_inner(path)
+    except Exception as exc:
+        logger.exception("Unexpected error for %s", path)
+        self._set_error_state(path, f"Unexpected error: {exc}")
+```
+
+The inner method handles expected errors (Result checks, specific exceptions). The outer method guarantees the UI always transitions to a terminal state.
 
 ### CLI Error Boundary
 
@@ -455,19 +472,6 @@ Usage: `logger = get_logger(__name__)`
 ## Jinja2 Templating
 
 Use when generating text output (HTML, configs, reports, markdown):
-
-```python
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-
-env = Environment(
-    loader=FileSystemLoader(Path(__file__).parent),
-    autoescape=select_autoescape(default_for_string=True, default=True),
-)
-template = env.get_template("template.html")
-output = template.render(**data)
-```
-
-For markdown (no HTML escaping): set `autoescape=select_autoescape(default_for_string=False, default=False)`.
 
 ---
 
