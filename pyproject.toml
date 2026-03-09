@@ -1,0 +1,105 @@
+[project]
+name = "coding-rules-python"
+description = "Personal Python coding standards, templates, reusable components, and AI skills"
+version = "0.1.0"
+license = { text = "GPL-3.0" }
+authors = [
+    { name = "@stone-w4tch3r", email = "no@e.mail" },
+]
+requires-python = ">=3.14"
+dependencies = [
+    "rusty-results>=1.1.1",
+    "colorlog>=6.10.1",
+    "pyside6>=6.10.1",
+    "tomli>=2.2.1",
+    "tomli-w>=1.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.6",
+    "basedpyright>=1.34.0",
+    "pre-commit",
+    "poethepoet",
+]
+
+# ============================================================================
+# Type Checking - basedpyright (strict, no Any)
+# ============================================================================
+
+[tool.basedpyright]
+pythonPlatform = "Linux"
+pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "strict"
+reportAny = "error"
+reportImplicitStringConcatenation = "none"
+reportUnusedCallResult = "none"
+reportUnnecessaryIsInstance = "none"
+include = ["reusable", "reusable_tests"]
+exclude = [
+    "**/__pycache__",
+    ".venv",
+    "venv",
+]
+
+# ============================================================================
+# Linting & Formatting - ruff
+# ============================================================================
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+include = ["reusable/**/*.py", "reusable_tests/**/*.py"]
+extend-exclude = [
+    "venv", ".venv", "*.egg", "*.egg-info", "**/dist", "**/build",
+    "**/__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so",
+    ".git", ".pytest_cache",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "E", "F", "W",   # pycodestyle + pyflakes
+    "I",              # isort
+    "N",              # naming
+    "UP",             # pyupgrade
+    "ASYNC",          # async best practices
+    "S",              # bandit security
+    "B",              # bugbear
+    "A",              # builtins
+    "C4",             # comprehensions
+    "SIM",            # simplify
+    "PT",             # pytest style
+    "PERF",           # performance
+    "RUF",            # ruff-specific
+]
+ignore = [
+    "S101",           # assert usage (needed in tests and preconditions)
+    "RUF001",         # ambiguous unicode (Russian text)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"reusable_tests/*" = ["S101", "PT018"]
+
+# ============================================================================
+# Testing - pytest
+# ============================================================================
+
+[tool.pytest.ini_options]
+testpaths = ["reusable_tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# ============================================================================
+# Task Runner - poethepoet
+# ============================================================================
+
+[tool.poe.tasks]
+test = "pytest"
+
+[tool.poe.tasks.lint_full]
+shell = "basedpyright && ruff check --fix . && ruff format ."

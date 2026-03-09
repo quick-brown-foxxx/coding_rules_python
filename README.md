@@ -7,6 +7,14 @@ Personal Python development standards, templates, and AI skills.
 ```
 PHILOSOPHY.md          Core beliefs — every other doc inherits from this
 
+reusable/              Copy-paste reusable code (shadcn-ui style)
+  logging/               Logging setup + colored non-log output
+  shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
+
+reusable_tests/        Tests for reusable/ code
+  test_shortcuts_base.py   Generic shortcut config tests
+  test_shortcuts_manager.py  ShortcutManager tests
+
 rules/                 Copy-paste rule files for projects
   coding_rules.md        Full coding standards.
   coding_rules_short.md  Condensed version for scripts
@@ -26,12 +34,18 @@ skills/                Claude Code skills (deploy to ~/.claude/skills/)
   building-qt-apps/             PySide6 desktop apps
   testing-python/               Pytest setup, fixtures, containerized testing
   building-multi-ui-apps/       GUI + CLI + API architecture
+  setting-up-logging/           Colored logging with colorlog
+  setting-up-shortcuts/         PySide6 keyboard shortcuts
 
 notes/                Project-specific personal notes
   other-patterns.md      Localization, config merging + JSON schema validation
 ```
 
 ## How to Use
+
+### Reusable code (shadcn-ui style)
+
+The `reusable/` folder contains copy-paste components — not an installable library. Copy what you need into your project's `shared/` directory and update import paths. Each module is self-contained and documented.
 
 ### Starting a new project
 

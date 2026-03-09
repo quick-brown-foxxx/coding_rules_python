@@ -48,7 +48,9 @@ project/
 ├── docs/
 │   ├── coding_rules.md       # Copy from rules/coding_rules.md
 │   └── PHILOSOPHY.md          # Copy from PHILOSOPHY.md
-├── shared/                   # Cross-cutting (logging, shortcuts)
+├── shared/                   # Cross-cutting (copy from coding_rules_python/reusable/)
+│   ├── logging/              # Logging + colored output (if needed)
+│   └── shortcuts/            # Keyboard shortcuts (if PySide6 app)
 ├── AGENTS.md                 # Copy from templates/AGENTS.md, customize
 ├── CLAUDE.md                 # Symlink → AGENTS.md
 ├── pyproject.toml            # Copy from templates/pyproject.toml, customize
@@ -79,7 +81,14 @@ project/
    - `PHILOSOPHY.md` → `docs/PHILOSOPHY.md`
    - Create symlink: `ln -s AGENTS.md CLAUDE.md`
 
-3. **Create entry points:**
+3. **Copy reusable code (if needed):**
+   - From `coding_rules_python/reusable/` copy modules you need into `shared/`
+   - `logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging` skill)
+   - `shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts` skill)
+   - Also copy matching tests from `coding_rules_python/reusable_tests/` into your `tests/` (e.g., `test_shortcuts_base.py`, `test_shortcuts_manager.py`)
+   - Update import paths after copying (`reusable.` → `shared.` or your package path, `reusable_tests.` → your test package)
+
+4. **Create entry points:**
    ```python
    # src/APPNAME/__init__.py
    __version__ = "0.1.0"
@@ -96,7 +105,7 @@ project/
        sys.exit(main())
    ```
 
-4. **Create initial test:**
+5. **Create initial test:**
    ```python
    # tests/test_main.py
    from APPNAME.__main__ import main
@@ -105,7 +114,7 @@ project/
        assert main() == 0
    ```
 
-5. **Initialize environment:**
+6. **Initialize environment:**
    ```bash
    git init
    uv sync --all-extras --group dev
@@ -114,7 +123,7 @@ project/
    uv run poe test
    ```
 
-6. **Verify everything works:**
+7. **Verify everything works:**
    - `uv run poe app` runs the application
    - `uv run poe lint_full` passes with 0 errors
    - `uv run poe test` passes
