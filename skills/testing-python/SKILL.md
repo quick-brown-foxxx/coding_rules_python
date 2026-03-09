@@ -13,9 +13,21 @@ Tests prove features work. Coverage is secondary. E2e tests beat unit tests. Rea
 
 - **Trustworthiness > coverage.** A test that mocks away the tested thing proves nothing.
 - **5 good e2e tests > 100 unit tests** with heavy mocking.
-- **20/80 rule.** Test where it gives the most confidence.
+- **Pareto principle.** Write the fewest tests that cover 80% of what matters. E2e tests naturally do this.
 - **Unit tests for pure logic only.** Functions that transform data honestly.
 - **Real over mocked.** Real HTTP servers (pytest-httpserver), real tmp dirs, real processes.
+
+---
+
+## Test Planning
+
+When writing new tests, plan before coding:
+
+1. List all potential test cases for the feature
+2. Categorize each as **critical**, **medium**, or **small** importance
+3. Discard small-importance cases — not worth the maintenance cost
+4. Write remaining cases to `docs/plans/test-cases-<feature>.md`
+5. Only then write test code
 
 ---
 
@@ -71,12 +83,7 @@ dev = [
 
 ---
 
-## What to Test (Priority Order)
-
-1. **CLI/e2e tests** — run the actual command, check output and exit codes
-2. **Integration tests** — test component interactions through public API
-3. **Unit tests** — pure functions that transform data (worth testing honestly)
-4. **Skip** — testing framework glue, UI layout, trivial getters/setters
+## Test Examples
 
 ### CLI Test Example
 
@@ -203,6 +210,19 @@ Not targets to chase, but sanity checks:
 | Utilities | As needed |
 
 If coverage is low but e2e tests cover the workflows, that's fine.
+
+---
+
+## Test Validation
+
+After all tests are written and passing, dispatch a separate sub-agent to validate test quality. The validation agent must check:
+
+- **Meaningful coverage** — are tests verifying real behavior, or just producing green checkmarks by testing getters/setters/trivial glue?
+- **Correctness** — are assertions actually testing the right thing? No tautologies, no asserting mocks return what they were told to return.
+- **No source code compromises** — was production code incorrectly adjusted just to make tests pass? Logic changes that serve tests rather than users are bugs.
+- **No shortcuts** — no `# type: ignore` to silence test failures, no overly broad exception catching, no tests that pass regardless of input.
+
+This step is mandatory before submitting work as complete.
 
 ---
 
@@ -382,21 +402,3 @@ def dbus_session() -> Generator[str, None, None]:
     process.wait()
 ```
 
-### CI Integration
-
-```yaml
-# .github/workflows/test.yml
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    services:
-      mock-api:
-        image: ghcr.io/org/mock-api:latest
-        ports:
-          - 18080:8080
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - run: uv sync --all-extras --group dev
-      - run: uv run poe test
-```
