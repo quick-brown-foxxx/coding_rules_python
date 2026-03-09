@@ -5,57 +5,72 @@ description: "Set up colored logging and stdout output for Python apps and CLI t
 
 # Setting Up Logging
 
-Colored logging and stdout output setup for CLI tools, scripts, and applications. Uses `colorlog` for prefix-only coloring (log prefix is colored, message text stays default). Includes rotating file logging for GUI apps and servers.
+Rotating file logging, colored stdout logging, and colored non-log output. Uses `colorlog` for prefix-only coloring (log prefix is colored, message text stays default).
 
 Copy reusable code from `coding_rules_python/reusable/logging/`.
 
 ---
 
+## Key Principle
+
+**File logging is always on** — it's the durable record for post-mortem debugging. Stdout is lost on terminal close; file logs survive.
+
+**Stdout logging** is for modes where no human reads stdout directly. When you launch a GUI app from terminal or run a server in a container, stdout logs are useful — they show real-time output during development and serve as container log transport (Docker/systemd capture stdout).
+
+**CLI tools must NOT use stdout logging** — stdout is the user interface. Log lines mixed into stdout corrupt the output (imagine `mytool | grep something` with log lines). Use `write_info`/`write_error` for user-facing messages instead.
+
+| Mode | File log | Stdout log | Non-log colored output |
+|------|----------|------------|------------------------|
+| **CLI tool** | Always | Never | `write_info`, `write_error` for user messages |
+| **GUI app** | Always | Yes (dev convenience from terminal) | No (no terminal) |
+| **Server (FastAPI)** | Always | Yes (container log transport) | No |
+
+---
+
 ## When to Use
 
-- **CLI tools** — stdout logging only (colored) + `write_info`/`write_error` for non-log output
-- **GUI apps / servers** — file logging always on, stdout logging typically off (stdout reserved for user-facing output)
-- **Development / debugging** — both stdout and file logging
+- **Every app** — `setup_file_logging()` in your entrypoint
+- **GUI apps / servers** — also `setup_stdout_logging()` (stdout is not the user interface)
+- **CLI tools** — `write_info`/`write_error` for user-facing messages (NOT stdout logging)
 - **Suppressing noisy loggers** — `configure_logger_level("httpx", logging.WARNING)`
 
 ---
 
 ## Typical Patterns
 
-### CLI tools — stdout only
-
-```python
-import logging
-from shared.logging import setup_stdout_logging, configure_logger_level
-
-setup_stdout_logging(level=logging.INFO)
-configure_logger_level("httpx", logging.WARNING)
-```
-
-### GUI apps / servers — file logging, no stdout
+### CLI tool — file logging + colored user output
 
 ```python
 import logging
 from pathlib import Path
-from shared.logging import setup_file_logging, configure_logger_level
+from shared.logging import setup_file_logging, configure_logger_level, write_info, write_error
 
-# File logs always running (DEBUG captures everything)
+# File logs always on
 setup_file_logging(
     log_dir=Path("~/.local/state/myapp/logs").expanduser(),
     app_name="myapp",
 )
 configure_logger_level("httpx", logging.WARNING)
+
+# User-facing output via write_info/write_error (NOT stdout logging)
+write_info("Processing 42 items...")
+write_error("Connection failed")
 ```
 
-### Development — both
+### GUI app / server — file logging + stdout logging
 
 ```python
 import logging
 from pathlib import Path
-from shared.logging import setup_stdout_logging, setup_file_logging, configure_logger_level
+from shared.logging import setup_file_logging, setup_stdout_logging, configure_logger_level
 
-setup_stdout_logging(level=logging.DEBUG)
-setup_file_logging(log_dir=Path("logs"), app_name="myapp")
+# File logs always on
+setup_file_logging(
+    log_dir=Path("~/.local/state/myapp/logs").expanduser(),
+    app_name="myapp",
+)
+# Stdout logs for dev convenience (visible when launched from terminal / in containers)
+setup_stdout_logging(level=logging.INFO)
 configure_logger_level("httpx", logging.WARNING)
 ```
 
@@ -85,7 +100,7 @@ configure_logger_level("httpx", logging.WARNING)
 
 ## Non-Log Colored Output
 
-For colored messages that are NOT log entries (status messages, results, prompts):
+For CLI tools — colored messages that are NOT log entries (status messages, results, prompts). This is how CLI tools communicate with the user instead of stdout logging:
 
 ```python
 from shared.logging import write_info, write_success, write_warning, write_error
@@ -123,11 +138,11 @@ Update import paths after copying (e.g., `from shared.logging import ...`).
 
 ## API Reference
 
-### `setup_stdout_logging(level=logging.INFO)`
-Add colored StreamHandler to root logger. For CLI tools and scripts.
-
 ### `setup_file_logging(log_dir, app_name="app", level=DEBUG, max_bytes=5MB, backup_count=3)`
-Add RotatingFileHandler to root logger. Creates `<log_dir>/<app_name>.log`. For GUI apps and servers where file logs always run.
+Add RotatingFileHandler to root logger. Creates `<log_dir>/<app_name>.log`. Always use this — every app needs durable file logs.
+
+### `setup_stdout_logging(level=logging.INFO)`
+Add colored StreamHandler to root logger. For GUI apps and servers where stdout is not the user interface. Do NOT use for CLI tools.
 
 ### `configure_logger_level(logger_name, level, propagate=True)`
 Set a specific logger's level. Use to suppress verbose third-party loggers.
