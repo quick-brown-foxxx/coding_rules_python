@@ -344,6 +344,75 @@ def test_button_click(qtbot: QtBot) -> None:
         qtbot.mouseClick(widget.button, Qt.LeftButton)
 ```
 
+## Routing QML Logs to Python Logger
+
+QML `console.log/info/warn/error` calls print to stderr by default with no structure or log levels. Install a custom Qt message handler before creating the QML engine to route them through Python's `logging` module.
+
+### The Handler
+
+```python
+import logging
+from PySide6.QtCore import QMessageLogContext, QtMsgType, qInstallMessageHandler
+
+_qt_logger = logging.getLogger("qt.qml")
+
+def _qt_message_handler(msg_type: QtMsgType, context: QMessageLogContext, message: str) -> None:
+    file: str = context.file or ""
+    line: int = context.line or 0
+    location = f" ({file}:{line})" if file else ""
+    log_message = f"{message}{location}"
+
+    if msg_type == QtMsgType.QtDebugMsg:
+        _qt_logger.debug(log_message)
+    elif msg_type == QtMsgType.QtInfoMsg:
+        _qt_logger.info(log_message)
+    elif msg_type == QtMsgType.QtWarningMsg:
+        _qt_logger.warning(log_message)
+    else:  # QtCriticalMsg, QtFatalMsg
+        _qt_logger.error(log_message)
+```
+
+### Install Before QML Engine
+
+```python
+qInstallMessageHandler(_qt_message_handler)
+engine = QQmlApplicationEngine()
+```
+
+Order matters — install before `QQmlApplicationEngine()` so early QML load warnings are captured.
+
+### QML Usage
+
+```qml
+Component.onCompleted: {
+    console.info("Panel loaded, items: " + listModel.count)
+    console.warn("Missing optional property")
+    console.error("Failed to load resource")
+}
+```
+
+### Gotcha: `console.log()` Is Silently Dropped
+
+Qt maps `console.log()` to `QtDebugMsg`, which Qt's own message filtering suppresses **before** the handler is called. The handler never sees it.
+
+| QML call | Qt type | Reaches handler | Recommendation |
+|---|---|---|---|
+| `console.log()` | `QtDebugMsg` | No | Don't use |
+| `console.info()` | `QtInfoMsg` | Yes | Use for debug output |
+| `console.warn()` | `QtWarningMsg` | Yes | Recoverable issues |
+| `console.error()` | `QtCriticalMsg` | Yes | Errors |
+
+**Always use `console.info()` instead of `console.log()`.**
+
+The logger name `qt.qml` lets you filter or suppress QML messages independently:
+```python
+logging.getLogger("qt.qml").setLevel(logging.WARNING)  # silence info-level QML noise
+```
+
+See the `setting-up-logging` skill for colored stdout/file logging setup that works with this handler.
+
+---
+
 ## Platform Integration -  File Dialogs (XDG Desktop Portals)
 
 On Linux, file dialogs use XDG Desktop Portals for native system pickers (with favorites, bookmarks, etc.). The app sets `QT_QPA_PLATFORMTHEME=xdgdesktopportal` at startup if no platform theme is configured.

@@ -136,6 +136,14 @@ Update import paths after copying (e.g., `from shared.logging import ...`).
 
 ---
 
+## QML Log Routing (PySide6)
+
+QML `console.info/warn/error` can be routed through Python's `logging` module via a custom Qt message handler. This integrates QML output with your file and stdout logging setup. The handler logs under the `qt.qml` logger name, so you can filter it independently.
+
+See the `building-qt-apps` skill for the full handler implementation and the `console.log()` gotcha (it's silently dropped by Qt).
+
+---
+
 ## API Reference
 
 ### `setup_file_logging(log_dir, app_name="app", level=DEBUG, max_bytes=5MB, backup_count=3)`
