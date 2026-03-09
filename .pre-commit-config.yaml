@@ -1,0 +1,35 @@
+# Pre-commit hooks
+# Install: uv run pre-commit install
+
+repos:
+  - repo: local
+    hooks:
+      - id: uv-sync
+        name: uv-sync
+        entry: uv sync --quiet
+        language: system
+        always_run: true
+        pass_filenames: false
+
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+        files: ^(reusable|reusable_tests)/
+
+      - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+        files: ^(reusable|reusable_tests)/
+
+      - id: basedpyright
+        name: basedpyright
+        entry: uv run basedpyright
+        language: system
+        types: [python]
+        files: ^(reusable|reusable_tests)/
+        pass_filenames: true
+        stages: [pre-commit]
