@@ -73,7 +73,7 @@ def load_item(item_id: str) -> Result[Item, str]:
 ### Type Safety
 
 - Strict mode. No `Any`. No `typing.cast()`.
-- `TypedDict` for external data shapes. `dataclass` for domain objects.
+- `msgspec.Struct` for external data (JSON, configs, APIs). `dataclass` for domain objects.
 - Wrap untyped third-party libraries with typed interfaces.
 
 ### Async

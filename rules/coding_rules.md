@@ -21,21 +21,29 @@ No exceptions to strictness.
 | `Any`                              | `object` for top type, `Protocol` for duck typing      |
 | `typing.cast()`                    | `isinstance`, `TypeIs`, pattern matching               |
 | `# type: ignore` without rationale | `# type: ignore[specific-code]  # rationale: <reason>` |
-| Raw `dict` in business logic       | `TypedDict` or `dataclass`                             |
+| Raw `dict` in business logic       | `msgspec.Struct`, `dataclass`, or `TypedDict`          |
 | Implicit return types              | Explicit annotation on every function                  |
 
 ### 1.3 Type Patterns
 
-**External data (JSON, configs, APIs):**
+**External data (JSON, configs, APIs)** → `msgspec.Struct`:
 
 ```python
-from typing import Required, NotRequired, TypedDict
+import msgspec
 
-class UserConfig(TypedDict):
-    name: Required[str]
-    port: Required[int]
-    debug: NotRequired[bool]
+class UserConfig(msgspec.Struct):
+    name: str
+    port: int
+    debug: bool = False
+
+# JSON → typed object (validates at decode time)
+config = msgspec.json.decode(raw_bytes, type=UserConfig)
+
+# Dict/YAML → typed object
+config = msgspec.convert(raw_dict, type=UserConfig)
 ```
+
+`TypedDict` is still valid when you need dict compatibility (e.g., `**unpacking`, APIs expecting dicts).
 
 **Domain objects:**
 
@@ -246,6 +254,8 @@ At the entry of each subsystem, check:
 - Required external dependencies (binaries, libraries)
 - Configuration validity
 - Input sanity (types already guaranteed by type system, but value ranges and business rules need runtime checks)
+
+> **Note:** `msgspec` handles structural validation (types, required fields) at decode time. Precondition checks are still needed for business rules and value ranges.
 
 ### 5.2 Pattern
 

@@ -38,7 +38,7 @@ skills/                Claude Code skills (deploy to ~/.claude/skills/)
   setting-up-shortcuts/         PySide6 keyboard shortcuts
 
 notes/                Project-specific personal notes
-  other-patterns.md      Localization, config merging + JSON schema validation
+  other-patterns.md      Localization, config merging + msgspec validation
 ```
 
 ## How to Use
@@ -64,8 +64,9 @@ Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-pyth
 
 ### Quick reference
 
-- **What tools?** uv, basedpyright (strict), ruff, pytest, poethepoet
+- **What tools?** uv, basedpyright (strict), ruff, pytest, poethepoet, msgspec
 - **Error handling?** `Result[T, E]` from rusty-results. Exceptions = bugs only.
+- **Data validation?** `msgspec.Struct` for external data (JSON, configs, APIs). Validates at decode time.
 - **CLI?** typer (argparse only for stdlib-only scripts)
 - **GUI?** PySide6 + qasync (not QtAsyncio — still in technical preview)
 - **Text output?** Jinja2

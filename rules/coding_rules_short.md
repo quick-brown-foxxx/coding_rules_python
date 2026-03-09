@@ -9,7 +9,7 @@ For single-file scripts and small projects. See [full version](https://github.co
 - basedpyright strict mode, `reportAny=error`
 - Type annotations on all functions
 - No `Any`, no `typing.cast()`, no blanket `# type: ignore`
-- `TypedDict` for config/JSON shapes, `dataclass` for domain objects
+- `msgspec.Struct` for external data (JSON, configs, APIs), `dataclass` for domain objects
 
 ## Error Handling
 
