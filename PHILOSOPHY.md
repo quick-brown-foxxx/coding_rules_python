@@ -23,7 +23,7 @@ Everything should be known before runtime. We always know what types and values 
 
 - **Strict type checking is non-negotiable.** basedpyright in strict mode, `reportAny=error`. No `Any`, no `typing.cast()`, no unvalidated `# type: ignore`.
 - **Errors are values, not exceptions.** Use `Result[T, E]` for expected failures. Exceptions are reserved for programming errors (impossible states, invariant violations) — they mean "this is a bug."
-- **Data has shape.** Use `TypedDict` for external data (JSON, configs, APIs). Use `dataclass` for domain objects. Never pass raw `dict` through business logic.
+- **Data has shape.** Use `msgspec.Struct` for external data (JSON, configs, APIs) — defines shape and validates at decode time. Use `dataclass` for domain objects. `TypedDict` only when dict compatibility is required. Never pass raw `dict` through business logic.
 - **Dynamic boundaries get wrapped.** Third-party libraries with weak typing get typed wrappers. Untyped data from outside (user input, network, files) gets validated and narrowed immediately at the boundary.
 
 The goal: if the type checker says it's correct, it runs correctly. If something can fail, the type signature says so.
@@ -89,7 +89,7 @@ Standard tools for standard tasks:
 - **CLI**: typer for all projects with `uv`. argparse only for stdlib-only scripts without external deps.
 - **GUI**: PySide6 with qasync for async integration (QtAsyncio is still in technical preview). Never block the event loop.
 - **Text generation** (HTML, configs, reports): Jinja2 templates. Separate data from presentation.
-- **HTTP**: httpx (async-capable). Logging: colorlog. Config: YAML + JSON Schema validation.
+- **HTTP**: httpx (async-capable). Logging: colorlog. Config: YAML + msgspec validation.
 - **Async**: for all I/O operations. `asyncio.create_subprocess_exec()` for subprocesses. Never `subprocess.run()` in async context. Never `time.sleep()` in event loops.
 
 ## 9. Project Setup: Invest Early

@@ -56,3 +56,5 @@ def validate_config(config: dict[str, object], schema_path: Path) -> Result[None
         return Err("\n".join(e.message for e in errors))
     return Ok(None)
 ```
+
+note: may be this automated/improved with pydantic/msgspec?

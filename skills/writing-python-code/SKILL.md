@@ -42,21 +42,29 @@ reportAttributeAccessIssue = "error"
 | `Any` | `object` for top type, `Protocol` for duck typing |
 | `typing.cast()` | `isinstance`, `TypeIs`, pattern matching |
 | `# type: ignore` without rationale | `# type: ignore[specific-code]  # rationale: <reason>` |
-| Raw `dict` in business logic | `TypedDict` or `dataclass` |
+| Raw `dict` in business logic | `msgspec.Struct`, `dataclass`, or `TypedDict` |
 | Implicit return types | Explicit annotation on every function |
 
 ### Type Patterns
 
-**External data** → `TypedDict`:
+**External data** → `msgspec.Struct`:
 
 ```python
-from typing import Required, NotRequired, TypedDict
+import msgspec
 
-class UserConfig(TypedDict):
-    name: Required[str]
-    port: Required[int]
-    debug: NotRequired[bool]
+class UserConfig(msgspec.Struct):
+    name: str
+    port: int
+    debug: bool = False
+
+# JSON → typed object (validates at decode time)
+config = msgspec.json.decode(raw_bytes, type=UserConfig)
+
+# Dict/YAML → typed object
+config = msgspec.convert(raw_dict, type=UserConfig)
 ```
+
+`TypedDict` is still valid when dict compatibility is needed (e.g., `**unpacking`, APIs expecting dicts).
 
 **Domain objects** → `dataclass`:
 
@@ -84,7 +92,11 @@ CONFIG_PATH: Final[Path] = Path("~/.config/app")
 
 ### Handling `Any` at Library Boundaries
 
-**1. Typed wrappers (preferred):**
+**0. Typed deserialization (for external data):**
+
+`msgspec.json.decode(data, type=MyStruct)` eliminates `Any` for JSON/API responses — the return type is `MyStruct`, not `Any`. Use this before reaching for wrappers when the boundary is data deserialization.
+
+**1. Typed wrappers (preferred for library APIs):**
 
 ```python
 class WhisperModelWrapper:
@@ -124,6 +136,8 @@ assert isinstance(raw_value, str)    # narrows to str
 ```
 
 ### TypeIs Guards
+
+> **Note:** `TypeIs` guards are unnecessary for `msgspec`-decoded data (already fully typed). Use them for narrowing in-memory objects of unknown type.
 
 ```python
 from typing import TypeIs, TypedDict, Required
@@ -470,6 +484,7 @@ For markdown (no HTML escaping): set `autoescape=select_autoescape(default_for_s
 | `argparse` | CLI only for stdlib-only scripts |
 | `PySide6` | GUI (no system deps) |
 | `httpx` | HTTP (async) |
+| `msgspec` | External data validation + parsing |
 | `Jinja2` | Text output generation |
 
 **Run `uv run poe lint_full` continuously**, not just at the end.
