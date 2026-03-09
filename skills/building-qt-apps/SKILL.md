@@ -343,3 +343,11 @@ def test_button_click(qtbot: QtBot) -> None:
     with qtbot.waitSignal(widget.action_triggered, timeout=1000):
         qtbot.mouseClick(widget.button, Qt.LeftButton)
 ```
+
+## Platform Integration -  File Dialogs (XDG Desktop Portals)
+
+On Linux, file dialogs use XDG Desktop Portals for native system pickers (with favorites, bookmarks, etc.). The app sets `QT_QPA_PLATFORMTHEME=xdgdesktopportal` at startup if no platform theme is configured.
+
+**Requirements:** `xdg-desktop-portal` + a desktop backend (`xdg-desktop-portal-kde`, `xdg-desktop-portal-gnome`, etc.).
+
+**No code changes needed** — standard `QFileDialog` calls automatically use portals when the platform theme is set. In Flatpak environments, portals are used transparently without any configuration.

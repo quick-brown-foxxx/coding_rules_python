@@ -32,6 +32,11 @@
 **Key decisions:**
 - TODO: List major architectural decisions specific to this project
 
+<!-- if building-qt-apps -->
+- XDG Desktop Portal file dialogs via `QT_QPA_PLATFORMTHEME=xdgdesktopportal` (set at GUI startup)
+- `qasync` for Qt + asyncio integration in GUI mode
+<!-- endif building-qt-apps -->
+
 ---
 
 ## Toolchain
