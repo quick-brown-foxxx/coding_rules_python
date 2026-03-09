@@ -1,12 +1,19 @@
 """Logging setup utilities.
 
-Provides colored stdout logging, rotating file logging, and utilities for
+Provides rotating file logging, colored stdout logging, and utilities for
 configuring logger levels.
 
+Key principle:
+    File logging is always on — it's the durable record for post-mortem debugging.
+    Stdout logging is for modes where no human reads stdout directly (GUI, server).
+    CLI tools should NOT use stdout logging — use non_log_stdout_output instead,
+    so that stdout stays clean for user-facing output (help, prompts, results).
+
 Typical usage patterns:
-    - CLI tools: stdout logging only (colored)
-    - GUI apps / servers: file logging always, stdout logging optional
-    - Both: configure noisy third-party loggers with configure_logger_level()
+    - CLI tools: file logging + non_log_stdout_output for user messages
+    - GUI apps: file logging + stdout logging (dev convenience when launched from terminal)
+    - Servers (FastAPI): file logging + stdout logging (container log transport)
+    - All modes: configure_logger_level() to suppress noisy third-party loggers
 
 Usage:
     from shared.logging.logger_setup import (
@@ -15,15 +22,12 @@ Usage:
         configure_logger_level,
     )
 
-    # Stdout only (CLI tools, scripts)
-    setup_stdout_logging(level=logging.INFO)
-
-    # File only (GUI apps, servers — stdout goes to user, not logs)
+    # CLI tool — file logging only, user messages via write_info/write_error
     setup_file_logging(log_dir=Path("~/.local/state/myapp/logs"), app_name="myapp")
 
-    # Both (development, debugging)
-    setup_stdout_logging(level=logging.DEBUG)
-    setup_file_logging(log_dir=log_dir, app_name="myapp")
+    # GUI app / server — file logging + stdout logging
+    setup_file_logging(log_dir=Path("~/.local/state/myapp/logs"), app_name="myapp")
+    setup_stdout_logging(level=logging.INFO)
 
     # Suppress noisy loggers
     configure_logger_level("httpx", logging.WARNING)
@@ -55,9 +59,12 @@ import colorlog
 def setup_stdout_logging(level: int = logging.INFO) -> None:
     """Set up stdout logging with colored log prefix but uncolored messages.
 
-    Adds a colored StreamHandler to the root logger. Call once at app startup.
-    For GUI apps and servers, you may skip this and use setup_file_logging() instead,
-    since stdout is typically reserved for user-facing output.
+    Adds a colored StreamHandler to the root logger. Use for GUI apps and servers
+    where stdout is not the user interface — it provides dev convenience (see logs
+    when launching from terminal) and serves as container log transport.
+
+    Do NOT use for CLI tools — stdout is the user interface there. Use
+    non_log_stdout_output (write_info, write_error) for user-facing messages instead.
 
     Args:
         level: Logging level to use
