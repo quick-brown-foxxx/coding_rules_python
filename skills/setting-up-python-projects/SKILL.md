@@ -1,7 +1,7 @@
 ---
 name: setting-up-python-projects
 description: >
-  ALWAYS LOAD WHEN CREATING A NEW PYTHON PROJECT OR SETTING UP PROJECT STRUCTURE.
+  ALWAYS LOAD THIS SKILL WHEN CREATING A NEW PYTHON PROJECT OR SETTING UP PROJECT STRUCTURE. Do not scaffold or bootstrap Python projects directly — use this skill first.
   Bootstrap new Python projects: directory structure, pyproject.toml, pre-commit, uv sync.
 ---
 

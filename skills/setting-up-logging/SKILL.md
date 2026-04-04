@@ -1,7 +1,7 @@
 ---
 name: setting-up-logging
 description: >
-  LOAD WHEN ADDING LOGGING, CONFIGURING LOG OUTPUT, OR SETTING UP COLORLOG.
+  ALWAYS LOAD THIS SKILL WHEN ADDING LOGGING, CONFIGURING LOG OUTPUT, OR SETTING UP COLORLOG. Do not configure Python logging directly — use this skill first.
   Set up colored logging and stdout output for Python apps and CLI tools using colorlog.
 ---
 

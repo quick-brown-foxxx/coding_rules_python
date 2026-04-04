@@ -1,7 +1,7 @@
 ---
 name: writing-python-scripts
 description: >
-  LOAD THIS WHEN CREATING ANY STANDALONE PYTHON SCRIPT OR SINGLE-FILE AUTOMATION.
+  ALWAYS LOAD THIS SKILL WHEN CREATING ANY STANDALONE PYTHON SCRIPT OR SINGLE-FILE AUTOMATION. Do not create Python scripts directly — use this skill first.
   Single-file Python scripts with PEP 722 inline metadata, uv run, and typer CLI.
 ---
 

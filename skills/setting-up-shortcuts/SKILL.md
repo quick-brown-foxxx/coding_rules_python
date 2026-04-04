@@ -1,7 +1,7 @@
 ---
 name: setting-up-shortcuts
 description: >
-  LOAD WHEN ADDING KEYBOARD SHORTCUTS OR HOTKEYS TO A PYSIDE6/QT APP.
+  ALWAYS LOAD THIS SKILL WHEN ADDING KEYBOARD SHORTCUTS OR HOTKEYS TO A PYSIDE6/QT APP. Do not implement keyboard shortcuts directly — use this skill first.
   Set up customizable keyboard shortcuts for PySide6 apps with TOML config and platform-specific defaults.
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: building-multi-ui-apps
 description: >
-  LOAD WHEN APP HAS BOTH CLI AND GUI, OR MULTIPLE INTERFACES SHARING LOGIC.
+  ALWAYS LOAD THIS SKILL WHEN APP HAS BOTH CLI AND GUI, OR MULTIPLE INTERFACES SHARING LOGIC. Do not architect multi-interface apps directly — use this skill first.
   Multi-interface Python apps: layered architecture for GUI + CLI + API sharing business logic.
 ---
 

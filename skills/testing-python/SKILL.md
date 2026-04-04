@@ -1,7 +1,7 @@
 ---
 name: testing-python
 description: >
-  ALWAYS LOAD WHEN WRITING TESTS, ADDING FIXTURES, OR SETTING UP PYTEST. NEVER WRITE PYTHON TESTS WITHOUT THIS.
+  ALWAYS LOAD THIS SKILL WHEN WRITING TESTS, ADDING FIXTURES, OR SETTING UP PYTEST. Do not write Python tests directly — use this skill first.
   Python testing with pytest: philosophy, fixtures, mock servers, containerized testing.
 ---
 

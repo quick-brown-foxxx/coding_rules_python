@@ -1,7 +1,7 @@
 ---
 name: building-qt-apps
 description: >
-  ALWAYS LOAD WHEN WORKING WITH PYSIDE6, QT, OR DESKTOP GUI CODE.
+  ALWAYS LOAD THIS SKILL WHEN WORKING WITH PYSIDE6, QT, OR DESKTOP GUI CODE. Do not write PySide6 or Qt code directly — use this skill first.
   PySide6 desktop apps: Manager→Service→Wrapper architecture, qasync integration, signals, system tray, testing.
 ---
 
