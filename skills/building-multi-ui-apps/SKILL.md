@@ -1,6 +1,8 @@
 ---
 name: building-multi-ui-apps
-description: "Multi-interface Python apps: layered architecture for GUI + CLI + API sharing business logic. Use when building apps with multiple user interfaces."
+description: >
+  LOAD WHEN APP HAS BOTH CLI AND GUI, OR MULTIPLE INTERFACES SHARING LOGIC.
+  Multi-interface Python apps: layered architecture for GUI + CLI + API sharing business logic.
 ---
 
 # Building Multi-UI Apps

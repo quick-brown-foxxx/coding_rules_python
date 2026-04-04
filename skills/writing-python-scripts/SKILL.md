@@ -1,6 +1,8 @@
 ---
 name: writing-python-scripts
-description: "Single-file Python scripts with PEP 722 inline metadata, uv run, and typer CLI. Use when creating standalone scripts or small automations."
+description: >
+  LOAD THIS WHEN CREATING ANY STANDALONE PYTHON SCRIPT OR SINGLE-FILE AUTOMATION.
+  Single-file Python scripts with PEP 722 inline metadata, uv run, and typer CLI.
 ---
 
 # Writing Python Scripts

@@ -1,6 +1,8 @@
 ---
 name: setting-up-logging
-description: "Set up colored logging and stdout output for Python apps and CLI tools using colorlog."
+description: >
+  LOAD WHEN ADDING LOGGING, CONFIGURING LOG OUTPUT, OR SETTING UP COLORLOG.
+  Set up colored logging and stdout output for Python apps and CLI tools using colorlog.
 ---
 
 # Setting Up Logging

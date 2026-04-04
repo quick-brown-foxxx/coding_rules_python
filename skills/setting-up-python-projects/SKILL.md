@@ -1,6 +1,8 @@
 ---
 name: setting-up-python-projects
-description: "Bootstrap new Python projects: directory structure, pyproject.toml, pre-commit, uv sync. Use when creating a new project from scratch."
+description: >
+  ALWAYS LOAD WHEN CREATING A NEW PYTHON PROJECT OR SETTING UP PROJECT STRUCTURE.
+  Bootstrap new Python projects: directory structure, pyproject.toml, pre-commit, uv sync.
 ---
 
 # Setting Up Python Projects

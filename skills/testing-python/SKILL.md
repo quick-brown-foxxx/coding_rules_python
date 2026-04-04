@@ -1,6 +1,8 @@
 ---
 name: testing-python
-description: "Python testing with pytest: philosophy, fixtures, mock servers, containerized testing. Use when writing tests or setting up test infrastructure."
+description: >
+  ALWAYS LOAD WHEN WRITING TESTS, ADDING FIXTURES, OR SETTING UP PYTEST. NEVER WRITE PYTHON TESTS WITHOUT THIS.
+  Python testing with pytest: philosophy, fixtures, mock servers, containerized testing.
 ---
 
 # Testing Python

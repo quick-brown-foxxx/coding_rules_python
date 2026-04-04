@@ -1,6 +1,8 @@
 ---
 name: setting-up-shortcuts
-description: "Set up customizable keyboard shortcuts for PySide6 apps with TOML config and platform-specific defaults."
+description: >
+  LOAD WHEN ADDING KEYBOARD SHORTCUTS OR HOTKEYS TO A PYSIDE6/QT APP.
+  Set up customizable keyboard shortcuts for PySide6 apps with TOML config and platform-specific defaults.
 ---
 
 # Setting Up Keyboard Shortcuts

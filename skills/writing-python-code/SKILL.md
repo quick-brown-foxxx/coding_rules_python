@@ -1,6 +1,8 @@
 ---
 name: writing-python-code
-description: "Core Python standards: basedpyright strict typing, Result-based error handling, async patterns, security, code style. Use when writing or editing any Python code."
+description: >
+  ALWAYS LOAD THIS SKILL WHEN WRITING OR EDITING PYTHON CODE. NEVER WRITE PYTHON WITHOUT CHECKING THIS FIRST.
+  Core Python standards: basedpyright strict typing, Result-based error handling, async patterns, security, code style.
 ---
 
 # Writing Python Code

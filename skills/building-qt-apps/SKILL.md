@@ -1,6 +1,8 @@
 ---
 name: building-qt-apps
-description: "PySide6 desktop apps: Manager→Service→Wrapper architecture, qasync integration, signals, system tray, testing. Use when building or modifying Qt GUI applications."
+description: >
+  ALWAYS LOAD WHEN WORKING WITH PYSIDE6, QT, OR DESKTOP GUI CODE.
+  PySide6 desktop apps: Manager→Service→Wrapper architecture, qasync integration, signals, system tray, testing.
 ---
 
 # Building Qt Apps
