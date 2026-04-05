@@ -63,6 +63,7 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
+addopts = ["-n", "auto", "--dist", "worksteal"]
 
 markers = [
     "unit: unit tests",
@@ -76,6 +77,7 @@ markers = [
 [dependency-groups]
 dev = [
     "pytest>=9.0.1",
+    "pytest-xdist>=3.5.0",
     "pytest-cov>=7.0.0",
     "pytest-asyncio>=1.3.0",
     # "pytest-qt>=4.5.0",          # For Qt apps
@@ -190,13 +192,28 @@ def test_fetch_from_api(mock_api: HTTPServer) -> None:
 
 ## Running Tests
 
+Tests run in parallel by default (`-n auto` via addopts). Override with `-n0` (sequential) or `-n4` (exact count).
+
 ```bash
-uv run poe test                    # All tests
+uv run poe test                    # All tests (parallel, auto workers)
 uv run pytest tests/unit/          # Unit only
-uv run pytest tests/integration/   # Integration only
-uv run pytest -m "not slow"        # Skip slow tests
+uv run pytest -n0                  # Force sequential (debugging)
 uv run pytest --cov                # With coverage report
 ```
+
+---
+
+## Test Isolation
+
+**Every test must set up its own state and clean up after itself.** Use `tmp_path` for files, `monkeypatch` for env vars, `yield` fixtures for teardown. Never rely on test ordering or shared mutable state. For heavy setup (containers, DB), isolate between groups — scope fixtures to `session`/`module` and use non-overlapping namespaces.
+
+Tests that pass alone but fail in parallel are **broken tests** — fix isolation, don't disable parallelism.
+
+---
+
+## Flaky Tests
+
+A flaky test is worse than a broken one — broken tests block immediately, flaky tests erode trust silently. **Never ignore a flaky test.** Fix it, rewrite it, or if the root cause is complex — file a bug and report to the user. No other options.
 
 ---
 

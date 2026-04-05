@@ -25,6 +25,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=9.0.1",
+    "pytest-xdist>=3.5.0",
     "pytest-cov>=7.0.0",
     "pytest-asyncio>=1.3.0",
     "ruff>=0.14.6",
@@ -121,6 +122,7 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
+addopts = ["-n", "auto", "--dist", "worksteal"]
 # markers = [
 #     "unit: unit tests",
 #     "integration: integration tests",
