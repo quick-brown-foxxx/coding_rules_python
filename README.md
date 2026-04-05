@@ -43,6 +43,14 @@ notes/                Project-specific personal notes
 
 ## How to Use
 
+### Install
+
+`npx -y skills add quick-brown-foxxx/coding_rules_python`
+
+Note: `skills` updates detection has bugs, more reliable is to do force add from time to time. Eg for all skills in current project for specified agents:
+
+`npx -y skills add quick-brown-foxxx/coding_rules_python -s "*" -a claude-code universal kilo codex opencode -y`
+
 ### Reusable code (shadcn-ui style)
 
 The `reusable/` folder contains copy-paste components — not an installable library. Copy what you need into your project's `shared/` directory and update import paths. Each module is self-contained and documented.
