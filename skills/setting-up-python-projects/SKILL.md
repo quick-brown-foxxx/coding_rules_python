@@ -132,6 +132,77 @@ project/
 
 ---
 
+## Graceful Shutdown
+
+Design every app to be interruptible without corruption, hanging, or ugly tracebacks. The shutdown strategy depends on what the app does:
+
+```
+App type                              → Strategy
+─────────────────────────────────────────────────────────────
+Simple script/CLI                     → catch KeyboardInterrupt, exit 130
+CLI wrapping a quick subtask          → kill process group immediately
+CLI wrapping complex tool (vagrant…)  → SIGTERM → wait → SIGKILL
+Qt/async app                          → see building-qt-apps skill
+```
+
+### Scripts and simple CLIs
+
+```python
+# __main__.py
+def main() -> int:
+    try:
+        return run()
+    except KeyboardInterrupt:
+        return 130  # 128 + SIGINT(2), Unix convention
+```
+
+### Subprocess wrappers
+
+Always pass `start_new_session=True` — creates a process group so you can kill the entire tree, not just the parent.
+
+**Quick subtask (immediate kill):**
+
+```python
+import os, signal, subprocess
+
+process = subprocess.Popen(cmd, start_new_session=True)
+try:
+    process.wait()
+except KeyboardInterrupt:
+    os.killpg(process.pid, signal.SIGKILL)
+```
+
+**Complex tool wrapper (escalation):**
+
+```python
+process = subprocess.Popen(cmd, start_new_session=True)
+try:
+    process.wait()
+except KeyboardInterrupt:
+    os.killpg(process.pid, signal.SIGTERM)
+    try:
+        process.wait(timeout=5.0)
+    except subprocess.TimeoutExpired:
+        os.killpg(process.pid, signal.SIGKILL)
+```
+
+**Async subprocess (complex apps using asyncio):**
+
+```python
+process = await asyncio.create_subprocess_exec(*cmd, start_new_session=True)
+try:
+    await process.wait()
+except asyncio.CancelledError:
+    process.terminate()
+    try:
+        await asyncio.wait_for(process.wait(), timeout=5.0)
+    except TimeoutError:
+        process.kill()
+    raise
+```
+
+---
+
 ## Bootstrap Script
 
 ```python

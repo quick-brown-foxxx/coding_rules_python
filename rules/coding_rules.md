@@ -326,6 +326,10 @@ Utilities (Helpers, Wrappers, Common)
 - **Small project**: few modules, flat structure
 - **Large project**: `src/` layout with `core/`, `ui/`, `cli/`, `utils/`, `wrappers/`
 
+### 6.4 Graceful Shutdown
+
+- **Graceful shutdown:** All apps must handle Ctrl+C without tracebacks or hanging. Scripts: catch `KeyboardInterrupt` at entry point, exit 130. Subprocess wrappers: use `start_new_session=True` and kill process groups on interrupt. Qt apps: install SIGINT handler before event loop. See `setting-up-python-projects` skill for patterns.
+
 ---
 
 ## 7. Security

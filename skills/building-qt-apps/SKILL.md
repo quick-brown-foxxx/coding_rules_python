@@ -99,6 +99,7 @@ class WhisperModelWrapper:
 
 ```python
 import asyncio
+import signal
 import qasync
 from PySide6.QtWidgets import QApplication
 
@@ -106,6 +107,7 @@ def main() -> int:
     app = QApplication(sys.argv)
     loop = qasync.QEventLoop(app)
     asyncio.set_event_loop(loop)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)  # Make Ctrl+C work (Qt blocks it)
     with loop:
         window = MainWindow()
         window.show()
@@ -174,6 +176,28 @@ class AsyncRecorder(QObject):
 5. **Typed wrappers** around untyped libraries, enforced via ruff `banned-api`
 6. **Signals at class level**, not in `__init__`
 7. **camelCase for Qt event handlers** (ignore ruff N802), **snake_case for our slots**
+
+---
+
+## Ctrl+C and Shutdown
+
+Qt's event loop blocks Python signal handling, making Ctrl+C appear to do nothing. Fix: `signal.signal(signal.SIGINT, signal.SIG_DFL)` before `loop.run_forever()` — lets the OS handle SIGINT directly (shown in the setup example above).
+
+**If the app needs cleanup on Ctrl+C** (save state, release locks, stop recordings), use a handler that calls `QApplication.quit()` instead of `SIG_DFL`, so Qt's shutdown sequence runs:
+
+```python
+def _sigint_handler(*_args: object) -> None:
+    QApplication.quit()
+
+signal.signal(signal.SIGINT, _sigint_handler)
+
+# Timer lets Python process the signal between Qt events
+timer = QTimer()
+timer.start(200)
+timer.timeout.connect(lambda: None)
+```
+
+For subprocess shutdown patterns, see `setting-up-python-projects` skill.
 
 ---
 

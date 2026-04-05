@@ -93,7 +93,10 @@ def main_command() -> None:
     typer.echo(result.unwrap())
 
 if __name__ == "__main__":
-    app()
+    try:
+        app()
+    except KeyboardInterrupt:
+        sys.exit(130)  # No traceback on Ctrl+C
 ```
 
 ---
@@ -124,3 +127,11 @@ ignore = ["S101", "B008", "RUF001"]
 Use typer for all scripts with `uv`. Use argparse only if the script must work without any external dependencies (stdlib-only, no uv).
 
 **Always** pass `context_settings={"help_option_names": ["-h", "--help"]}` to `typer.Typer()` — typer only supports `--help` by default, and users expect `-h` to work.
+
+---
+
+## Ctrl+C Handling
+
+Scripts must not dump tracebacks on Ctrl+C. The template entry point above catches `KeyboardInterrupt` and exits with code 130 (Unix convention: 128 + signal 2).
+
+If a script spawns subprocesses, always use `start_new_session=True` so Ctrl+C can kill the entire process tree. See `setting-up-python-projects` skill for subprocess shutdown patterns.
