@@ -486,12 +486,18 @@ Use when generating text output (HTML, configs, reports, markdown):
 | `ruff` | Lint + format |
 | `pytest` | Testing |
 | `rusty-results` | Result[T, E] pattern |
-| `typer` | CLI framework (preferred) |
+| `typer` | CLI framework (preferred) — always configure `-h` support (see below) |
 | `argparse` | CLI only for stdlib-only scripts |
 | `PySide6` | GUI (no system deps) |
 | `httpx` | HTTP (async) |
 | `msgspec` | External data validation + parsing |
 | `Jinja2` | Text output generation |
+
+**Always** enable `-h` for help — typer only supports `--help` by default:
+
+```python
+app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]})
+```
 
 **Run `uv run poe lint_full` continuously**, not just at the end.
 

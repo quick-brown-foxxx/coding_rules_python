@@ -82,7 +82,7 @@ def process_item(config: ItemConfig) -> Result[str, str]: ...
 # CLI Interface
 # =============================================================================
 
-app = typer.Typer(help="Description", add_completion=False)
+app = typer.Typer(help="Description", add_completion=False, context_settings={"help_option_names": ["-h", "--help"]})
 
 @app.command()
 def main_command() -> None:
@@ -122,3 +122,5 @@ ignore = ["S101", "B008", "RUF001"]
 ## CLI Note
 
 Use typer for all scripts with `uv`. Use argparse only if the script must work without any external dependencies (stdlib-only, no uv).
+
+**Always** pass `context_settings={"help_option_names": ["-h", "--help"]}` to `typer.Typer()` — typer only supports `--help` by default, and users expect `-h` to work.
