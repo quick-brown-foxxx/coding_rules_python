@@ -33,8 +33,11 @@ Template usage: `{{ i18n.section_summary }}`
 Load multiple YAML configs, merge (last wins), then render:
 
 ```python
-def load_configs(paths: list[Path]) -> Result[dict[str, object], str]:
-    merged: dict[str, object] = {}
+# Use a type alias for config values
+type ConfigValue = str | int | float | bool | list[str]
+
+def load_configs(paths: list[Path]) -> Result[dict[str, ConfigValue], str]:
+    merged: dict[str, ConfigValue] = {}
     for path in paths:
         data = yaml.safe_load(path.read_text())
         merged.update(data)  # Later configs override earlier ones
@@ -48,7 +51,7 @@ Validate merged config before rendering:
 ```python
 from jsonschema import Draft7Validator
 
-def validate_config(config: dict[str, object], schema_path: Path) -> Result[None, str]:
+def validate_config(config: dict[str, ConfigValue], schema_path: Path) -> Result[None, str]:
     schema = json.loads(schema_path.read_text())
     validator = Draft7Validator(schema)
     errors = list(validator.iter_errors(config))

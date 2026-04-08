@@ -378,7 +378,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading, json
 
 class MockAPIHandler(BaseHTTPRequestHandler):
-    profiles: dict[str, dict[str, object]] = {}
+    profiles: dict[str, dict[str, str | int | bool]] = {}
 
     def do_POST(self) -> None:
         if self.path == "/api/profiles":

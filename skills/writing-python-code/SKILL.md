@@ -146,7 +146,7 @@ from typing import TypeIs, TypedDict, Required
 
 class ValidResponse(TypedDict):
     status: Required[str]
-    data: Required[dict[str, object]]
+    data: Required[dict[str, str | int | bool | list[str]]]
 
 def is_valid_response(obj: object) -> TypeIs[ValidResponse]:
     return (

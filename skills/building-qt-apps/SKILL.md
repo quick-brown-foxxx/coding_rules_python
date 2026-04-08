@@ -205,7 +205,7 @@ For subprocess shutdown patterns, see `setting-up-python-projects` skill.
 
 - Define signals at class level (not in `__init__`)
 - Connect signals in the component that owns the relationship
-- Use typed signals: `Signal(str)`, `Signal(float)`, `Signal(object)`
+- Use typed signals: `Signal(str)`, `Signal(float)`. Use `Signal(object)` only when PySide6 lacks generic signal support — add `# PySide6 limitation: no generic signals` comment
 
 ```python
 class AudioManager(QObject):
