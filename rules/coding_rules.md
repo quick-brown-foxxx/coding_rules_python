@@ -107,6 +107,45 @@ MAX_RETRIES: Final = 3
 CONFIG_PATH: Final[Path] = Path("~/.config/app")
 ```
 
+### 1.6 Immutability
+
+Prefer immutable data by default. Mutable structures require justification.
+
+- `@dataclass(frozen=True, slots=True)` is the default. Omit `frozen` only for builder patterns or explicit accumulation with a comment.
+- Return `tuple` over `list` for fixed collections. Use `Sequence` in parameters that don't mutate.
+- `frozenset` over `set` when mutation isn't needed.
+
+```python
+@dataclass(frozen=True, slots=True)
+class Profile:
+    name: str
+    version: str
+    active: bool = True
+```
+
+### 1.7 Domain Identifiers
+
+Use `NewType` for domain IDs and typed strings that must not be interchangeable. Use `Path` for filesystem paths, never raw `str`.
+
+```python
+from typing import NewType
+
+ProfileId = NewType("ProfileId", str)
+UserId = NewType("UserId", str)
+
+def delete_profile(profile_id: ProfileId) -> Result[None, str]: ...
+# delete_profile(user_id)  # basedpyright error — caught at check time
+```
+
+### 1.8 Enum vs Literal vs Union
+
+| Use case                                         | Tool                                       |
+| ------------------------------------------------ | ------------------------------------------ |
+| Small fixed string set in function params         | `Literal["json", "yaml"]`                  |
+| Value set with behavior, iteration, or in models | `StrEnum`                                  |
+| Structurally different variants                   | Union type: `type Outcome = Success \| Failure` |
+| C/binary protocol interop                         | `IntEnum`                                  |
+
 ---
 
 ## 2. Error Handling
@@ -210,7 +249,13 @@ The inner method handles expected errors (Result checks, specific exceptions). T
 | Private                       | `_prefix`                   | `_internal_state`              |
 | Qt event handlers             | `camelCase` (Qt convention) | `mousePressEvent`              |
 
-### 3.3 Documentation
+### 3.3 Function Signatures
+
+- **Maximum 5 parameters.** Beyond that, group into a config `dataclass` or `msgspec.Struct`. Enforced by ruff `PLR0913`.
+- **No boolean flag parameters** that switch behavior. Use two named functions or an enum parameter. Enforced by ruff `FBT001`/`FBT002`.
+- Functions in the same module with similar purposes must have consistent parameter ordering.
+
+### 3.4 Documentation
 
 Google-style docstrings for all public functions and classes:
 
@@ -326,7 +371,15 @@ Utilities (Helpers, Wrappers, Common)
 - **Small project**: few modules, flat structure
 - **Large project**: `src/` layout with `core/`, `ui/`, `cli/`, `utils/`, `wrappers/`
 
-### 6.4 Graceful Shutdown
+### 6.4 Module-Level State
+
+Module-level mutable state is banned. All module globals must be `Final`. Registries, caches, and singletons belong in explicitly constructed objects passed via dependency injection. Exceptions: `logging.getLogger()` and `Final` constants.
+
+### 6.5 Circular Imports
+
+Circular imports are architectural bugs — not something to work around with `TYPE_CHECKING`. If two modules import each other, invert the dependency: extract a `Protocol`, move shared types to a common module, or restructure layers. `TYPE_CHECKING` is only for forward references within the same layer. Enforce layer boundaries with ruff `banned-api` where practical.
+
+### 6.6 Graceful Shutdown
 
 - **Graceful shutdown:** All apps must handle Ctrl+C without tracebacks or hanging. Scripts: catch `KeyboardInterrupt` at entry point, exit 130. Subprocess wrappers: use `start_new_session=True` and kill process groups on interrupt. Qt apps: install SIGINT handler before event loop. See `setting-up-python-projects` skill for patterns.
 
