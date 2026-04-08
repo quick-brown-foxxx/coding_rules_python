@@ -179,14 +179,139 @@ Circular imports are architectural bugs, not something to work around with `TYPE
 | `notes/other-patterns.md` | 60 | ~60 | Fine |
 | `PHILOSOPHY.md` | 101 | 101 | No changes |
 
+## 10. Automated enforcement
+
+### 10a. Config-only wins (ruff + basedpyright)
+
+Add to `templates/pyproject.toml` and reference from skills:
+
+```toml
+# ruff — function signature discipline
+[tool.ruff.lint]
+extend-select = [
+    "PLR",   # pylint refactor (includes PLR0913 — max args)
+    "FBT",   # flake8-boolean-trap (FBT001, FBT002)
+]
+
+[tool.ruff.lint.pylint]
+max-args = 5
+
+# basedpyright — circular import detection
+[tool.basedpyright]
+reportImportCycles = "error"
+```
+
+**Files:** `templates/pyproject.toml`, `writing-python-code/SKILL.md` (basedpyright config block), `setting-up-python-projects/SKILL.md` (mention in setup checklist)
+
+### 10b. Custom linting scripts (`reusable/linting/`)
+
+Three pure-stdlib AST-based scripts (no dependencies beyond Python stdlib). Each is a standalone PEP 722 script runnable via `uv run`. Designed to run as pre-commit hooks.
+
+**Shared conventions across all three scripts:**
+
+- **Ignore mechanism:** Each check supports an inline ignore comment with required rationale:
+  `# lint-ignore[check-name]: rationale here`
+  The rationale is mandatory — bare `# lint-ignore[check-name]` without text after `:` is reported as an error. This mirrors the existing `# type: ignore[code] # rationale: <reason>` pattern.
+- **Exit codes:** 0 = clean, 1 = violations found.
+- **Output format:** `file.py:line: [check-name] message`
+- **Input:** Accept file paths as CLI args (for pre-commit integration). If no args, scan current directory recursively for `.py` files.
+- **Pure stdlib:** `ast` + `sys` + `pathlib` only. No external dependencies.
+
+**Script 1: `check_object_annotations.py`** (~80-100 lines)
+
+Check name: `restricted-object`
+
+Walks all type annotations in function signatures, variable annotations, and class attributes. Flags:
+- `dict[str, object]` or any `dict[..., object]`
+- `list[object]`, `Sequence[object]`, `tuple[object, ...]`
+- Bare `object` as a function parameter type (except whitelisted positions)
+
+Whitelist (allowed uses — not flagged):
+- `TypeIs` / `TypeGuard` parameter: `def foo(obj: object) -> TypeIs[X]`
+- Variadic args: `*args: object`, `**kwargs: object`
+- `Coroutine[object, None, T]` (first two type params)
+- Logging/debug: configurable via `# lint-ignore[restricted-object]: logging utility`
+
+**Script 2: `check_frozen_dataclasses.py`** (~40-50 lines)
+
+Check name: `unfrozen-dataclass`
+
+Finds `@dataclass` and `@dataclass(...)` decorators. Flags any that don't include `frozen=True`.
+
+Whitelist:
+- `# lint-ignore[unfrozen-dataclass]: builder pattern` or similar rationale
+- `@dataclass(frozen=True)` — obviously fine
+- `@dataclass(frozen=True, slots=True)` — fine regardless of other args
+
+**Script 3: `check_module_mutables.py`** (~60-80 lines)
+
+Check name: `module-mutable-state`
+
+Flags module-level (top-level, not inside functions/classes) assignments that create mutable containers:
+- `x = []`, `x = {}`, `x = set()`, `x: list[...] = []`, `x: dict[...] = {}`
+- `x = list()`, `x = dict()`, `x = set()`
+- `x = defaultdict(...)`, `x = OrderedDict()`
+
+Whitelist:
+- Anything annotated with `Final`: `x: Final[dict[str, str]] = {}`
+- `# lint-ignore[module-mutable-state]: rationale`
+- Assignments inside `if TYPE_CHECKING:` blocks
+- Logger assignments: `logger = getLogger(...)`, `logger = logging.getLogger(...)`
+
+**Tests (`reusable_tests/test_linting/`):**
+
+Each script gets a test module with:
+- Valid code that should pass (no violations)
+- Code with violations that should be caught
+- Code with valid `# lint-ignore[check-name]: rationale` that should be silenced
+- Code with bare `# lint-ignore[check-name]` (no rationale) that should still be flagged
+- Edge cases (nested functions, class methods, TYPE_CHECKING blocks, etc.)
+
+Tests use `subprocess.run` to invoke the scripts against fixture `.py` files in `reusable_tests/fixtures/linting/`, checking exit codes and output.
+
+**Pre-commit integration:**
+
+```yaml
+# .pre-commit-config.yaml
+- repo: local
+  hooks:
+    - id: check-object-annotations
+      name: Check restricted object annotations
+      entry: uv run reusable/linting/check_object_annotations.py
+      language: system
+      types: [python]
+    - id: check-frozen-dataclasses
+      name: Check frozen dataclasses
+      entry: uv run reusable/linting/check_frozen_dataclasses.py
+      language: system
+      types: [python]
+    - id: check-module-mutables
+      name: Check module mutable state
+      entry: uv run reusable/linting/check_module_mutables.py
+      language: system
+      types: [python]
+```
+
 ## Implementation order
 
+Two parallel tracks:
+
+**Track A — Documentation updates (items 1-9):**
 1. Fix inconsistencies first (examples that violate current rules)
 2. `coding_rules.md` — add all new sections (items 2, 4, 5, 6, 7, 8)
 3. `coding_rules.md` + `writing-python-code/SKILL.md` — rewrite `object` guidance (item 1)
 4. `building-multi-ui-apps/SKILL.md` — add DI composition root section (item 3)
 5. `coding_rules_short.md` — update with new bullet points
 6. Minor cross-reference additions to `building-qt-apps/SKILL.md`
+7. Config updates: `templates/pyproject.toml` (ruff PLR/FBT + basedpyright reportImportCycles)
+
+**Track B — Linting scripts (item 10b):**
+1. Create `reusable/linting/` directory with three scripts
+2. Create `reusable_tests/test_linting/` with test fixtures and test modules
+3. Validate all scripts pass on the project's own code
+4. Add pre-commit hook entries to `templates/pre-commit-config.yaml`
+
+Track B is a separate coding task — spawn coder agent, then validator.
 
 ## Out of scope
 
