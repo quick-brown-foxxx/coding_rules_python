@@ -72,13 +72,13 @@ Separate what changes for different reasons. Separate what should be testable in
 
 Use tools that enforce the philosophy automatically. Prefer tools that are fast, opinionated, and all-in-one over legacy alternatives.
 
-- **`uv`** for package management and script execution — fast, handles PEP 722 inline scripts
+- **`uv`** for package management and script execution — fast, handles PEP 723 inline scripts
 - **`basedpyright`** for type checking — strict mode, faster than mypy, catches more
 - **`ruff`** for linting and formatting — replaces black, isort, flake8, bandit in one tool
 - **`pytest`** for testing — with plugins as needed (pytest-qt, pytest-asyncio, pytest-httpserver)
 - **`poethepoet`** for task running — simple task definitions in pyproject.toml
 - **`pre-commit`** for git hooks — automates linting, formatting, type checking on every commit
-- **PEP 722 inline metadata** for single-file scripts — dependencies declared in the script, not in separate files
+- **PEP 723 inline metadata** for single-file scripts — dependencies declared in the script, not in separate files
 - **Prefer packages without system deps.** PySide6 over PyQt (no extra system libraries). Pure Python or wheels over packages requiring C compilation.
 - **Python version: latest stable.** Use modern features (generic syntax, TypeIs, match statements). Don't target old versions unless required.
 
@@ -96,6 +96,6 @@ Standard tools for standard tasks:
 
 Every project, no matter how small, starts with the safety net configured:
 
-- **Single script**: PEP 722 metadata, pyproject.toml for tool config (ruff + basedpyright), shebang for direct execution
+- **Single script**: PEP 723 metadata, pyproject.toml for tool config (ruff + basedpyright), shebang for direct execution
 - **Full project**: src layout, AGENTS.md, coding_rules.md, pyproject.toml with all tools, pre-commit hooks, test directory structure
 - **The overhead is worth it.** Spending 10 minutes on setup saves hours of debugging implicit failures later. This is the pit of success in action.

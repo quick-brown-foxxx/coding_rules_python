@@ -6,6 +6,12 @@ Personal Python development standards, templates, and AI skills.
 
 ```
 PHILOSOPHY.md          Core beliefs — every other doc inherits from this
+pyproject.toml         Project config (deps, tooling)
+uv.lock                Locked dependency versions
+
+docs/                  Project documentation
+  anthropics-full-guide-for-ai-skills.md
+  ISSUES.md
 
 reusable/              Copy-paste reusable code (shadcn-ui style)
   logging/               Logging setup + colored non-log output
@@ -42,7 +48,7 @@ templates/             Copy into new projects, fill TODOs
 
 skills/                Claude Code skills (deploy to ~/.claude/skills/)
   writing-python-code/          Core Python: typing, errors, async, style, security
-  writing-python-scripts/       PEP 722 single-file scripts
+  writing-python-scripts/       PEP 723 single-file scripts
   setting-up-python-projects/   New project bootstrap
   building-qt-apps/             PySide6 desktop apps
   testing-python/               Pytest setup, fixtures, containerized testing

@@ -51,7 +51,7 @@ The file is automatically created with defaults on first load.
 Dependencies:
 -------------
 - PySide6 (Qt6)
-- tomli, tomli-w (TOML parsing)
+- tomllib (stdlib), tomli-w (TOML writing)
 - rusty-results (Result types)
 """
 
@@ -59,11 +59,11 @@ from __future__ import annotations
 
 import logging
 import sys
+import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Final, cast
 
-import tomli
 import tomli_w
 from PySide6.QtGui import QKeySequence
 from rusty_results.prelude import Err, Ok, Result
@@ -115,7 +115,7 @@ class ActionShortcut:
         return self.default_linux
 
 
-def _validate_key_sequence(sequence: str) -> Result[QKeySequence, str]:
+def validate_key_sequence(sequence: str) -> Result[QKeySequence, str]:
     """Validate a key sequence string.
 
     Args:
@@ -213,7 +213,7 @@ class ShortcutConfig:
                 continue
 
             # Validate the key sequence (sequence is str after isinstance check above)
-            validation = _validate_key_sequence(sequence)
+            validation = validate_key_sequence(sequence)
             if validation.is_err:
                 logger.warning(f"Invalid shortcut for '{action_id}': {validation.unwrap_err()}")
                 continue  # Skip this invalid shortcut but continue processing
@@ -261,7 +261,7 @@ class ShortcutConfig:
             Ok(None) if valid, Err(message) if invalid
         """
         if sequence:
-            validation = _validate_key_sequence(sequence)
+            validation = validate_key_sequence(sequence)
             if validation.is_err:
                 return Err(validation.unwrap_err())
 
@@ -341,9 +341,9 @@ class ShortcutManager:
             return Ok(self._config)
 
         try:
-            # tomli.loads returns Any, so we need to ignore the type error
-            raw_data = tomli.loads(self._config_path.read_text(encoding="utf-8"))  # type: ignore[assignment]  # tomli.loads returns Any, need dict for downstream processing
-        except tomli.TOMLDecodeError as exc:
+            # tomllib.loads returns Any, so we need to ignore the type error
+            raw_data = tomllib.loads(self._config_path.read_text(encoding="utf-8"))  # type: ignore[assignment]  # tomllib.loads returns Any, need dict for downstream processing
+        except tomllib.TOMLDecodeError as exc:
             return Err(f"Invalid shortcuts file: {exc}")
         except OSError as exc:
             return Err(f"Failed to read shortcuts file: {exc}")

@@ -2,18 +2,18 @@
 name: writing-python-scripts
 description: >
   ALWAYS LOAD THIS SKILL WHEN CREATING ANY STANDALONE PYTHON SCRIPT OR SINGLE-FILE AUTOMATION. Do not create Python scripts directly — use this skill first.
-  Single-file Python scripts with PEP 722 inline metadata, uv run, and typer CLI.
+  Single-file Python scripts with PEP 723 inline metadata, uv run, and typer CLI.
 ---
 
 # Writing Python Scripts
 
-Single-file scripts use PEP 722 inline metadata for dependencies, executed via `uv run --script`. All type safety and error handling rules from `writing-python-code` still apply.
+Single-file scripts use PEP 723 inline metadata for dependencies, executed via `uv run --script`. All type safety and error handling rules from `writing-python-code` still apply.
 
 ---
 
 ## When to Use Single Script
 
-| Single Script (PEP 722) | Full Project |
+| Single Script (PEP 723) | Full Project |
 |--------------------------|--------------|
 | One task, one file | Multiple features |
 | No tests needed | Tests required |

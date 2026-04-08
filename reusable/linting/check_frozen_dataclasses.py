@@ -34,8 +34,10 @@ def _has_frozen_true(decorator: ast.expr) -> bool:
 
 
 def _is_dataclass_decorator(decorator: ast.expr) -> bool:
-    """Check if a decorator is @dataclass or @dataclass(...)."""
+    """Check if a decorator is @dataclass, @dataclasses.dataclass, or @dataclass(...)."""
     if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
+        return True
+    if isinstance(decorator, ast.Attribute) and decorator.attr == "dataclass":
         return True
     if isinstance(decorator, ast.Call):
         func = decorator.func
@@ -77,7 +79,7 @@ def check_file(path: Path) -> list[str]:
             if is_ignored(source_line, CHECK_NAME):
                 break
 
-            if isinstance(decorator, ast.Name) or not _has_frozen_true(decorator):
+            if isinstance(decorator, ast.Name | ast.Attribute) or not _has_frozen_true(decorator):
                 violations.append(report(path, line_num, CHECK_NAME, f"dataclass '{node.name}' missing frozen=True"))
             break  # Only check the first matching decorator
 

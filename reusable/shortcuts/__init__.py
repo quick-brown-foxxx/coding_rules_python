@@ -19,17 +19,17 @@ Example:
     )
 """
 
-# Import private function for advanced users who need custom validation
+# Import validation function for advanced users who need custom validation
 from reusable.shortcuts.shortcuts import (
     ActionShortcut,
     ShortcutConfig,
     ShortcutManager,
-    _validate_key_sequence,  # type: ignore[import-private]  # public API for advanced users needing custom validation
+    validate_key_sequence,
 )
 
 __all__ = [
     "ActionShortcut",
     "ShortcutConfig",
     "ShortcutManager",
-    "_validate_key_sequence",
+    "validate_key_sequence",
 ]

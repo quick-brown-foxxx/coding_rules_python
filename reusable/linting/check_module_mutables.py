@@ -17,6 +17,7 @@ from typing import Final
 from reusable.linting.lint_utils import (
     collect_files,
     has_bare_ignore,
+    is_final_annotation,
     is_ignored,
     read_source_lines,
     report,
@@ -34,17 +35,6 @@ _MUTABLE_CONSTRUCTORS: Final = frozenset({"list", "dict", "set", "defaultdict", 
 _LOGGER_FUNCS: Final = frozenset({"getLogger"})
 
 
-def _is_final_annotation(annotation: ast.expr | None) -> bool:
-    """Check if annotation is Final or Final[...]."""
-    if annotation is None:
-        return False
-    if isinstance(annotation, ast.Name) and annotation.id == "Final":
-        return True
-    if isinstance(annotation, ast.Subscript) and isinstance(annotation.value, ast.Name):
-        return annotation.value.id == "Final"
-    return False
-
-
 def _is_logger_call(value: ast.expr) -> bool:
     """Check if value is a getLogger(...) or logging.getLogger(...) call."""
     if not isinstance(value, ast.Call):
@@ -59,8 +49,12 @@ def _is_mutable_value(value: ast.expr) -> bool:
     """Check if a value creates a mutable container."""
     if isinstance(value, _MUTABLE_LITERALS):
         return True
-    if isinstance(value, ast.Call) and isinstance(value.func, ast.Name):
-        return value.func.id in _MUTABLE_CONSTRUCTORS
+    if isinstance(value, ast.Call):
+        func = value.func
+        if isinstance(func, ast.Name) and func.id in _MUTABLE_CONSTRUCTORS:
+            return True
+        if isinstance(func, ast.Attribute) and func.attr in _MUTABLE_CONSTRUCTORS:
+            return True
     return False
 
 
@@ -121,7 +115,7 @@ def check_file(path: Path) -> list[str]:
 
         # Handle annotated assignments: x: list[str] = []
         if isinstance(node, ast.AnnAssign) and node.value is not None:
-            if _is_final_annotation(node.annotation):
+            if is_final_annotation(node.annotation):
                 continue
             _check_mutable_assignment(node, node.value, path, source_lines, violations)
 

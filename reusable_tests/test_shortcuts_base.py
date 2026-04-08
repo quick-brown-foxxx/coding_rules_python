@@ -40,7 +40,7 @@ import pytest
 from reusable.shortcuts import (
     ActionShortcut,
     ShortcutConfig,
-    _validate_key_sequence,  # type: ignore[import-private]  # public API re-exported from __init__ for advanced users
+    validate_key_sequence,
 )
 
 
@@ -146,7 +146,7 @@ class TestActionShortcut:
 
 
 class TestValidateKeySequence:
-    """Generic tests for _validate_key_sequence function.
+    """Generic tests for validate_key_sequence function.
 
     These tests verify key sequence validation logic without depending
     on app-specific shortcuts or configuration.
@@ -171,7 +171,7 @@ class TestValidateKeySequence:
         ]
 
         for seq in valid_sequences:
-            result = _validate_key_sequence(seq)
+            result = validate_key_sequence(seq)
             assert result.is_ok, f"Sequence '{seq}' should be valid"
             if seq:
                 # Non-empty sequences should not be empty QKeySequences
@@ -195,11 +195,8 @@ class TestValidateKeySequence:
         ]
 
         for seq in invalid_sequences:
-            result = _validate_key_sequence(seq)
-            # Some invalid sequences may create QKeySequences with unknown keys
-            # rather than failing, which is Qt's behavior
-            # We just verify it doesn't crash and returns either Ok or Err
-            assert result.is_ok or result.is_err, f"Validation of '{seq}' should not crash"
+            result = validate_key_sequence(seq)
+            assert result.is_err, f"'{seq}' should be rejected"
 
 
 class TestShortcutConfig:
@@ -420,9 +417,7 @@ class TestShortcutConfig:
         config = ShortcutConfig(shortcuts={})
         result = config.set_shortcut("test_action", "Invalid+++")
 
-        # May succeed due to Qt's permissive parsing, or may fail
-        # We just verify it doesn't crash
-        assert result.is_ok or result.is_err
+        assert result.is_err
 
     def test_set_shortcut_empty(self) -> None:
         """Test setting an empty shortcut (disable).

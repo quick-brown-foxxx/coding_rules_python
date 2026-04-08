@@ -48,3 +48,15 @@ repos:
         entry: uv run python reusable/linting/check_module_mutables.py
         language: system
         types: [python]
+
+      - id: check-type-ignore
+        name: check-type-ignore
+        entry: uv run python reusable/linting/check_type_ignore.py
+        language: system
+        types: [python]
+
+      - id: check-raw-dicts
+        name: check-raw-dicts
+        entry: uv run python reusable/linting/check_raw_dicts.py
+        language: system
+        types: [python]

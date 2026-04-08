@@ -145,7 +145,7 @@ class QAsyncSignalBridge(QObject):
                 else:
                     self.error.emit(str(e))
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         self._task = loop.create_task(_wrapped())
 ```
 
@@ -162,7 +162,7 @@ class AsyncRecorder(QObject):
         self._executor = ThreadPoolExecutor(max_workers=1)
 
     async def start_recording(self) -> None:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         result = await loop.run_in_executor(self._executor, self._sync_record)
         self.recording_completed.emit(result)
 ```

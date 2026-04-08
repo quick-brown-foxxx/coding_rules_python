@@ -20,6 +20,7 @@ All Python code follows the pit-of-success philosophy: strict types, Result-base
 pythonVersion = "3.14"
 typeCheckingMode = "strict"
 reportAny = "error"
+reportImportCycles = "error"
 reportImplicitStringConcatenation = "none"
 reportUnusedCallResult = "none"
 reportUnnecessaryIsInstance = "none"
@@ -92,7 +93,7 @@ class Renderable(Protocol):
 
 ```python
 MAX_RETRIES: Final = 3
-CONFIG_PATH: Final[Path] = Path("~/.config/app")
+CONFIG_PATH: Final[Path] = Path("~/.config/app").expanduser()
 ```
 
 ### Handling `Any` at Library Boundaries

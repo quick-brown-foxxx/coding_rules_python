@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 from typing import Final
@@ -45,10 +46,34 @@ def read_source_lines(path: Path) -> list[str]:
     """Read a file's source lines. Returns empty list on read errors."""
     try:
         return path.read_text(encoding="utf-8").splitlines()
-    except OSError, UnicodeDecodeError:
+    except (OSError, UnicodeDecodeError):
         return []
 
 
 def report(path: Path, line: int, check_name: str, message: str) -> str:
     """Format a violation report line."""
     return f"{path}:{line}: [{check_name}] {message}"
+
+
+def is_final_annotation(annotation: ast.expr | None) -> bool:
+    """Check if annotation is Final or Final[...].
+
+    Handles both ``Final`` / ``typing.Final`` name forms and
+    ``Final[T]`` / ``typing.Final[T]`` subscript forms.
+    """
+    if annotation is None:
+        return False
+    # Final (bare name)
+    if isinstance(annotation, ast.Name) and annotation.id == "Final":
+        return True
+    # typing.Final (attribute access)
+    if isinstance(annotation, ast.Attribute) and annotation.attr == "Final":
+        return True
+    # Final[T] or typing.Final[T]
+    if isinstance(annotation, ast.Subscript):
+        value = annotation.value
+        if isinstance(value, ast.Name) and value.id == "Final":
+            return True
+        if isinstance(value, ast.Attribute) and value.attr == "Final":
+            return True
+    return False

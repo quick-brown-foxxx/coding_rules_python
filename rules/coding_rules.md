@@ -11,7 +11,7 @@ For full guide, see [rules navigation doc](https://github.com/quick-brown-foxxx/
 
 ### 1.1 Strict Mode (Non-Negotiable)
 
-basedpyright in strict mode with `reportAny=error`. Every function has type annotations.
+basedpyright in strict mode with `reportAny=error`, `reportImportCycles=error`. Every function has type annotations.
 No exceptions to strictness.
 
 ### 1.2 Banned Patterns
@@ -64,7 +64,7 @@ config = msgspec.convert(raw_dict, type=UserConfig)
 ```python
 from dataclasses import dataclass
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class Profile:
     name: str
     version: str
@@ -118,7 +118,7 @@ When wrappers are impractical, use type stubs in `src/stubs/`.
 from typing import Final
 
 MAX_RETRIES: Final = 3
-CONFIG_PATH: Final[Path] = Path("~/.config/app")
+CONFIG_PATH: Final[Path] = Path("~/.config/app").expanduser()
 ```
 
 ### 1.7 Immutability

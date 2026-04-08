@@ -17,6 +17,7 @@ dependencies = [
     "colorlog>=6.10.1",          # Colored logging
     # "httpx>=0.28.1",           # Async HTTP client (uncomment if needed)
     # "python-dotenv>=1.0.1",    # Env vars from .env (uncomment if needed)
+    # "msgspec>=0.19.0",         # Struct validation + fast JSON (uncomment if needed)
     # "typer>=0.12.0",           # CLI framework (uncomment if needed)
     # "pyside6>=6.10.1",         # Qt GUI (uncomment if needed)
     # "qasync>=0.28.0",          # Qt + asyncio (uncomment if needed)

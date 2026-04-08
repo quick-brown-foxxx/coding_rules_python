@@ -18,6 +18,7 @@ from pathlib import Path
 from reusable.linting.lint_utils import (
     collect_files,
     has_bare_ignore,
+    is_final_annotation,
     is_ignored,
     read_source_lines,
     report,
@@ -41,13 +42,6 @@ def _contains_raw_dict(node: ast.expr) -> bool:
     if isinstance(node, ast.BinOp):
         return _contains_raw_dict(node.left) or _contains_raw_dict(node.right)
 
-    return False
-
-
-def _is_final_annotation(annotation: ast.expr) -> bool:
-    """Check if annotation is Final[...]."""
-    if isinstance(annotation, ast.Subscript) and isinstance(annotation.value, ast.Name):
-        return annotation.value.id == "Final"
     return False
 
 
@@ -122,7 +116,7 @@ def check_file(path: Path) -> list[str]:
     # and class-level AnnAssign from function-local ones.
     for node in tree.body:
         # Module-level annotated assignment
-        if isinstance(node, ast.AnnAssign) and node.annotation and not _is_final_annotation(node.annotation):
+        if isinstance(node, ast.AnnAssign) and node.annotation and not is_final_annotation(node.annotation):
             _check_annotation(
                 path,
                 source_lines,
@@ -141,7 +135,7 @@ def check_file(path: Path) -> list[str]:
                 if (
                     isinstance(class_node, ast.AnnAssign)
                     and class_node.annotation
-                    and not _is_final_annotation(class_node.annotation)
+                    and not is_final_annotation(class_node.annotation)
                 ):
                     _check_annotation(
                         path,
