@@ -269,6 +269,21 @@ Each script gets a test module with:
 
 Tests use `subprocess.run` to invoke the scripts against fixture `.py` files in `reusable_tests/fixtures/linting/`, checking exit codes and output.
 
+**Poe tasks (in `templates/pyproject.toml`):**
+
+```toml
+[tool.poe.tasks]
+lint_objects = "python reusable/linting/check_object_annotations.py"
+lint_frozen = "python reusable/linting/check_frozen_dataclasses.py"
+lint_mutables = "python reusable/linting/check_module_mutables.py"
+lint_custom = ["lint_objects", "lint_frozen", "lint_mutables"]
+
+[tool.poe.tasks.lint_full]
+shell = "basedpyright . && ruff check --fix . && ruff format . && poe lint_custom"
+```
+
+Individual tasks for running each check separately, `lint_custom` for all custom checks, and `lint_full` updated to include them.
+
 **Pre-commit integration:**
 
 ```yaml
