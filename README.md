@@ -10,10 +10,23 @@ PHILOSOPHY.md          Core beliefs — every other doc inherits from this
 reusable/              Copy-paste reusable code (shadcn-ui style)
   logging/               Logging setup + colored non-log output
   shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
+  linting/               Custom lint checks (AST-based)
+    lint_utils.py          Shared utilities (file collection, ignore handling)
+    check_frozen_dataclasses.py  Enforce frozen=True on all dataclasses
+    check_module_mutables.py     Ban module-level mutable state
+    check_object_annotations.py  Restrict object to boundary positions
+    check_type_ignore.py         Require rationale on type:ignore comments
+    check_raw_dicts.py           Ban raw dict annotations in business code
 
 reusable_tests/        Tests for reusable/ code
   test_shortcuts_base.py   Generic shortcut config tests
   test_shortcuts_manager.py  ShortcutManager tests
+  test_linting/            Tests for custom lint checks
+    test_check_frozen_dataclasses.py
+    test_check_module_mutables.py
+    test_check_object_annotations.py
+    test_check_raw_dicts.py
+    test_check_type_ignore.py
 
 rules/                 Copy-paste rule files for projects
   coding_rules.md        Full coding standards.
