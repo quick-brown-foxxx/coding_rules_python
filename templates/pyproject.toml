@@ -58,6 +58,7 @@ venvPath = "."
 venv = ".venv"
 typeCheckingMode = "strict"
 reportAny = "error"
+reportImportCycles = "error"
 reportImplicitStringConcatenation = "none"
 reportUnusedCallResult = "none"
 reportUnnecessaryIsInstance = "none"
@@ -98,6 +99,8 @@ extend-select = [
     "SIM",            # simplify
     "PT",             # pytest style
     "PERF",           # performance
+    "PLR",            # pylint refactor (max args, complexity)
+    "FBT",            # flake8-boolean-trap (no bool params)
     "RUF",            # ruff-specific
 ]
 ignore = [
@@ -106,7 +109,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "PT018"]
+"tests/*" = ["S101", "PT018", "FBT001"]
+
+[tool.ruff.lint.pylint]
+max-args = 5
 
 # Uncomment and customize for wrapper enforcement:
 # [tool.ruff.lint.flake8-tidy-imports.banned-api]
@@ -135,6 +141,12 @@ addopts = ["-n", "auto", "--dist", "worksteal"]
 [tool.poe.tasks]
 test = "pytest"
 app = "python -m TODO_PACKAGE_NAME"
+lint_objects = "python reusable/linting/check_object_annotations.py"
+lint_frozen = "python reusable/linting/check_frozen_dataclasses.py"
+lint_mutables = "python reusable/linting/check_module_mutables.py"
+
+[tool.poe.tasks.lint_custom]
+sequence = ["lint_objects", "lint_frozen", "lint_mutables"]
 
 [tool.poe.tasks.lint_full]
-shell = "basedpyright . && ruff check --fix . && ruff format ."
+shell = "basedpyright . && ruff check --fix . && ruff format . && poe lint_custom"

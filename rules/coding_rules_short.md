@@ -6,10 +6,14 @@ For single-file scripts and small projects. See [full version](https://github.co
 
 ## Type Safety
 
-- basedpyright strict mode, `reportAny=error`
+- basedpyright strict mode, `reportAny=error`, `reportImportCycles=error`
 - Type annotations on all functions
 - No `Any`, no `typing.cast()`, no blanket `# type: ignore`
-- `msgspec.Struct` for external data (JSON, configs, APIs), `dataclass` for domain objects
+- `object` restricted to boundary positions (TypeIs guards, signal handlers, coroutine params)
+- `msgspec.Struct` for external data (JSON, configs, APIs), `dataclass(frozen=True)` for domain objects
+- `NewType` for domain identifiers (ProfileId, UserId) — prevent mixing
+- Immutable by default: `frozen=True`, `tuple` over `list`, `Sequence` in params
+- Max 5 function parameters; no boolean flag params
 
 ## Error Handling
 

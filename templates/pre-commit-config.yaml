@@ -30,3 +30,21 @@ repos:
         types: [python]
         pass_filenames: true
         stages: [pre-commit]
+
+      - id: check-object-annotations
+        name: check-object-annotations
+        entry: uv run python reusable/linting/check_object_annotations.py
+        language: system
+        types: [python]
+
+      - id: check-frozen-dataclasses
+        name: check-frozen-dataclasses
+        entry: uv run python reusable/linting/check_frozen_dataclasses.py
+        language: system
+        types: [python]
+
+      - id: check-module-mutables
+        name: check-module-mutables
+        entry: uv run python reusable/linting/check_module_mutables.py
+        language: system
+        types: [python]
