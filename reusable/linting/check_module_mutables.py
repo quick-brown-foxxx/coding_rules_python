@@ -12,6 +12,7 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
+from typing import Final
 
 from reusable.linting.lint_utils import (
     collect_files,
@@ -27,10 +28,10 @@ CHECK_NAME = "module-mutable-state"
 _MUTABLE_LITERALS = (ast.List, ast.Dict, ast.Set)
 
 # Mutable constructor function names
-_MUTABLE_CONSTRUCTORS = {"list", "dict", "set", "defaultdict", "OrderedDict"}
+_MUTABLE_CONSTRUCTORS: Final = frozenset({"list", "dict", "set", "defaultdict", "OrderedDict"})
 
 # Logger function names (allowed)
-_LOGGER_FUNCS = {"getLogger"}
+_LOGGER_FUNCS: Final = frozenset({"getLogger"})
 
 
 def _is_final_annotation(annotation: ast.expr | None) -> bool:
@@ -126,6 +127,10 @@ def check_file(path: Path) -> list[str]:
 
         # Handle plain assignments: x = [] or x = dict()
         if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target = node.targets[0]
+            # Skip dunder assignments (__all__, __version__, etc.)
+            if isinstance(target, ast.Name) and target.id.startswith("__") and target.id.endswith("__"):
+                continue
             _check_mutable_assignment(node, node.value, path, source_lines, violations)
 
     return violations

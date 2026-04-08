@@ -141,7 +141,7 @@ def _validate_key_sequence(sequence: str) -> Result[QKeySequence, str]:
     return Ok(key_seq)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True)  # lint-ignore[unfrozen-dataclass]: mutable config loaded from TOML, updated at runtime
 class ShortcutConfig:
     """Loaded shortcut configuration.
 
@@ -174,7 +174,9 @@ class ShortcutConfig:
         return self._TOML_HEADER + "\n" + body
 
     @staticmethod
-    def from_toml(data: dict[str, object]) -> Result[ShortcutConfig, str]:
+    def from_toml(
+        data: dict[str, object],  # lint-ignore[restricted-object]: TOML parsed dict
+    ) -> Result[ShortcutConfig, str]:
         """Deserialize from TOML dict, with validation.
 
         Invalid shortcuts are logged as warnings and skipped rather than
@@ -222,7 +224,9 @@ class ShortcutConfig:
 
     # Keep old from_dict method for backward compatibility with tests
     @staticmethod
-    def from_dict(data: dict[str, object]) -> Result[ShortcutConfig, str]:
+    def from_dict(
+        data: dict[str, object],  # lint-ignore[restricted-object]: TOML parsed dict
+    ) -> Result[ShortcutConfig, str]:
         """Deserialize from dict, with validation.
 
         This is an alias for from_toml for backward compatibility.

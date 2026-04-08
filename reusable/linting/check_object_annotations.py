@@ -12,6 +12,7 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
+from typing import Final
 
 from reusable.linting.lint_utils import (
     collect_files,
@@ -24,7 +25,7 @@ from reusable.linting.lint_utils import (
 CHECK_NAME = "restricted-object"
 
 # Container types where object as a type arg is banned
-_BANNED_CONTAINERS = {"dict", "list", "Sequence", "tuple", "set", "frozenset"}
+_BANNED_CONTAINERS: Final = frozenset({"dict", "list", "Sequence", "tuple", "set", "frozenset"})
 
 
 def _is_object_name(node: ast.expr) -> bool:

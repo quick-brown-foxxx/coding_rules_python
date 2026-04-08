@@ -4,17 +4,26 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Final
 
 # Pattern: # lint-ignore[check-name]: rationale text
 _IGNORE_PATTERN = re.compile(r"#\s*lint-ignore\[([^\]]+)\]\s*:\s*(.+)")
 _IGNORE_NO_RATIONALE = re.compile(r"#\s*lint-ignore\[([^\]]+)\]\s*:?\s*$")
 
 
+_EXCLUDED_DIRS: Final = frozenset({".venv", "venv", ".git", "__pycache__", "node_modules", ".tox", ".mypy_cache"})
+
+
+def _is_excluded(path: Path) -> bool:
+    """Check if a path is under an excluded directory."""
+    return bool(_EXCLUDED_DIRS & set(path.parts))
+
+
 def collect_files(args: list[str]) -> list[Path]:
     """Collect Python files from CLI args or scan current directory."""
     if args:
         return [Path(a) for a in args if a.endswith(".py")]
-    return sorted(Path(".").rglob("*.py"))
+    return sorted(p for p in Path(".").rglob("*.py") if not _is_excluded(p))
 
 
 def is_ignored(line: str, check_name: str) -> bool:
