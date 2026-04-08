@@ -247,12 +247,9 @@ When the project wraps third-party libraries (for typing, platform abstraction, 
 "faster_whisper".msg = "Use src/wrappers/transcriber.py instead"
 ```
 
-Common reasons to wrap a library:
-- **Poorly typed** — library has no stubs or incomplete stubs; wrapper provides typed facade
-- **Platform-specific** — library only works on certain OS; wrapper provides abstraction layer with platform detection
-- **Swappable** — you may replace the library later; wrapper gives stable internal API
+Wrap when a library is **poorly typed** (need typed facade), **platform-specific** (need abstraction layer), or **swappable** (need stable internal API). The template `pyproject.toml` has commented examples — uncomment and customize per project.
 
-This replaces the need for custom import-checking scripts. The template `pyproject.toml` has commented examples — uncomment and customize per project.
+Inside the wrapper files themselves, suppress the ban with a per-file ruff ignore: `"src/wrappers/*".msg = ""` in the banned-api config, or use `# noqa: TID251` on individual import lines.
 
 ### Research before building
 

@@ -103,8 +103,10 @@ python_functions = ["test_*"]
 
 [tool.poe.tasks]
 test = "pytest"
-lint_objects.shell = "find reusable -name '*.py' | xargs python -m reusable.linting.check_object_annotations"
-lint_frozen.shell = "find reusable -name '*.py' | xargs python -m reusable.linting.check_frozen_dataclasses"
-lint_mutables.shell = "find reusable -name '*.py' | xargs python -m reusable.linting.check_module_mutables"
-lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables"]
+lint_objects.shell = "find reusable reusable_tests -path reusable_tests/fixtures -prune -o -name '*.py' -print | xargs python -m reusable.linting.check_object_annotations"
+lint_frozen.shell = "find reusable reusable_tests -path reusable_tests/fixtures -prune -o -name '*.py' -print | xargs python -m reusable.linting.check_frozen_dataclasses"
+lint_mutables.shell = "find reusable reusable_tests -path reusable_tests/fixtures -prune -o -name '*.py' -print | xargs python -m reusable.linting.check_module_mutables"
+lint_type_ignore.shell = "find reusable reusable_tests -path reusable_tests/fixtures -prune -o -name '*.py' -print | xargs python -m reusable.linting.check_type_ignore"
+lint_raw_dicts.shell = "find reusable reusable_tests -path reusable_tests/fixtures -prune -o -name '*.py' -print | xargs python -m reusable.linting.check_raw_dicts"
+lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables", "lint_type_ignore", "lint_raw_dicts"]
 lint_full.shell = "basedpyright && ruff check --fix . && ruff format . && poe lint_custom_linters"

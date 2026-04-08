@@ -235,7 +235,7 @@ class TestShortcutConfig:
 
         Verifies that valid TOML data can be loaded into a ShortcutConfig.
         """
-        data: dict[str, object] = {
+        data: dict[str, object] = {  # lint-ignore[restricted-object]: testing untyped input
             "shortcuts": {
                 "test_action": "Ctrl+T",
                 "another_action": "F5",
@@ -274,7 +274,7 @@ class TestShortcutConfig:
 
         The from_dict method is an alias for from_toml for backward compatibility.
         """
-        data: dict[str, object] = {
+        data: dict[str, object] = {  # lint-ignore[restricted-object]: testing untyped input
             "shortcuts": {
                 "test_action": "Ctrl+T",
                 "another_action": "F5",
@@ -300,7 +300,7 @@ class TestShortcutConfig:
 
         caplog.set_level(logging.WARNING)
 
-        data: dict[str, object] = {
+        data: dict[str, object] = {  # lint-ignore[restricted-object]: testing untyped input
             "shortcuts": {
                 "valid_action": "Ctrl+N",
                 "invalid_action": "Invalid+++",  # Invalid sequence
@@ -330,7 +330,7 @@ class TestShortcutConfig:
 
         caplog.set_level(logging.WARNING)
 
-        data: dict[str, object] = {
+        data: dict[str, object] = {  # lint-ignore[restricted-object]: testing untyped input
             "shortcuts": {
                 "valid_action": "Ctrl+N",
                 123: "Ctrl+E",  # type: ignore[dict-item]  # intentionally passing non-string key to test validation
@@ -355,7 +355,7 @@ class TestShortcutConfig:
 
         caplog.set_level(logging.WARNING)
 
-        data: dict[str, object] = {
+        data: dict[str, object] = {  # lint-ignore[restricted-object]: testing untyped input
             "shortcuts": {
                 "valid_action": "Ctrl+N",
                 "invalid_action": 123,  # type: ignore[dict-item]  # intentionally passing non-string value to test validation
@@ -377,7 +377,7 @@ class TestShortcutConfig:
 
         A null (None) value should be treated the same as an empty string.
         """
-        data: dict[str, object] = {
+        data: dict[str, object] = {  # lint-ignore[restricted-object]: testing untyped input
             "shortcuts": {
                 "disabled_action": None,  # type: ignore[dict-item]  # intentionally passing None to test null-as-disabled handling
             }
