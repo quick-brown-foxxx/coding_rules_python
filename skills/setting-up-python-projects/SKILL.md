@@ -237,6 +237,23 @@ After scaffolding, **adapt everything to the specific project**. The templates a
 | **Test structure** | Adjust to match what matters. A CLI tool needs heavy e2e tests. A library needs heavy unit tests. A web service needs API integration tests. |
 | **CI/CD** | Add domain-appropriate checks (e.g. migration consistency, API schema validation, container builds). |
 
+### Wrapper enforcement with banned-api
+
+When the project wraps third-party libraries (for typing, platform abstraction, or swappability), enforce wrapper usage via ruff's `flake8-tidy-imports.banned-api` in `pyproject.toml`:
+
+```toml
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"soundcard".msg = "Use src/wrappers/audio_backend.py instead"
+"faster_whisper".msg = "Use src/wrappers/transcriber.py instead"
+```
+
+Common reasons to wrap a library:
+- **Poorly typed** — library has no stubs or incomplete stubs; wrapper provides typed facade
+- **Platform-specific** — library only works on certain OS; wrapper provides abstraction layer with platform detection
+- **Swappable** — you may replace the library later; wrapper gives stable internal API
+
+This replaces the need for custom import-checking scripts. The template `pyproject.toml` has commented examples — uncomment and customize per project.
+
 ### Research before building
 
 When setting up a project in an unfamiliar domain or with unfamiliar libraries:

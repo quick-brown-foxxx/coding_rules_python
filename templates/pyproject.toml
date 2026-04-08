@@ -114,9 +114,15 @@ ignore = [
 [tool.ruff.lint.pylint]
 max-args = 5
 
-# Uncomment and customize for wrapper enforcement:
+# Wrapper enforcement — ban direct imports of wrapped libraries.
+# Customize this list per project. Common reasons to wrap:
+#   - poorly typed libs (need typed facade)
+#   - platform-specific libs (need abstraction layer)
+#   - libs you may swap out (need stable internal API)
 # [tool.ruff.lint.flake8-tidy-imports.banned-api]
-# "some_lib" = { msg = "Use src/wrappers/some_wrapper instead" }
+# "soundcard".msg = "Use src/wrappers/audio_backend.py instead"
+# "faster_whisper".msg = "Use src/wrappers/transcriber.py instead"
+# "huggingface_hub".msg = "Use src/wrappers/model_hub.py instead"
 
 # ============================================================================
 # Testing - pytest
@@ -144,5 +150,7 @@ app = "python -m TODO_PACKAGE_NAME"
 lint_objects = "python reusable/linting/check_object_annotations.py"
 lint_frozen = "python reusable/linting/check_frozen_dataclasses.py"
 lint_mutables = "python reusable/linting/check_module_mutables.py"
-lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables"]
+lint_type_ignore = "python reusable/linting/check_type_ignore.py"
+lint_raw_dicts = "python reusable/linting/check_raw_dicts.py"
+lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables", "lint_type_ignore", "lint_raw_dicts"]
 lint_full.shell = "basedpyright . && ruff check --fix . && ruff format . && poe lint_custom_linters"
