@@ -21,6 +21,8 @@ Qt apps use PySide6 with qasync for async integration. Architecture follows Mana
 
 ## Architecture: Manager → Service → Wrapper
 
+For dependency wiring patterns (composition root), see `building-multi-ui-apps` skill.
+
 ```
 UI Layer (MainWindow, Dialogs, TrayIcon)
     |  Qt signals/slots

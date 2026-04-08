@@ -132,6 +132,55 @@ def get_backend() -> PlatformBackend:
 
 ---
 
+## Dependency Injection — Composition Root
+
+Pass dependencies via constructor parameters. Wire everything in a single composition root function. No DI libraries — they break basedpyright strict or add unnecessary indirection.
+
+### Pattern
+
+```python
+# app/bootstrap.py
+def create_domain(config: AppConfig) -> SessionManager:
+    """Composition root — the ONLY place dependencies are wired."""
+    db = DatabaseWrapper(config.db_path)
+    api = ApiClientWrapper(config.api_url, config.api_key)
+    auth = AuthService(api_client=api)
+    sync = SyncService(db=db, api_client=api)
+    return SessionManager(auth=auth, sync=sync)
+
+# GUI entry point
+def main_gui() -> None:
+    config = load_config()
+    session = create_domain(config)
+    window = MainWindow(session=session)
+    ...
+
+# CLI entry point
+def main_cli() -> None:
+    config = load_config()
+    session = create_domain(config)
+    cli_app = build_typer_app(session=session)
+    cli_app()
+```
+
+### Rules
+
+- **Domain classes never instantiate their own infrastructure.** Dependencies come through the constructor.
+- **One composition root per app.** This is the single place to understand the object graph.
+- **Protocol-typed interfaces** for dependencies that may have test doubles.
+- **Testing:** construct with fakes directly — no container setup needed:
+
+```python
+def test_sync_handles_conflict() -> None:
+    db = FakeDatabaseWrapper()
+    api = FakeApiClient(responses=[CONFLICT_RESPONSE])
+    sync = SyncService(db=db, api_client=api)
+    result = sync.pull_changes()
+    assert result.is_err
+```
+
+---
+
 ## Other Presentation Layers
 
 FastAPI can be added as another presentation layer consuming the same domain:
