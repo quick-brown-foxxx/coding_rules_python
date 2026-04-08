@@ -41,11 +41,14 @@ reportAttributeAccessIssue = "error"
 
 | Banned | Use Instead |
 |--------|-------------|
-| `Any` | `object` for top type, `Protocol` for duck typing |
+| `Any` | Banned entirely — define the actual type |
+| `object` (unrestricted) | Restricted to boundary positions only (see below) |
 | `typing.cast()` | `isinstance`, `TypeIs`, pattern matching |
 | `# type: ignore` without rationale | `# type: ignore[specific-code]  # rationale: <reason>` |
 | Raw `dict` in business logic | `msgspec.Struct`, `dataclass`, or `TypedDict` |
 | Implicit return types | Explicit annotation on every function |
+
+**`object` is allowed only in:** TypeIs/TypeGuard params, `*args: object`, `Coroutine[object, None, T]`, PySide6 `Signal(object)`. Everywhere else, use `Protocol`, `TypeVar`, union types, or typed structures.
 
 ### Type Patterns
 

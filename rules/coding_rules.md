@@ -18,13 +18,27 @@ No exceptions to strictness.
 
 | Banned                             | Use Instead                                            |
 | ---------------------------------- | ------------------------------------------------------ |
-| `Any`                              | `object` for top type, `Protocol` for duck typing      |
+| `Any`                              | Banned entirely. No replacement — define the actual type |
+| `object` (unrestricted)            | Restricted to boundary positions only (see §1.3)       |
 | `typing.cast()`                    | `isinstance`, `TypeIs`, pattern matching               |
 | `# type: ignore` without rationale | `# type: ignore[specific-code]  # rationale: <reason>` |
 | Raw `dict` in business logic       | `msgspec.Struct`, `dataclass`, or `TypedDict`          |
 | Implicit return types              | Explicit annotation on every function                  |
 
-### 1.3 Type Patterns
+### 1.3 Restricted `object`
+
+`object` is the top type but offers no useful operations without narrowing. It is allowed **only** in boundary/guard positions:
+
+| Allowed use                        | Example                                      |
+| ---------------------------------- | -------------------------------------------- |
+| `TypeIs`/`TypeGuard` parameters    | `def is_valid(obj: object) -> TypeIs[Config]` |
+| Variadic signal/handler args       | `*_args: object`                              |
+| Coroutine type params              | `Coroutine[object, None, T]`                  |
+| PySide6 `Signal(object)`           | PySide6 limitation — no generic signals       |
+
+Everywhere else, replace `object` with the actual type: `Protocol` for duck typing, `TypeVar` for generics, explicit union for known variants, `msgspec.Struct`/`TypedDict` for dict shapes.
+
+### 1.4 Type Patterns
 
 **External data (JSON, configs, APIs)** → `msgspec.Struct`:
 
@@ -87,7 +101,7 @@ match response:
         return Err("Unknown response format")
 ```
 
-### 1.4 Third-Party Library Boundaries
+### 1.5 Third-Party Library Boundaries
 
 Libraries with weak typing get typed wrappers. Enforce via ruff `banned-api`:
 
@@ -98,7 +112,7 @@ Libraries with weak typing get typed wrappers. Enforce via ruff `banned-api`:
 
 When wrappers are impractical, use type stubs in `src/stubs/`.
 
-### 1.5 Constants
+### 1.6 Constants
 
 ```python
 from typing import Final
@@ -107,7 +121,7 @@ MAX_RETRIES: Final = 3
 CONFIG_PATH: Final[Path] = Path("~/.config/app")
 ```
 
-### 1.6 Immutability
+### 1.7 Immutability
 
 Prefer immutable data by default. Mutable structures require justification.
 
@@ -123,7 +137,7 @@ class Profile:
     active: bool = True
 ```
 
-### 1.7 Domain Identifiers
+### 1.8 Domain Identifiers
 
 Use `NewType` for domain IDs and typed strings that must not be interchangeable. Use `Path` for filesystem paths, never raw `str`.
 
@@ -137,7 +151,7 @@ def delete_profile(profile_id: ProfileId) -> Result[None, str]: ...
 # delete_profile(user_id)  # basedpyright error — caught at check time
 ```
 
-### 1.8 Enum vs Literal vs Union
+### 1.9 Enum vs Literal vs Union
 
 | Use case                                         | Tool                                       |
 | ------------------------------------------------ | ------------------------------------------ |
