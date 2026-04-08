@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 # Inside functions — allowed
-def build_cache() -> dict[str, int]:
+def build_cache() -> dict[str, int]:  # lint-ignore[raw-dict]: fixture for check_module_mutables testing
     cache: dict[str, int] = {}
     return cache
 

@@ -6,7 +6,7 @@ from typing import Required, TypedDict
 
 
 # dict[str, object] — banned
-def load_data(path: str) -> dict[str, object]:
+def load_data(path: str) -> dict[str, object]:  # lint-ignore[raw-dict]: fixture for check_object_annotations testing
     return {}
 
 
@@ -22,4 +22,4 @@ def process(data: object) -> str:
 
 # TypedDict with dict[str, object] — banned
 class Response(TypedDict):
-    data: Required[dict[str, object]]
+    data: Required[dict[str, object]]  # lint-ignore[raw-dict]: fixture for check_object_annotations testing

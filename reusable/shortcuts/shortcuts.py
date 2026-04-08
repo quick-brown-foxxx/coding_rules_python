@@ -149,7 +149,7 @@ class ShortcutConfig:
         shortcuts: Dict mapping action_id to key sequence string
     """
 
-    shortcuts: dict[str, str] = field(default_factory=dict)
+    shortcuts: dict[str, str] = field(default_factory=dict)  # lint-ignore[raw-dict]: TOML key sequences
 
     _TOML_HEADER = """# Edit keyboard shortcuts using Qt QKeySequence string format.
 #
@@ -175,7 +175,7 @@ class ShortcutConfig:
 
     @staticmethod
     def from_toml(
-        data: dict[str, object],  # lint-ignore[restricted-object]: TOML parsed dict
+        data: dict[str, object],  # lint-ignore[restricted-object]: TOML dict  # lint-ignore[raw-dict]: TOML data
     ) -> Result[ShortcutConfig, str]:
         """Deserialize from TOML dict, with validation.
 
@@ -198,7 +198,7 @@ class ShortcutConfig:
         shortcuts: dict[str, str] = {}
         # Cast to dict[str, Any] to allow iteration with type checking
         shortcuts_dict: dict[str, Any] = cast(dict[str, Any], shortcuts_obj)
-        for action_id, sequence in shortcuts_dict.items():  # type: ignore[assignment]
+        for action_id, sequence in shortcuts_dict.items():  # type: ignore[assignment]  # cast to dict[str, Any] above handles typing, but items() still infers wrong types
             if not isinstance(action_id, str):
                 logger.warning(f"Action ID must be a string, got {type(action_id).__name__}")
                 continue
@@ -225,7 +225,7 @@ class ShortcutConfig:
     # Keep old from_dict method for backward compatibility with tests
     @staticmethod
     def from_dict(
-        data: dict[str, object],  # lint-ignore[restricted-object]: TOML parsed dict
+        data: dict[str, object],  # lint-ignore[restricted-object]: TOML dict  # lint-ignore[raw-dict]: TOML data
     ) -> Result[ShortcutConfig, str]:
         """Deserialize from dict, with validation.
 
@@ -342,7 +342,7 @@ class ShortcutManager:
 
         try:
             # tomli.loads returns Any, so we need to ignore the type error
-            raw_data = tomli.loads(self._config_path.read_text(encoding="utf-8"))  # type: ignore[assignment]
+            raw_data = tomli.loads(self._config_path.read_text(encoding="utf-8"))  # type: ignore[assignment]  # tomli.loads returns Any, need dict for downstream processing
         except tomli.TOMLDecodeError as exc:
             return Err(f"Invalid shortcuts file: {exc}")
         except OSError as exc:

@@ -40,7 +40,7 @@ import pytest
 from reusable.shortcuts import (
     ActionShortcut,
     ShortcutConfig,
-    _validate_key_sequence,  # type: ignore[import]
+    _validate_key_sequence,  # type: ignore[import-private]  # public API re-exported from __init__ for advanced users
 )
 
 
@@ -256,7 +256,7 @@ class TestShortcutConfig:
 
         Verifies proper error handling for invalid input types.
         """
-        result = ShortcutConfig.from_toml("not a dict")  # type: ignore
+        result = ShortcutConfig.from_toml("not a dict")  # type: ignore[arg-type]  # intentionally passing wrong type to test error handling
         assert result.is_err
         assert "must be a dictionary" in result.unwrap_err()
 
@@ -333,7 +333,7 @@ class TestShortcutConfig:
         data: dict[str, object] = {
             "shortcuts": {
                 "valid_action": "Ctrl+N",
-                123: "Ctrl+E",  # type: ignore - Invalid: non-string action ID
+                123: "Ctrl+E",  # type: ignore[dict-item]  # intentionally passing non-string key to test validation
             }
         }
         result = ShortcutConfig.from_toml(data)
@@ -358,7 +358,7 @@ class TestShortcutConfig:
         data: dict[str, object] = {
             "shortcuts": {
                 "valid_action": "Ctrl+N",
-                "invalid_action": 123,  # type: ignore - Invalid: non-string sequence
+                "invalid_action": 123,  # type: ignore[dict-item]  # intentionally passing non-string value to test validation
             }
         }
         result = ShortcutConfig.from_toml(data)
@@ -379,7 +379,7 @@ class TestShortcutConfig:
         """
         data: dict[str, object] = {
             "shortcuts": {
-                "disabled_action": None,  # type: ignore - Should be treated as empty string
+                "disabled_action": None,  # type: ignore[dict-item]  # intentionally passing None to test null-as-disabled handling
             }
         }
         result = ShortcutConfig.from_toml(data)

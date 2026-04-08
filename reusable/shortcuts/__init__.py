@@ -24,7 +24,7 @@ from reusable.shortcuts.shortcuts import (
     ActionShortcut,
     ShortcutConfig,
     ShortcutManager,
-    _validate_key_sequence,  # type: ignore[import-private]
+    _validate_key_sequence,  # type: ignore[import-private]  # public API for advanced users needing custom validation
 )
 
 __all__ = [

@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-_plugin_registry: dict[str, str] = {}  # lint-ignore[module-mutable-state]: plugin system needs mutable registry
+_plugin_registry: dict[str, str] = {}  # lint-ignore[module-mutable-state]: needed  # lint-ignore[raw-dict]: fixture

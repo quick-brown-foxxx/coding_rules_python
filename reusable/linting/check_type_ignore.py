@@ -1,4 +1,4 @@
-"""Check that all `# type: ignore` directives have an error code and rationale.
+"""Check that type-ignore directives have an error code and rationale.
 
 Usage: python -m reusable.linting.check_type_ignore [file1.py file2.py ...]
 If no files given, scans current directory recursively.
@@ -22,7 +22,7 @@ from reusable.linting.lint_utils import (
 
 CHECK_NAME = "type-ignore-rationale"
 
-# Matches `# type: ignore` with optional bracket and captures the rest
+# Matches `# type: ignore` with optional bracket  # lint-ignore[type-ignore-rationale]: pattern docs
 # Handles: type:ignore, type: ignore, type:  ignore
 _TYPE_IGNORE_RE = re.compile(r"#\s*type:\s*ignore")
 _TYPE_IGNORE_WITH_CODE_RE = re.compile(r"#\s*type:\s*ignore\[([^\]]+)\]")

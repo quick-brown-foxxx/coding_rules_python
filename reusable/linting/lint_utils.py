@@ -7,11 +7,13 @@ from pathlib import Path
 from typing import Final
 
 # Pattern: # lint-ignore[check-name]: rationale text
-_IGNORE_PATTERN = re.compile(r"#\s*lint-ignore\[([^\]]+)\]\s*:\s*(.+)")
+_IGNORE_PATTERN = re.compile(r"#\s*lint-ignore\[([^\]]+)\]\s*:\s*(.+?)(?=\s+#\s*lint-ignore\[|$)")
 _IGNORE_NO_RATIONALE = re.compile(r"#\s*lint-ignore\[([^\]]+)\]\s*:?\s*$")
 
 
-_EXCLUDED_DIRS: Final = frozenset({".venv", "venv", ".git", "__pycache__", "node_modules", ".tox", ".mypy_cache"})
+_EXCLUDED_DIRS: Final = frozenset(
+    {".venv", "venv", ".git", "__pycache__", "node_modules", ".tox", ".mypy_cache", "fixtures"}
+)
 
 
 def _is_excluded(path: Path) -> bool:
@@ -28,8 +30,7 @@ def collect_files(args: list[str]) -> list[Path]:
 
 def is_ignored(line: str, check_name: str) -> bool:
     """Check if a source line has a valid lint-ignore comment for this check."""
-    match = _IGNORE_PATTERN.search(line)
-    return bool(match and match.group(1) == check_name)
+    return any(match.group(1) == check_name for match in _IGNORE_PATTERN.finditer(line))
 
 
 def has_bare_ignore(line: str, check_name: str) -> bool:
@@ -44,7 +45,7 @@ def read_source_lines(path: Path) -> list[str]:
     """Read a file's source lines. Returns empty list on read errors."""
     try:
         return path.read_text(encoding="utf-8").splitlines()
-    except (OSError, UnicodeDecodeError):
+    except OSError, UnicodeDecodeError:
         return []
 
 

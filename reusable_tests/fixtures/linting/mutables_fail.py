@@ -6,7 +6,7 @@ from __future__ import annotations
 _cache: list[str] = []
 
 # Mutable dict
-registry: dict[str, int] = {}
+registry: dict[str, int] = {}  # lint-ignore[raw-dict]: fixture for check_module_mutables testing
 
 # Mutable set
 seen = set()
