@@ -44,7 +44,7 @@ def read_source_lines(path: Path) -> list[str]:
     """Read a file's source lines. Returns empty list on read errors."""
     try:
         return path.read_text(encoding="utf-8").splitlines()
-    except OSError, UnicodeDecodeError:
+    except (OSError, UnicodeDecodeError):
         return []
 
 
