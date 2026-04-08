@@ -74,7 +74,7 @@ config = msgspec.convert(raw_dict, type=UserConfig)
 **Domain objects** → `dataclass`:
 
 ```python
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class Profile:
     name: str
     version: str
@@ -213,6 +213,8 @@ if TYPE_CHECKING:
 class TranscriptionService:
     def __init__(self, audio: "AudioManager") -> None: ...
 ```
+
+> **Note:** `TYPE_CHECKING` is for forward references within the same layer. If two modules import each other, that's a circular dependency — fix the architecture (extract a Protocol, move types to a common module), don't hide the cycle with `TYPE_CHECKING`.
 
 ---
 
