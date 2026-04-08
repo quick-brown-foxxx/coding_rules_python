@@ -82,7 +82,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"reusable_tests/*" = ["S101", "PT018"]
+"reusable_tests/*" = ["S101", "PT018", "S603"]
 
 # ============================================================================
 # Testing - pytest
