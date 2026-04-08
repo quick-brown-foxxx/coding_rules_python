@@ -1,0 +1,44 @@
+"""Shared utilities for custom linting scripts."""
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
+
+# Pattern: # lint-ignore[check-name]: rationale text
+_IGNORE_PATTERN = re.compile(r"#\s*lint-ignore\[([^\]]+)\]\s*:\s*(.+)")
+_IGNORE_NO_RATIONALE = re.compile(r"#\s*lint-ignore\[([^\]]+)\]\s*:?\s*$")
+
+
+def collect_files(args: list[str]) -> list[Path]:
+    """Collect Python files from CLI args or scan current directory."""
+    if args:
+        return [Path(a) for a in args if a.endswith(".py")]
+    return sorted(Path(".").rglob("*.py"))
+
+
+def is_ignored(line: str, check_name: str) -> bool:
+    """Check if a source line has a valid lint-ignore comment for this check."""
+    match = _IGNORE_PATTERN.search(line)
+    return bool(match and match.group(1) == check_name)
+
+
+def has_bare_ignore(line: str, check_name: str) -> bool:
+    """Check if a source line has a lint-ignore WITHOUT rationale (error)."""
+    if _IGNORE_PATTERN.search(line):
+        return False  # Has rationale — not bare
+    match = _IGNORE_NO_RATIONALE.search(line)
+    return bool(match and match.group(1) == check_name)
+
+
+def read_source_lines(path: Path) -> list[str]:
+    """Read a file's source lines. Returns empty list on read errors."""
+    try:
+        return path.read_text(encoding="utf-8").splitlines()
+    except OSError, UnicodeDecodeError:
+        return []
+
+
+def report(path: Path, line: int, check_name: str, message: str) -> str:
+    """Format a violation report line."""
+    return f"{path}:{line}: [{check_name}] {message}"
