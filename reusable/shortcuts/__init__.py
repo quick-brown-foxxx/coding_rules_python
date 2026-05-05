@@ -20,12 +20,7 @@ Example:
 """
 
 # Import validation function for advanced users who need custom validation
-from reusable.shortcuts.shortcuts import (
-    ActionShortcut,
-    ShortcutConfig,
-    ShortcutManager,
-    validate_key_sequence,
-)
+from .shortcuts import ActionShortcut, ShortcutConfig, ShortcutManager, validate_key_sequence
 
 __all__ = [
     "ActionShortcut",
