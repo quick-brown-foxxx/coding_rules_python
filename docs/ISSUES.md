@@ -36,8 +36,6 @@ At the time this file was last updated, these checks were green.
   - Core stance should stay strict, but docs need a realistic policy for weakly typed third-party ecosystems.
   - Especially relevant for scientific / ORM / legacy library boundaries.
 
-- **X7 — Explicit sync carve-out for test code**
-  - Document that `subprocess.run()` and similar sync patterns are acceptable in tests/harness code.
 
 ## Low-priority backlog
 
@@ -62,7 +60,7 @@ At the time this file was last updated, these checks were green.
 
 ## Suggested next planning order
 
-1. **X2 + X7 together** — rewrite async/subprocess guidance coherently
+1. **X2** — rewrite overly broad async guidance where needed
 2. **X4** — add pragmatic exceptions without weakening the core philosophy too much
 3. Low-priority backlog opportunistically
 4. Revisit `rusty-results` only if the watch item turns into a real problem
