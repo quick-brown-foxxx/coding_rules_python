@@ -18,22 +18,14 @@ Current HEAD has been validated with:
 
 At the time this file was last updated, these checks were green.
 
-## Open critical design issue
+## Watch item
 
-- **C4 — Replace `rusty-results`**
-  - Current state: the repo’s error-handling philosophy depends on `rusty-results`.
-  - Risk: tiny ecosystem footprint and low confidence as a long-term foundation.
-  - Needed next step: choose a replacement strategy before further philosophy/docs work.
-  - Options to evaluate:
-    - adopt a more established library
-    - hand-roll a minimal internal `Result` type
-    - partially retreat from Result-first guidance where Python ergonomics are poor
+- **W1 — `rusty-results` maintenance risk**
+  - Decision: keep `rusty-results` for now.
+  - Reason: current usage is narrow and simple, and it works well for personal-project standards syncing.
+  - Revisit only if compatibility, typing, or scope needs change.
 
 ## Open design / guidance work
-
-- **X1 — Result ergonomics after C4**
-  - Define the recommended style for multi-step flows.
-  - Need guidance on verbosity, chaining, and when `try/except` is still better.
 
 - **X2 — Async guidance is too broad**
   - Current docs overstate “all I/O should be async”.
@@ -46,9 +38,6 @@ At the time this file was last updated, these checks were green.
 - **X4 — Practical exceptions for `Any` / `cast()`**
   - Core stance should stay strict, but docs need a realistic policy for weakly typed third-party ecosystems.
   - Especially relevant for scientific / ORM / legacy library boundaries.
-
-- **X6 — Better GUI/CLI entry selection pattern**
-  - Replace the fragile `len(sys.argv) > 1` heuristic in multi-UI guidance.
 
 - **X7 — Explicit sync carve-out for test code**
   - Document that `subprocess.run()` and similar sync patterns are acceptable in tests/harness code.
@@ -76,8 +65,7 @@ At the time this file was last updated, these checks were green.
 
 ## Suggested next planning order
 
-1. **C4 + X1 together** — choose the future of Result-style guidance first
-2. **X2 + X7 together** — rewrite async/subprocess guidance coherently
-3. **X3 + X4 together** — add pragmatic exceptions without weakening the core philosophy too much
-4. **X6** — clean up multi-UI app entry guidance
-5. Low-priority backlog opportunistically
+1. **X2 + X7 together** — rewrite async/subprocess guidance coherently
+2. **X3 + X4 together** — add pragmatic exceptions without weakening the core philosophy too much
+3. Low-priority backlog opportunistically
+4. Revisit `rusty-results` only if the watch item turns into a real problem

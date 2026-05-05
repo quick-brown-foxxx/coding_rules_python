@@ -167,7 +167,7 @@ def delete_profile(profile_id: ProfileId) -> Result[None, str]: ...
 
 ### 2.1 The Result Pattern
 
-Use `rusty-results` library. Errors are return values, not exceptions.
+Use `rusty-results` library. Rusty-results is nice for our use case and we will use it, but it is not maintained and may require replacement in future. Errors are return values, not exceptions.
 
 ```python
 from rusty_results import Result, Ok, Err

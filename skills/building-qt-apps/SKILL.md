@@ -99,6 +99,8 @@ class WhisperModelWrapper:
 
 ### Setup
 
+This startup shape is fine for a GUI-only app. If the app also supports CLI commands, do not switch on `len(sys.argv) > 1`; use the tiny top-level router pattern from `building-multi-ui-apps`, and let the Qt startup stay in the GUI entry point only.
+
 ```python
 import asyncio
 import signal

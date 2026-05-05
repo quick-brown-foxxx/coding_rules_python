@@ -96,16 +96,61 @@ project/
    __version__ = "0.1.0"
 
    # src/APPNAME/__main__.py
+   from __future__ import annotations
+
+   import argparse
    import sys
+   from pathlib import Path
+
+   CLI_WORDS = {"config"}  # Top-level CLI entry words for this app
+
+   def parse_gui_request(argv: list[str]) -> tuple[Path | None, bool] | None:
+       parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
+       parser.add_argument("path", nargs="?")
+       parser.add_argument("--debug", action="store_true")
+
+       try:
+           ns, unknown = parser.parse_known_args(argv)
+       except SystemExit:
+           return None
+
+       if unknown:
+           return None
+
+       path = Path(ns.path).expanduser() if isinstance(ns.path, str) else None
+       return path, bool(ns.debug)
 
    def main() -> int:
-       if len(sys.argv) > 1:
-           return cli_main()  # CLI mode
-       return gui_main()      # GUI mode (if applicable)
+       argv = sys.argv[1:]
+
+       if argv and (argv[0] in {"-h", "--help"} or argv[0] in CLI_WORDS):
+           from APPNAME.bootstrap import create_services
+           from APPNAME.cli import build_cli_app
+
+           services = create_services(debug=False)
+           app = build_cli_app(services)
+           app(args=argv, prog_name="APPNAME", standalone_mode=False)
+           return 0
+
+       gui_request = parse_gui_request(argv)
+       if gui_request is not None:
+           from APPNAME.gui import run_gui
+
+           path, debug = gui_request
+           return run_gui(path=path, debug=debug)
+
+       from APPNAME.bootstrap import create_services
+       from APPNAME.cli import build_cli_app
+
+       services = create_services(debug=False)
+       app = build_cli_app(services)
+       app(args=argv, prog_name="APPNAME", standalone_mode=False)
+       return 0
 
    if __name__ == "__main__":
        sys.exit(main())
    ```
+   `__main__.py` is the router only. Keep Typer assembly in `APPNAME.cli`, keep GUI startup in `APPNAME.gui`, and avoid `len(sys.argv) > 1` heuristics. The tiny pre-parse only answers “is this a GUI-shaped invocation?” so `APPNAME`, `APPNAME file.txt`, and `APPNAME --debug` can reach the GUI, while `APPNAME -h` and `APPNAME config ...` stay in Typer.
 
 5. **Create initial test:**
    ```python

@@ -92,7 +92,7 @@ Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-pyth
 ### Quick reference
 
 - **What tools?** uv, basedpyright (strict), ruff, pytest, poethepoet, msgspec
-- **Error handling?** `Result[T, E]` from rusty-results. Exceptions = bugs only.
+- **Error handling?** `Result[T, E]` from rusty-results. Rusty-results is nice for our use case and we will use it, but it is not maintained and may require replacement in future. Exceptions = bugs only.
 - **Data validation?** `msgspec.Struct` for external data (JSON, configs, APIs). Validates at decode time.
 - **CLI?** typer (argparse only for stdlib-only scripts)
 - **GUI?** PySide6 + qasync (not QtAsyncio — still in technical preview)
