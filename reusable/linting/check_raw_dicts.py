@@ -51,19 +51,24 @@ def _check_annotation(
     annotation: ast.expr,
     violations: list[str],
     message: str,
+    seen_bare_ignore_lines: set[int],
 ) -> None:
     """Check a single annotation for raw dict usage, respecting ignore comments."""
+    if not _contains_raw_dict(annotation):
+        return
+
     line_num = annotation.lineno
     source_line = source_lines[line_num - 1] if line_num <= len(source_lines) else ""
 
     if has_bare_ignore(source_line, CHECK_NAME):
-        violations.append(report(path, line_num, CHECK_NAME, "lint-ignore requires rationale after ':'"))
+        if line_num not in seen_bare_ignore_lines:
+            violations.append(report(path, line_num, CHECK_NAME, "lint-ignore requires rationale after ':'"))
+            seen_bare_ignore_lines.add(line_num)
         return
     if is_ignored(source_line, CHECK_NAME):
         return
 
-    if _contains_raw_dict(annotation):
-        violations.append(report(path, line_num, CHECK_NAME, message))
+    violations.append(report(path, line_num, CHECK_NAME, message))
 
 
 def _check_function(
@@ -71,6 +76,7 @@ def _check_function(
     path: Path,
     source_lines: list[str],
     violations: list[str],
+    seen_bare_ignore_lines: set[int],
 ) -> None:
     """Check function parameter and return annotations (but NOT body AnnAssigns)."""
     # Check parameter annotations (skip **kwargs)
@@ -86,6 +92,7 @@ def _check_function(
             arg.annotation,
             violations,
             f"raw dict annotation in parameter '{arg.arg}' — use TypedDict or dataclass",
+            seen_bare_ignore_lines,
         )
 
     # Check return type
@@ -96,6 +103,7 @@ def _check_function(
             func.returns,
             violations,
             f"raw dict annotation in return type of '{func.name}' — use TypedDict or dataclass",
+            seen_bare_ignore_lines,
         )
 
 
@@ -111,6 +119,7 @@ def check_file(path: Path) -> list[str]:
         return []
 
     violations: list[str] = []
+    seen_bare_ignore_lines: set[int] = set()
 
     # Walk module body manually (NOT ast.walk) to distinguish module-level
     # and class-level AnnAssign from function-local ones.
@@ -123,11 +132,12 @@ def check_file(path: Path) -> list[str]:
                 node.annotation,
                 violations,
                 "raw dict annotation at module level — use TypedDict or dataclass",
+                seen_bare_ignore_lines,
             )
 
         # Functions at module level
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-            _check_function(node, path, source_lines, violations)
+            _check_function(node, path, source_lines, violations, seen_bare_ignore_lines)
 
         # Classes — check class body for attribute annotations and methods
         if isinstance(node, ast.ClassDef):
@@ -143,9 +153,10 @@ def check_file(path: Path) -> list[str]:
                         class_node.annotation,
                         violations,
                         "raw dict annotation in class attribute — use TypedDict or dataclass",
+                        seen_bare_ignore_lines,
                     )
                 if isinstance(class_node, ast.FunctionDef | ast.AsyncFunctionDef):
-                    _check_function(class_node, path, source_lines, violations)
+                    _check_function(class_node, path, source_lines, violations, seen_bare_ignore_lines)
 
     return violations
 

@@ -25,7 +25,7 @@
 - [x] **T1.** ~~Tautological assertions.~~ **Fixed** — now assert `result.is_err`.
 - [x] **T2.** ~~Linting assertions use `>=`.~~ **Fixed** — exact `==` counts.
 - [x] **T3.** ~~Relative `FIXTURES` path fragile.~~ **Fixed** — uses `Path(__file__).resolve()`.
-- [ ] **T4.** No tests for `reusable/logging/` — zero coverage. **Won't fix** — thin wrappers around stdlib logging + colorlog; testing would mostly test the libraries. Code fixes (I5, I6) still apply.
+- [x] **T4.** ~~No tests for `reusable/logging/` — zero coverage.~~ **Fixed** — added focused regression coverage in `reusable_tests/test_logging_reusable.py` for stdout/file handler level behavior.
 - [x] **T5.** ~~`ShortcutManager.load()` caching untested.~~ **Fixed** — caching + reload test added.
 - [x] **T6.** ~~No edge case fixtures for linters.~~ **Fixed** — 5 edge case fixtures + tests added.
 - [x] **T7.** ~~Tests never verify reported line numbers.~~ **Fixed** — line number assertions added to all fail tests.
@@ -89,11 +89,19 @@ Follow-up verification pass also fixed two latent linter logic bugs discovered d
 - narrowed the `Coroutine[...]` exemption in `check_object_annotations.py` to only `Coroutine[object, None, T]`
 - fixed `check_module_mutables.py` so `if TYPE_CHECKING:` only exempts the `if` body, not the runtime `else:` branch
 
+Manual/runtime validation pass additionally:
+- fixed `setup_stdout_logging()` so the configured level is applied to the stdout handler
+- added regression coverage for reusable logging
+- validated custom linters with temporary mock files and real repo task execution
+- confirmed `lint_full` passes end-to-end
+
 Final verification after follow-up:
-- 84/84 tests pass
+- 96/96 tests pass
+- `poe lint_full` passes
 - ruff passes
 - basedpyright passes
 - custom linters pass
+- manual validation of shortcuts, logging, and linting completed
 - independent read-only review found no remaining must-fix issues before commit
 
 ### Phase 3: Design Decisions (need brainstorming before implementation)

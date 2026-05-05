@@ -141,17 +141,24 @@ def validate_key_sequence(sequence: str) -> Result[QKeySequence, str]:
     return Ok(key_seq)
 
 
-def _is_dict_object_object(value: object) -> TypeGuard[dict[object, object]]:
+type _ObjectObjectDict = dict[object, object]
+type _StringObjectDict = dict[str, object]
+type _ObjectItems = list[tuple[object, object]]
+
+
+def _is_dict_object_object(value: object) -> TypeGuard[_ObjectObjectDict]:
     """Return whether a value is a dictionary with object-typed entries."""
     return isinstance(value, dict)
 
 
-def _to_string_object_dict(value: object) -> dict[str, object] | None:
+def _to_string_object_dict(
+    value: object,  # lint-ignore[restricted-object]: boundary
+) -> _StringObjectDict | None:
     """Return a string-keyed dictionary copy when value is a dictionary."""
     if not _is_dict_object_object(value):
         return None
 
-    narrowed: dict[str, object] = {}
+    narrowed: _StringObjectDict = {}
     for key, item in value.items():
         if not isinstance(key, str):
             return None
@@ -159,7 +166,9 @@ def _to_string_object_dict(value: object) -> dict[str, object] | None:
     return narrowed
 
 
-def _iter_object_items(value: object) -> list[tuple[object, object]] | None:
+def _iter_object_items(
+    value: object,  # lint-ignore[restricted-object]: boundary
+) -> _ObjectItems | None:
     """Return dictionary items as object-typed pairs when value is a dictionary."""
     if not _is_dict_object_object(value):
         return None
@@ -167,7 +176,7 @@ def _iter_object_items(value: object) -> list[tuple[object, object]] | None:
     return list(value.items())
 
 
-def _load_toml_data(path: Path) -> Result[dict[str, object], str]:
+def _load_toml_data(path: Path) -> Result[_StringObjectDict, str]:
     """Load a TOML document into a string-keyed object dictionary."""
     try:
         loaded = tomllib.loads(path.read_text(encoding="utf-8"))

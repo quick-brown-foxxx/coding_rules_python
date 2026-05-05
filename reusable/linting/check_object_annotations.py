@@ -14,13 +14,7 @@ import sys
 from pathlib import Path
 from typing import Final
 
-from reusable.linting.lint_utils import (
-    collect_files,
-    has_bare_ignore,
-    is_ignored,
-    read_source_lines,
-    report,
-)
+from reusable.linting.lint_utils import collect_files, has_bare_ignore, is_ignored, read_source_lines, report
 
 CHECK_NAME = "restricted-object"
 
@@ -33,8 +27,37 @@ def _is_object_name(node: ast.expr) -> bool:
     return isinstance(node, ast.Name) and node.id == "object"
 
 
+def _is_coroutine_annotation(node: ast.expr) -> bool:
+    """Check if annotation refers to Coroutine[...] in name or attribute form."""
+    if not isinstance(node, ast.Subscript):
+        return False
+
+    value = node.value
+    if isinstance(value, ast.Name):
+        return value.id == "Coroutine"
+    if isinstance(value, ast.Attribute):
+        return value.attr == "Coroutine"
+    return False
+
+
+def _is_allowed_coroutine_object(node: ast.expr) -> bool:
+    """Check for the exact allowed Coroutine[object, None, T] shape."""
+    if not isinstance(node, ast.Subscript) or not _is_coroutine_annotation(node):
+        return False
+
+    slice_node = node.slice
+    if not isinstance(slice_node, ast.Tuple) or len(slice_node.elts) != 3:
+        return False
+
+    first_arg, second_arg, _third_arg = slice_node.elts
+    return _is_object_name(first_arg) and isinstance(second_arg, ast.Constant) and second_arg.value is None
+
+
 def _annotation_has_banned_object(node: ast.expr) -> bool:
     """Check if a type annotation contains banned object usage."""
+    if _is_allowed_coroutine_object(node):
+        return False
+
     # Bare `object`
     if _is_object_name(node):
         return True
@@ -42,11 +65,11 @@ def _annotation_has_banned_object(node: ast.expr) -> bool:
     # Subscript: dict[str, object], list[object], etc.
     if isinstance(node, ast.Subscript):
         if isinstance(node.value, ast.Name) and node.value.id in _BANNED_CONTAINERS:
-            # Check type args
+            # Check type args recursively so nested cases are caught.
             if isinstance(node.slice, ast.Tuple):
-                return any(_is_object_name(elt) for elt in node.slice.elts)
-            return _is_object_name(node.slice)
-        # Recurse into nested subscripts (e.g. Required[dict[str, object]])
+                return any(_annotation_has_banned_object(elt) for elt in node.slice.elts)
+            return _annotation_has_banned_object(node.slice)
+        # Recurse into wrapper subscripts like Required[dict[str, object]]
         if isinstance(node.slice, ast.Tuple):
             return any(_annotation_has_banned_object(elt) for elt in node.slice.elts)
         return _annotation_has_banned_object(node.slice)
@@ -78,29 +101,6 @@ def _is_variadic(arg: ast.arg, func: ast.FunctionDef | ast.AsyncFunctionDef) -> 
     return arg.arg in variadic_names
 
 
-def _is_coroutine_param(node: ast.expr) -> bool:
-    """Check if annotation is exactly Coroutine[object, None, T]."""
-    if not isinstance(node, ast.Subscript):
-        return False
-
-    value = node.value
-    if isinstance(value, ast.Name):
-        if value.id != "Coroutine":
-            return False
-    elif isinstance(value, ast.Attribute):
-        if value.attr != "Coroutine":
-            return False
-    else:
-        return False
-
-    slice_node = node.slice
-    if not isinstance(slice_node, ast.Tuple) or len(slice_node.elts) != 3:
-        return False
-
-    first_arg, second_arg, _third_arg = slice_node.elts
-    return _is_object_name(first_arg) and isinstance(second_arg, ast.Constant) and second_arg.value is None
-
-
 def _check_annotation_violation(
     path: Path,
     source_lines: list[str],
@@ -109,6 +109,9 @@ def _check_annotation_violation(
     message: str,
 ) -> None:
     """Check a single annotation node for banned object usage."""
+    if not _annotation_has_banned_object(annotation):
+        return
+
     line_num = annotation.lineno
     source_line = source_lines[line_num - 1] if line_num <= len(source_lines) else ""
 
@@ -118,8 +121,7 @@ def _check_annotation_violation(
     if is_ignored(source_line, CHECK_NAME):
         return
 
-    if _annotation_has_banned_object(annotation):
-        violations.append(report(path, line_num, CHECK_NAME, message))
+    violations.append(report(path, line_num, CHECK_NAME, message))
 
 
 def check_file(path: Path) -> list[str]:
@@ -150,8 +152,8 @@ def check_file(path: Path) -> list[str]:
                 # Skip *args: object, **kwargs: object
                 if _is_variadic(arg, node) and _is_object_name(arg.annotation):
                     continue
-                # Skip Coroutine[object, None, T] annotations
-                if _is_coroutine_param(arg.annotation):
+                # Skip exact Coroutine[object, None, T] boundary annotations
+                if _is_allowed_coroutine_object(arg.annotation):
                     continue
 
                 _check_annotation_violation(

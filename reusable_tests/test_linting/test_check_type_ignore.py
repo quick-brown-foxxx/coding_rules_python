@@ -2,12 +2,33 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
 from reusable_tests.test_linting.conftest import RunLinter
 
 MODULE = "reusable.linting.check_type_ignore"
 
 
 class TestTypeIgnore:
+    def test_regression_linter_tests_do_not_self_trigger(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                MODULE,
+                str(repo_root / "reusable_tests" / "test_linting" / "test_check_type_ignore.py"),
+                str(repo_root / "reusable_tests" / "test_linting" / "test_lint_utils.py"),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, result.stdout
+        assert result.stdout.strip() == ""
+
     def test_pass_type_ignore_with_rationale(self, run_linter: RunLinter) -> None:
         result = run_linter(MODULE, "type_ignore_pass.py")
         assert result.returncode == 0
@@ -18,9 +39,9 @@ class TestTypeIgnore:
         assert result.returncode == 1
         assert result.stdout.count("[type-ignore-rationale]") == 3
         # Verify specific violation line numbers
-        assert ":6:" in result.stdout  # type: ignore[assignment] without rationale
-        assert ":9:" in result.stdout  # bare type: ignore
-        assert ":12:" in result.stdout  # type: ignore[arg-type] without rationale
+        assert ":6:" in result.stdout  # assignment-ignore fixture line
+        assert ":9:" in result.stdout  # bare-ignore fixture line
+        assert ":12:" in result.stdout  # arg-type-ignore fixture line
 
     def test_valid_ignore_silences_check(self, run_linter: RunLinter) -> None:
         result = run_linter(MODULE, "type_ignore_ignore.py")

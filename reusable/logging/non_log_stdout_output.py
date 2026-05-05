@@ -21,12 +21,13 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import IO
+from collections.abc import MutableMapping
+from typing import IO, Final
 
 import colorlog
 
 # Cached formatters per stream (I6: avoid recreating on every call)
-_formatter_cache: dict[int, colorlog.ColoredFormatter] = {}  # lint-ignore[raw-dict]: internal cache keyed by stream id
+_formatter_cache: Final[MutableMapping[int, colorlog.ColoredFormatter]] = {}
 
 
 def _get_formatter(stream: IO[str]) -> colorlog.ColoredFormatter:

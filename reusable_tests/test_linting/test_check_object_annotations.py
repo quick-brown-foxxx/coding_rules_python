@@ -2,12 +2,34 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
+from reusable.linting.check_object_annotations import check_file
 from reusable_tests.test_linting.conftest import RunLinter
 
 MODULE = "reusable.linting.check_object_annotations"
 
 
 class TestObjectAnnotations:
+    def test_regression_shortcuts_helpers_need_explicit_ignore(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                MODULE,
+                str(repo_root / "reusable" / "shortcuts" / "shortcuts.py"),
+                str(repo_root / "reusable_tests" / "test_shortcuts_base.py"),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, result.stdout
+        assert result.stdout.strip() == ""
+
     def test_pass_valid_object_uses(self, run_linter: RunLinter) -> None:
         result = run_linter(MODULE, "object_pass.py")
         assert result.returncode == 0
@@ -46,3 +68,41 @@ class TestObjectAnnotations:
         assert "send_coro" in result.stdout
         assert "return_coro" in result.stdout
         assert "allowed_coro" not in result.stdout
+
+    def test_mixed_bare_ignore_still_fails_for_relevant_check(self, tmp_path: Path) -> None:
+        path = tmp_path / "bare_ignore_combo.py"
+        path.write_text(
+            "value: dict[str, object] | None = None  "
+            "# lint-ignore[restricted-object]  "
+            "# lint-ignore[raw-dict]: raw-dict rationale only\n",
+            encoding="utf-8",
+        )
+
+        violations = check_file(path)
+
+        assert violations == [f"{path}:1: [restricted-object] lint-ignore requires rationale after ':'"]
+
+    def test_nested_object_inside_container_is_reported(self, tmp_path: Path) -> None:
+        path = tmp_path / "nested_object.py"
+        path.write_text(
+            "def bad_nested() -> list[tuple[object, str]]:\n    return []\n",
+            encoding="utf-8",
+        )
+
+        violations = check_file(path)
+
+        assert violations == [f"{path}:1: [restricted-object] restricted 'object' in return type of 'bad_nested'"]
+
+    def test_exact_allowed_coroutine_shape_is_allowed_beyond_parameters(self, tmp_path: Path) -> None:
+        path = tmp_path / "allowed_coroutine_positions.py"
+        path.write_text(
+            "from collections.abc import Coroutine\n\n"
+            "def produce() -> Coroutine[object, None, str]:\n"
+            "    raise NotImplementedError\n\n"
+            "value: Coroutine[object, None, str] | None = None\n",
+            encoding="utf-8",
+        )
+
+        violations = check_file(path)
+
+        assert violations == []

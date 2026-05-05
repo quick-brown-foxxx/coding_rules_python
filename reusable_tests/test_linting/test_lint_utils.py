@@ -64,6 +64,11 @@ class TestIsIgnored:
         assert is_ignored(line, "mutable-module") is True
         assert is_ignored(line, "other-check") is False
 
+    def test_multiple_ignores_mixed_bare_and_with_rationale(self) -> None:
+        line = "x: object = {}  # lint-ignore[restricted-object]  # lint-ignore[raw-dict]: boundary shim"
+        assert is_ignored(line, "restricted-object") is False
+        assert is_ignored(line, "raw-dict") is True
+
     def test_no_ignore_comment(self) -> None:
         line = "x = 42  # just a regular comment"
         assert is_ignored(line, "anything") is False
@@ -85,6 +90,11 @@ class TestHasBareIgnore:
     def test_no_ignore_at_all(self) -> None:
         line = "x = 42"
         assert has_bare_ignore(line, "mutable-module") is False
+
+    def test_bare_ignore_when_other_check_has_rationale(self) -> None:
+        line = "x: object = {}  # lint-ignore[restricted-object]  # lint-ignore[raw-dict]: boundary shim"
+        assert has_bare_ignore(line, "restricted-object") is True
+        assert has_bare_ignore(line, "raw-dict") is False
 
     def test_bare_ignore_wrong_check_name(self) -> None:
         line = "x = []  # lint-ignore[mutable-module]"
@@ -111,30 +121,30 @@ class TestReadSourceLines:
 class TestIsFinalAnnotation:
     def test_bare_final(self) -> None:
         node = ast.parse("x: Final = 1", mode="exec").body[0]
-        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]
+        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]  # ast.parse("x: ... = ...") returns stmt; tests intentionally access AnnAssign.annotation
 
     def test_typing_final(self) -> None:
         node = ast.parse("x: typing.Final = 1", mode="exec").body[0]
-        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]
+        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]  # ast.parse("x: ... = ...") returns stmt; tests intentionally access AnnAssign.annotation
 
     def test_final_with_type_param(self) -> None:
         node = ast.parse("x: Final[int] = 1", mode="exec").body[0]
-        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]
+        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]  # ast.parse("x: ... = ...") returns stmt; tests intentionally access AnnAssign.annotation
 
     def test_typing_final_with_type_param(self) -> None:
         node = ast.parse("x: typing.Final[str] = ''", mode="exec").body[0]
-        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]
+        assert is_final_annotation(node.annotation) is True  # type: ignore[attr-defined]  # ast.parse("x: ... = ...") returns stmt; tests intentionally access AnnAssign.annotation
 
     def test_none_annotation(self) -> None:
         assert is_final_annotation(None) is False
 
     def test_non_final_annotation(self) -> None:
         node = ast.parse("x: int = 1", mode="exec").body[0]
-        assert is_final_annotation(node.annotation) is False  # type: ignore[attr-defined]
+        assert is_final_annotation(node.annotation) is False  # type: ignore[attr-defined]  # ast.parse("x: ... = ...") returns stmt; tests intentionally access AnnAssign.annotation
 
     def test_non_final_subscript(self) -> None:
         node = ast.parse("x: list[int] = []", mode="exec").body[0]
-        assert is_final_annotation(node.annotation) is False  # type: ignore[attr-defined]
+        assert is_final_annotation(node.annotation) is False  # type: ignore[attr-defined]  # ast.parse("x: ... = ...") returns stmt; tests intentionally access AnnAssign.annotation
 
 
 class TestReport:

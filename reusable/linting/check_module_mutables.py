@@ -58,14 +58,45 @@ def _is_mutable_value(value: ast.expr) -> bool:
     return False
 
 
+def _is_type_checking_test(test: ast.expr) -> bool:
+    """Check if an if-test is TYPE_CHECKING or typing.TYPE_CHECKING."""
+    if isinstance(test, ast.Name):
+        return test.id == "TYPE_CHECKING"
+    return isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+
+
 def _in_type_checking_block(node: ast.stmt, tree: ast.Module) -> bool:
     """Check if a statement is inside the body of `if TYPE_CHECKING:`."""
     for top_node in tree.body:
-        if isinstance(top_node, ast.If):
-            test = top_node.test
-            if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING" and node in top_node.body:
-                return True
+        if isinstance(top_node, ast.If) and _is_type_checking_test(top_node.test) and node in top_node.body:
+            return True
     return False
+
+
+def _iter_nodes_to_check(tree: ast.Module) -> list[ast.stmt]:
+    """Collect module-level statements that should be checked for violations."""
+    nodes_to_check: list[ast.stmt] = []
+    for node in tree.body:
+        if isinstance(node, ast.If) and _is_type_checking_test(node.test):
+            nodes_to_check.extend(node.body)
+            nodes_to_check.extend(node.orelse)
+            continue
+        nodes_to_check.append(node)
+    return nodes_to_check
+
+
+def _type_checking_else_line(node: ast.stmt, tree: ast.Module) -> int | None:
+    """Return the `else:` line for qualified ``typing.TYPE_CHECKING`` branches."""
+    for top_node in tree.body:
+        if not isinstance(top_node, ast.If):
+            continue
+        if not isinstance(top_node.test, ast.Attribute) or top_node.test.attr != "TYPE_CHECKING":
+            continue
+        if node not in top_node.orelse or not top_node.body:
+            continue
+        last_body_stmt = top_node.body[-1]
+        return getattr(last_body_stmt, "end_lineno", last_body_stmt.lineno) + 1
+    return None
 
 
 def _check_mutable_assignment(
@@ -74,6 +105,7 @@ def _check_mutable_assignment(
     path: Path,
     source_lines: list[str],
     violations: list[str],
+    line_num_override: int | None = None,
 ) -> None:
     """Check a module-level assignment for mutable state."""
     if _is_logger_call(value):
@@ -81,8 +113,9 @@ def _check_mutable_assignment(
     if not _is_mutable_value(value):
         return
 
-    line_num = node.lineno
-    source_line = source_lines[line_num - 1] if line_num <= len(source_lines) else ""
+    source_line_num = node.lineno
+    line_num = line_num_override or source_line_num
+    source_line = source_lines[source_line_num - 1] if source_line_num <= len(source_lines) else ""
     if has_bare_ignore(source_line, CHECK_NAME):
         violations.append(report(path, line_num, CHECK_NAME, "lint-ignore requires rationale after ':'"))
     elif not is_ignored(source_line, CHECK_NAME):
@@ -104,24 +137,18 @@ def check_file(path: Path) -> list[str]:
 
     violations: list[str] = []
 
-    nodes_to_check: list[ast.stmt] = []
-    for node in tree.body:
-        nodes_to_check.append(node)
-        if isinstance(node, ast.If):
-            test = node.test
-            if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING":
-                nodes_to_check.extend(node.orelse)
-
-    for node in nodes_to_check:
+    for node in _iter_nodes_to_check(tree):
         # Skip if inside TYPE_CHECKING block
         if _in_type_checking_block(node, tree):
             continue
 
         # Handle annotated assignments: x: list[str] = []
+        line_num_override = _type_checking_else_line(node, tree)
+
         if isinstance(node, ast.AnnAssign) and node.value is not None:
             if is_final_annotation(node.annotation):
                 continue
-            _check_mutable_assignment(node, node.value, path, source_lines, violations)
+            _check_mutable_assignment(node, node.value, path, source_lines, violations, line_num_override)
 
         # Handle plain assignments: x = [] or x = dict()
         if isinstance(node, ast.Assign) and len(node.targets) == 1:
@@ -129,7 +156,7 @@ def check_file(path: Path) -> list[str]:
             # Skip dunder assignments (__all__, __version__, etc.)
             if isinstance(target, ast.Name) and target.id.startswith("__") and target.id.endswith("__"):
                 continue
-            _check_mutable_assignment(node, node.value, path, source_lines, violations)
+            _check_mutable_assignment(node, node.value, path, source_lines, violations, line_num_override)
 
     return violations
 

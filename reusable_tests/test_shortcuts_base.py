@@ -43,13 +43,16 @@ from reusable.shortcuts import (
     validate_key_sequence,
 )
 
+type _ObjectObjectDict = dict[object, object]
+type _StringObjectDict = dict[str, object]
 
-def _is_dict_object_object(value: object) -> TypeGuard[dict[object, object]]:
+
+def _is_dict_object_object(value: object) -> TypeGuard[_ObjectObjectDict]:
     """Return whether a value is a dictionary with object-typed entries."""
     return isinstance(value, dict)
 
 
-def _load_shortcuts_table(path: Path) -> dict[str, object]:
+def _load_shortcuts_table(path: Path) -> _StringObjectDict:
     """Load the shortcuts table from a saved TOML config."""
     import tomllib
 
@@ -59,7 +62,7 @@ def _load_shortcuts_table(path: Path) -> dict[str, object]:
     shortcuts_obj = loaded.get("shortcuts")
     assert _is_dict_object_object(shortcuts_obj)
 
-    shortcuts: dict[str, object] = {}
+    shortcuts: _StringObjectDict = {}
     for key, value in shortcuts_obj.items():
         assert isinstance(key, str)
         shortcuts[key] = value

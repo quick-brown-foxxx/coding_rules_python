@@ -70,6 +70,7 @@ def setup_stdout_logging(level: int = logging.INFO) -> None:
         level: Logging level to use
     """
     handler = colorlog.StreamHandler(sys.stdout)
+    handler.setLevel(level)
     handler.setFormatter(
         colorlog.ColoredFormatter(
             "%(log_color)s%(asctime)s [%(levelname)s] %(name)s:%(reset)s %(message)s",
