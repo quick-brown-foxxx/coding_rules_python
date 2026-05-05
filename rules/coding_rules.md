@@ -126,7 +126,7 @@ CONFIG_PATH: Final[Path] = Path("~/.config/app").expanduser()
 
 Prefer immutable data by default. Mutable structures require justification.
 
-- `@dataclass(frozen=True, slots=True)` is the default. Omit `frozen` only for builder patterns or explicit accumulation with a comment.
+- `@dataclass(frozen=True, slots=True)` is the default. Omit `frozen` only for edge cases where mutation is the natural model, such as builder patterns, explicit accumulation, ORM models, or framework-managed/stateful lifecycle objects — add a short comment when you do.
 - Return `tuple` over `list` for fixed collections. Use `Sequence` in parameters that don't mutate.
 - `frozenset` over `set` when mutation isn't needed.
 

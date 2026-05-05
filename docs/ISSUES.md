@@ -31,9 +31,6 @@ At the time this file was last updated, these checks were green.
   - Current docs overstate “all I/O should be async”.
   - Need a more accurate rule for file I/O, subprocesses, and practical app structure.
 
-- **X3 — `frozen=True` opt-out guidance**
-  - Keep immutable-by-default stance, but document when mutable dataclasses are acceptable.
-  - Examples to cover: builders, explicit accumulation, stateful lifecycle objects, framework constraints.
 
 - **X4 — Practical exceptions for `Any` / `cast()`**
   - Core stance should stay strict, but docs need a realistic policy for weakly typed third-party ecosystems.
@@ -66,6 +63,6 @@ At the time this file was last updated, these checks were green.
 ## Suggested next planning order
 
 1. **X2 + X7 together** — rewrite async/subprocess guidance coherently
-2. **X3 + X4 together** — add pragmatic exceptions without weakening the core philosophy too much
+2. **X4** — add pragmatic exceptions without weakening the core philosophy too much
 3. Low-priority backlog opportunistically
 4. Revisit `rusty-results` only if the watch item turns into a real problem
