@@ -152,6 +152,7 @@ class ValidResponse(TypedDict):
     status: Required[str]
     data: Required[dict[str, str | int | bool | list[str]]]
 
+# Simplified for brevity — production code should use msgspec.convert() for full validation
 def is_valid_response(obj: object) -> TypeIs[ValidResponse]:
     return (
         isinstance(obj, dict)

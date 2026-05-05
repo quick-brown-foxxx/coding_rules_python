@@ -466,9 +466,9 @@ class TestShortcutConfigSave:
         assert save_path.exists()
 
         # Load and verify
-        import tomli
+        import tomllib
 
-        loaded: dict[str, Any] = tomli.loads(save_path.read_text(encoding="utf-8"))
+        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
         shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
         assert shortcuts is not None
         assert isinstance(shortcuts, dict)
@@ -514,9 +514,9 @@ class TestShortcutConfigSave:
         assert save_result.is_ok
 
         # Load and verify
-        import tomli
+        import tomllib
 
-        loaded: dict[str, Any] = tomli.loads(save_path.read_text(encoding="utf-8"))
+        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
         shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
         assert shortcuts is not None
         assert isinstance(shortcuts, dict)
@@ -541,9 +541,9 @@ class TestShortcutConfigSave:
         assert save_result.is_ok
 
         # Load and verify all shortcuts
-        import tomli
+        import tomllib
 
-        loaded: dict[str, Any] = tomli.loads(save_path.read_text(encoding="utf-8"))
+        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
         shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
         assert shortcuts is not None
         assert isinstance(shortcuts, dict)
@@ -568,9 +568,9 @@ class TestShortcutConfigSave:
         config2.save(save_path)
 
         # Load and verify it has new content
-        import tomli
+        import tomllib
 
-        loaded: dict[str, Any] = tomli.loads(save_path.read_text(encoding="utf-8"))
+        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
         shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
         assert shortcuts is not None
         assert isinstance(shortcuts, dict)

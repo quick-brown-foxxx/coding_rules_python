@@ -135,6 +135,48 @@ class TestShortcutManager:
         shortcut = manager.get_shortcut("test_action")
         assert shortcut  # Should not be empty
 
+    def test_load_caching(self, tmp_path: Path) -> None:
+        """Test that load() caches: second call returns same config, file changes ignored until reload()."""
+        import tomli_w
+
+        manager = ShortcutManager(
+            config_dir=tmp_path,
+            app_name="testapp",
+            default_shortcuts=DUMMY_SHORTCUTS,
+        )
+
+        # First load creates default config
+        result1 = manager.load()
+        assert result1.is_ok
+        config1 = result1.unwrap()
+
+        # Second load returns the cached config (same object)
+        result2 = manager.load()
+        assert result2.is_ok
+        config2 = result2.unwrap()
+        assert config1 is config2
+
+        # Modify file externally between loads
+        config_path = tmp_path / "testapp_shortcuts.toml"
+        config_path.write_text(
+            tomli_w.dumps({"shortcuts": {"test_action": "Ctrl+Shift+X"}}),
+            encoding="utf-8",
+        )
+
+        # load() still returns cached version (ignores file change)
+        result3 = manager.load()
+        assert result3.is_ok
+        config3 = result3.unwrap()
+        assert config3 is config1
+        assert config3.get_shortcut("test_action") != "Ctrl+Shift+X"
+
+        # reload() picks up the file change
+        result4 = manager.reload()
+        assert result4.is_ok
+        config4 = result4.unwrap()
+        assert config4 is not config1
+        assert config4.get_shortcut("test_action") == "Ctrl+Shift+X"
+
     def test_reload(self, tmp_path: Path) -> None:
         """Test reloading config from file."""
         import tomli_w

@@ -85,6 +85,7 @@ class Renderable(Protocol):
 ```python
 from typing import TypeIs
 
+# Simplified for brevity — production code should use msgspec.convert() for full validation
 def is_valid_config(obj: object) -> TypeIs[UserConfig]:
     return isinstance(obj, dict) and "name" in obj and "port" in obj
 ```

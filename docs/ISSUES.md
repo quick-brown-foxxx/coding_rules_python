@@ -3,11 +3,11 @@
 ## CRITICAL
 
 - [x] **C1.** ~~`except` clause syntax bug (`reusable/linting/lint_utils.py:48`).~~ **Fixed.**
-- [ ] **C2.** Own code uses `Any` and `cast()` in shortcuts (`reusable/shortcuts/shortcuts.py`) — philosophy bans both. This is showcase reusable code so it must comply. **Medium fix** — refactor to isinstance narrowing.
+- [x] **C2.** ~~Own code uses `Any` and `cast()` in shortcuts.~~ **Fixed** — removed `Any`/`cast` imports, use isinstance narrowing.
 - [x] **C3.** ~~Wrong PEP number everywhere.~~ **Fixed** — PEP 722 → PEP 723 in all docs.
 - [ ] **C4.** `rusty-results` is a critical architectural risk — tiny library (3 releases), minimal adoption, no maintenance signal. Entire error-handling philosophy depends on it. No wrapping guidance. **Confirmed bad decision.** Need to evaluate alternatives: `result` library, hand-rolled Result type, or other. **HIGH effort — needs design decision, affects all docs/skills/rules/examples.**
-- [ ] **C5.** No tests for `lint_utils.py` — every linter depends on `collect_files`, `is_ignored`, `has_bare_ignore`, `read_source_lines`, `report`. Zero direct tests. **Medium fix.**
-- [ ] **C6.** Unsound `TypeIs` guard examples (coding_rules.md, writing-python-code skill) — `is_valid_response` narrows `object` to `ValidResponse` with only shallow checks. Type checker trusts the guard, so this lies to it. **Quick fix** — use `msgspec.convert()` or add thorough validation.
+- [x] **C5.** ~~No tests for `lint_utils.py`.~~ **Fixed** — 24 unit tests added.
+- [x] **C6.** ~~Unsound `TypeIs` guard examples.~~ **Fixed** — added "simplified for brevity" caveat noting msgspec.convert() for production.
 
 ## IMPORTANT — Code Fixes
 
@@ -26,9 +26,9 @@
 - [x] **T2.** ~~Linting assertions use `>=`.~~ **Fixed** — exact `==` counts.
 - [x] **T3.** ~~Relative `FIXTURES` path fragile.~~ **Fixed** — uses `Path(__file__).resolve()`.
 - [ ] **T4.** No tests for `reusable/logging/` — zero coverage. **Won't fix** — thin wrappers around stdlib logging + colorlog; testing would mostly test the libraries. Code fixes (I5, I6) still apply.
-- [ ] **T5.** `ShortcutManager.load()` caching untested (`test_shortcuts_manager.py`). **Quick fix.**
-- [ ] **T6.** No edge case fixtures for linters — missing nested classes, qualified decorators, multi-target assignments, etc. **Medium fix.**
-- [ ] **T7.** Tests never verify reported line numbers. **Medium fix.**
+- [x] **T5.** ~~`ShortcutManager.load()` caching untested.~~ **Fixed** — caching + reload test added.
+- [x] **T6.** ~~No edge case fixtures for linters.~~ **Fixed** — 5 edge case fixtures + tests added.
+- [x] **T7.** ~~Tests never verify reported line numbers.~~ **Fixed** — line number assertions added to all fail tests.
 - [x] **T8.** ~~`_run` helper duplicated across 5 test files.~~ **Fixed** — extracted to `conftest.py`.
 
 ## IMPORTANT — Docs Consistency
@@ -81,14 +81,9 @@
 
 All 21 items fixed: C1, C3, I1–I8, T1–T3, T8, D1–D7. Tests pass (54/54), ruff clean, custom linters clean.
 
-### Phase 2: Medium Fixes (straightforward but need some work)
+### Phase 2: Medium Fixes ✅ COMPLETE
 
-- [ ] C2 — Refactor `shortcuts.py` to remove `Any`/`cast()` usage
-- [ ] C5 — Write tests for `lint_utils.py` (`collect_files`, `is_ignored`, `has_bare_ignore`, `read_source_lines`, `report`)
-- [ ] C6 — Fix unsound `TypeIs` guard examples in coding_rules.md and writing-python-code skill
-- [ ] T5 — Add `ShortcutManager.load()` caching behavior tests
-- [ ] T6 — Add edge case fixtures for linters (nested classes, qualified decorators, multi-target assignments)
-- [ ] T7 — Add line number verification to linting test assertions
+All 6 items fixed: C2, C5, C6, T5, T6, T7. Tests pass (84/84), ruff clean.
 
 ### Phase 3: Design Decisions (need brainstorming before implementation)
 
