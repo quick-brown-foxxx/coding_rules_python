@@ -9,10 +9,6 @@ PHILOSOPHY.md          Core beliefs — every other doc inherits from this
 pyproject.toml         Project config (deps, tooling)
 uv.lock                Locked dependency versions
 
-docs/                  Project documentation
-  anthropics-full-guide-for-ai-skills.md
-  ISSUES.md
-
 reusable/              Copy-paste reusable code (shadcn-ui style)
   logging/               Logging setup + colored non-log output
   shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
