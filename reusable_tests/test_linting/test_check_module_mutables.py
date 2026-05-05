@@ -36,9 +36,13 @@ class TestModuleMutables:
         assert result.returncode == 1
         assert "requires rationale" in result.stdout.lower()
 
-    def test_fail_qualified_constructors_pass_final(self, run_linter: RunLinter) -> None:
+    def test_edge_cases_flag_runtime_else_branch_only(self, run_linter: RunLinter) -> None:
         result = run_linter(MODULE, "mutables_edge_cases.py")
         assert result.returncode == 1
         assert "[module-mutable-state]" in result.stdout
-        # Should flag defaultdict and OrderedDict, but not typing.Final
-        assert result.stdout.count("[module-mutable-state]") == 2
+        # Should flag defaultdict, OrderedDict, and TYPE_CHECKING else branch only.
+        assert result.stdout.count("[module-mutable-state]") == 3
+        assert ":10:" in result.stdout
+        assert ":13:" in result.stdout
+        assert ":21:" in result.stdout
+        assert ":18:" not in result.stdout

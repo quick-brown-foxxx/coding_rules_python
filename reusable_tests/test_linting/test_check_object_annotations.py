@@ -35,10 +35,14 @@ class TestObjectAnnotations:
         assert result.returncode == 1
         assert "requires rationale" in result.stdout.lower()
 
-    def test_variadic_object_allowed_sequence_object_flagged(self, run_linter: RunLinter) -> None:
+    def test_edge_cases_only_allow_exact_coroutine_shape(self, run_linter: RunLinter) -> None:
         result = run_linter(MODULE, "object_edge_cases.py")
         assert result.returncode == 1
         assert "[restricted-object]" in result.stdout
-        # Only Sequence[object] return type should be flagged; *args and **kwargs pass
-        assert result.stdout.count("[restricted-object]") == 1
+        # Sequence[object] plus non-exempt Coroutine[...] shapes should fail.
+        assert result.stdout.count("[restricted-object]") == 4
         assert "get_items" in result.stdout
+        assert "first_coro" in result.stdout
+        assert "send_coro" in result.stdout
+        assert "return_coro" in result.stdout
+        assert "allowed_coro" not in result.stdout

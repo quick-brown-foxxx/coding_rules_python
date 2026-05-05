@@ -33,7 +33,7 @@ ADAPTING FOR YOUR APP:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Final, cast
+from typing import Final, TypeGuard
 
 import pytest
 
@@ -42,6 +42,28 @@ from reusable.shortcuts import (
     ShortcutConfig,
     validate_key_sequence,
 )
+
+
+def _is_dict_object_object(value: object) -> TypeGuard[dict[object, object]]:
+    """Return whether a value is a dictionary with object-typed entries."""
+    return isinstance(value, dict)
+
+
+def _load_shortcuts_table(path: Path) -> dict[str, object]:
+    """Load the shortcuts table from a saved TOML config."""
+    import tomllib
+
+    loaded = tomllib.loads(path.read_text(encoding="utf-8"))
+    assert _is_dict_object_object(loaded)
+
+    shortcuts_obj = loaded.get("shortcuts")
+    assert _is_dict_object_object(shortcuts_obj)
+
+    shortcuts: dict[str, object] = {}
+    for key, value in shortcuts_obj.items():
+        assert isinstance(key, str)
+        shortcuts[key] = value
+    return shortcuts
 
 
 class TestActionShortcut:
@@ -466,13 +488,11 @@ class TestShortcutConfigSave:
         assert save_path.exists()
 
         # Load and verify
-        import tomllib
+        shortcuts = _load_shortcuts_table(save_path)
 
-        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
-        shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
-        assert shortcuts is not None
-        assert isinstance(shortcuts, dict)
-        assert cast(str, shortcuts.get("test_action")) == "Ctrl+T"
+        test_action = shortcuts.get("test_action")
+        assert isinstance(test_action, str)
+        assert test_action == "Ctrl+T"
 
     def test_save_creates_directories(self, tmp_path: Path) -> None:
         """Test that save creates parent directories.
@@ -514,12 +534,7 @@ class TestShortcutConfigSave:
         assert save_result.is_ok
 
         # Load and verify
-        import tomllib
-
-        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
-        shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
-        assert shortcuts is not None
-        assert isinstance(shortcuts, dict)
+        shortcuts = _load_shortcuts_table(save_path)
         assert len(shortcuts) == 0
 
     def test_save_multiple_shortcuts(self, tmp_path: Path) -> None:
@@ -541,17 +556,21 @@ class TestShortcutConfigSave:
         assert save_result.is_ok
 
         # Load and verify all shortcuts
-        import tomllib
+        shortcuts = _load_shortcuts_table(save_path)
 
-        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
-        shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
-        assert shortcuts is not None
-        assert isinstance(shortcuts, dict)
+        action1 = shortcuts.get("action1")
+        action2 = shortcuts.get("action2")
+        action3 = shortcuts.get("action3")
+        action4 = shortcuts.get("action4")
 
-        assert cast(str, shortcuts.get("action1")) == "Ctrl+A"
-        assert cast(str, shortcuts.get("action2")) == "Ctrl+B"
-        assert cast(str, shortcuts.get("action3")) == "F5"
-        assert cast(str, shortcuts.get("action4")) == ""
+        assert isinstance(action1, str)
+        assert isinstance(action2, str)
+        assert isinstance(action3, str)
+        assert isinstance(action4, str)
+        assert action1 == "Ctrl+A"
+        assert action2 == "Ctrl+B"
+        assert action3 == "F5"
+        assert action4 == ""
 
     def test_save_overwrites_existing(self, tmp_path: Path) -> None:
         """Test that save overwrites an existing file.
@@ -568,12 +587,9 @@ class TestShortcutConfigSave:
         config2.save(save_path)
 
         # Load and verify it has new content
-        import tomllib
+        shortcuts = _load_shortcuts_table(save_path)
 
-        loaded: dict[str, Any] = tomllib.loads(save_path.read_text(encoding="utf-8"))
-        shortcuts = cast(dict[str, Any], loaded.get("shortcuts"))
-        assert shortcuts is not None
-        assert isinstance(shortcuts, dict)
-
+        new_action = shortcuts.get("new_action")
         assert "old_action" not in shortcuts
-        assert cast(str, shortcuts.get("new_action")) == "Ctrl+N"
+        assert isinstance(new_action, str)
+        assert new_action == "Ctrl+N"

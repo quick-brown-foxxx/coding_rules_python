@@ -79,10 +79,26 @@ def _is_variadic(arg: ast.arg, func: ast.FunctionDef | ast.AsyncFunctionDef) -> 
 
 
 def _is_coroutine_param(node: ast.expr) -> bool:
-    """Check if annotation is Coroutine[object, None, T] (first two params allowed)."""
-    if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name):
-        return node.value.id == "Coroutine"
-    return False
+    """Check if annotation is exactly Coroutine[object, None, T]."""
+    if not isinstance(node, ast.Subscript):
+        return False
+
+    value = node.value
+    if isinstance(value, ast.Name):
+        if value.id != "Coroutine":
+            return False
+    elif isinstance(value, ast.Attribute):
+        if value.attr != "Coroutine":
+            return False
+    else:
+        return False
+
+    slice_node = node.slice
+    if not isinstance(slice_node, ast.Tuple) or len(slice_node.elts) != 3:
+        return False
+
+    first_arg, second_arg, _third_arg = slice_node.elts
+    return _is_object_name(first_arg) and isinstance(second_arg, ast.Constant) and second_arg.value is None
 
 
 def _check_annotation_violation(

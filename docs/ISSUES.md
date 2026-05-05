@@ -85,6 +85,17 @@ All 21 items fixed: C1, C3, I1–I8, T1–T3, T8, D1–D7. Tests pass (54/54), r
 
 All 6 items fixed: C2, C5, C6, T5, T6, T7. Tests pass (84/84), ruff clean.
 
+Follow-up verification pass also fixed two latent linter logic bugs discovered during independent review:
+- narrowed the `Coroutine[...]` exemption in `check_object_annotations.py` to only `Coroutine[object, None, T]`
+- fixed `check_module_mutables.py` so `if TYPE_CHECKING:` only exempts the `if` body, not the runtime `else:` branch
+
+Final verification after follow-up:
+- 84/84 tests pass
+- ruff passes
+- basedpyright passes
+- custom linters pass
+- independent read-only review found no remaining must-fix issues before commit
+
 ### Phase 3: Design Decisions (need brainstorming before implementation)
 
 - [ ] C4 — `rusty-results` replacement strategy: evaluate `result` lib, hand-rolled type, or other

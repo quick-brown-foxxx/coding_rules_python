@@ -59,15 +59,11 @@ def _is_mutable_value(value: ast.expr) -> bool:
 
 
 def _in_type_checking_block(node: ast.stmt, tree: ast.Module) -> bool:
-    """Check if a statement is inside an `if TYPE_CHECKING:` block."""
+    """Check if a statement is inside the body of `if TYPE_CHECKING:`."""
     for top_node in tree.body:
         if isinstance(top_node, ast.If):
             test = top_node.test
-            if (
-                isinstance(test, ast.Name)
-                and test.id == "TYPE_CHECKING"
-                and (node in top_node.body or node in top_node.orelse)
-            ):
+            if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING" and node in top_node.body:
                 return True
     return False
 
@@ -108,7 +104,15 @@ def check_file(path: Path) -> list[str]:
 
     violations: list[str] = []
 
+    nodes_to_check: list[ast.stmt] = []
     for node in tree.body:
+        nodes_to_check.append(node)
+        if isinstance(node, ast.If):
+            test = node.test
+            if isinstance(test, ast.Name) and test.id == "TYPE_CHECKING":
+                nodes_to_check.extend(node.orelse)
+
+    for node in nodes_to_check:
         # Skip if inside TYPE_CHECKING block
         if _in_type_checking_block(node, tree):
             continue

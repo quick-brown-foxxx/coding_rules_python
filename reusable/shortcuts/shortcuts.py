@@ -62,7 +62,7 @@ import sys
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Final
+from typing import Final, TypeGuard
 
 import tomli_w
 from PySide6.QtGui import QKeySequence
@@ -141,6 +141,47 @@ def validate_key_sequence(sequence: str) -> Result[QKeySequence, str]:
     return Ok(key_seq)
 
 
+def _is_dict_object_object(value: object) -> TypeGuard[dict[object, object]]:
+    """Return whether a value is a dictionary with object-typed entries."""
+    return isinstance(value, dict)
+
+
+def _to_string_object_dict(value: object) -> dict[str, object] | None:
+    """Return a string-keyed dictionary copy when value is a dictionary."""
+    if not _is_dict_object_object(value):
+        return None
+
+    narrowed: dict[str, object] = {}
+    for key, item in value.items():
+        if not isinstance(key, str):
+            return None
+        narrowed[key] = item
+    return narrowed
+
+
+def _iter_object_items(value: object) -> list[tuple[object, object]] | None:
+    """Return dictionary items as object-typed pairs when value is a dictionary."""
+    if not _is_dict_object_object(value):
+        return None
+
+    return list(value.items())
+
+
+def _load_toml_data(path: Path) -> Result[dict[str, object], str]:
+    """Load a TOML document into a string-keyed object dictionary."""
+    try:
+        loaded = tomllib.loads(path.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as exc:
+        return Err(f"Invalid shortcuts file: {exc}")
+    except OSError as exc:
+        return Err(f"Failed to read shortcuts file: {exc}")
+
+    data = _to_string_object_dict(loaded)
+    if data is None:
+        return Err("Shortcut config must be a dictionary")
+    return Ok(data)
+
+
 @dataclass(slots=True)  # lint-ignore[unfrozen-dataclass]: mutable config loaded from TOML, updated at runtime
 class ShortcutConfig:
     """Loaded shortcut configuration.
@@ -191,14 +232,12 @@ class ShortcutConfig:
         if not isinstance(data, dict):
             return Err("Shortcut config must be a dictionary")
 
-        shortcuts_obj = data.get("shortcuts", {})
-        if not isinstance(shortcuts_obj, dict):
+        shortcuts_items = _iter_object_items(data.get("shortcuts", {}))
+        if shortcuts_items is None:
             return Err("'shortcuts' must be a dictionary")
 
-        # isinstance(_, dict) narrows to dict[Unknown, Unknown] — reassert types
-        checked_shortcuts: dict[str, object] = shortcuts_obj  # type: ignore[assignment]  # isinstance-narrowed dict
         shortcuts: dict[str, str] = {}
-        for key, value in checked_shortcuts.items():
+        for key, value in shortcuts_items:
             if not isinstance(key, str):
                 logger.warning(f"Action ID must be a string, got {type(key).__name__}")
                 continue
@@ -343,16 +382,11 @@ class ShortcutManager:
             self._config = result.unwrap()
             return Ok(self._config)
 
-        try:
-            raw_data: dict[str, object] = tomllib.loads(  # type: ignore[assignment]  # tomllib returns dict[str, Any]; we narrow to object
-                self._config_path.read_text(encoding="utf-8"),
-            )
-        except tomllib.TOMLDecodeError as exc:
-            return Err(f"Invalid shortcuts file: {exc}")
-        except OSError as exc:
-            return Err(f"Failed to read shortcuts file: {exc}")
+        raw_data_result = _load_toml_data(self._config_path)
+        if raw_data_result.is_err:
+            return Err(raw_data_result.unwrap_err())
 
-        config_result = ShortcutConfig.from_toml(raw_data)
+        config_result = ShortcutConfig.from_toml(raw_data_result.unwrap())
         if config_result.is_ok:
             self._config = config_result.unwrap()
         else:
