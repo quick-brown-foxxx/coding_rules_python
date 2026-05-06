@@ -49,3 +49,33 @@ def test_stdout_logging_hides_debug_when_level_is_info(
     log_contents = (tmp_path / "mockapp.log").read_text(encoding="utf-8")
     assert "debug should only be in file" in log_contents
     assert "info should be in stdout and file" in log_contents
+
+
+def test_setup_stdout_logging_is_idempotent(
+    capsys: pytest.CaptureFixture[str],
+    isolated_root_logger: None,
+) -> None:
+    setup_stdout_logging(level=logging.INFO)
+    setup_stdout_logging(level=logging.INFO)
+
+    logger = logging.getLogger("mockapp.stdout")
+    logger.info("stdout should appear once")
+
+    captured = capsys.readouterr()
+
+    assert captured.out.count("stdout should appear once") == 1
+
+
+def test_setup_file_logging_is_idempotent(
+    tmp_path: Path,
+    isolated_root_logger: None,
+) -> None:
+    setup_file_logging(log_dir=tmp_path, app_name="mockapp")
+    setup_file_logging(log_dir=tmp_path, app_name="mockapp")
+
+    logger = logging.getLogger("mockapp.file")
+    logger.info("file should contain one line")
+
+    log_contents = (tmp_path / "mockapp.log").read_text(encoding="utf-8")
+
+    assert log_contents.count("file should contain one line") == 1

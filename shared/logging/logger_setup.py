@@ -52,8 +52,27 @@ import logging
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import Final
 
 import colorlog
+
+_STDOUT_HANDLER_NAME: Final = "shared.logging.stdout"
+_FILE_HANDLER_PREFIX: Final = "shared.logging.file:"
+
+
+def _existing_stdout_handler(root_logger: logging.Logger) -> logging.Handler | None:
+    for handler in root_logger.handlers:
+        if handler.get_name() == _STDOUT_HANDLER_NAME:
+            return handler
+    return None
+
+
+def _existing_file_handler(root_logger: logging.Logger, log_path: Path) -> logging.Handler | None:
+    handler_name = f"{_FILE_HANDLER_PREFIX}{log_path}"
+    for handler in root_logger.handlers:
+        if handler.get_name() == handler_name:
+            return handler
+    return None
 
 
 def setup_stdout_logging(level: int = logging.INFO) -> None:
@@ -69,25 +88,27 @@ def setup_stdout_logging(level: int = logging.INFO) -> None:
     Args:
         level: Logging level to use
     """
-    handler = colorlog.StreamHandler(sys.stdout)
-    handler.setLevel(level)
-    handler.setFormatter(
-        colorlog.ColoredFormatter(
-            "%(log_color)s%(asctime)s [%(levelname)s] %(name)s:%(reset)s %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-            log_colors={
-                "DEBUG": "cyan",
-                "INFO": "green",
-                "WARNING": "yellow",
-                "ERROR": "red",
-                "CRITICAL": "red,bg_white",
-            },
-            reset=True,
-        )
-    )
-
     root_logger = logging.getLogger()
-    root_logger.addHandler(handler)
+    handler = _existing_stdout_handler(root_logger)
+    if handler is None:
+        handler = colorlog.StreamHandler(sys.stdout)
+        handler.set_name(_STDOUT_HANDLER_NAME)
+        handler.setFormatter(
+            colorlog.ColoredFormatter(
+                "%(log_color)s%(asctime)s [%(levelname)s] %(name)s:%(reset)s %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+                log_colors={
+                    "DEBUG": "cyan",
+                    "INFO": "green",
+                    "WARNING": "yellow",
+                    "ERROR": "red",
+                    "CRITICAL": "red,bg_white",
+                },
+                reset=True,
+            )
+        )
+        root_logger.addHandler(handler)
+    handler.setLevel(level)
     # Set root level to the lowest of current and requested, so both
     # stdout and file handlers can filter independently
     if root_logger.level == logging.NOTSET or level < root_logger.level:
@@ -118,22 +139,24 @@ def setup_file_logging(
     log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_dir / f"{app_name}.log"
 
-    handler = RotatingFileHandler(
-        log_path,
-        maxBytes=max_bytes,
-        backupCount=backup_count,
-        encoding="utf-8",
-    )
-    handler.setLevel(level)
-    handler.setFormatter(
-        logging.Formatter(
-            "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-    )
-
     root_logger = logging.getLogger()
-    root_logger.addHandler(handler)
+    handler = _existing_file_handler(root_logger, log_path)
+    if handler is None:
+        handler = RotatingFileHandler(
+            log_path,
+            maxBytes=max_bytes,
+            backupCount=backup_count,
+            encoding="utf-8",
+        )
+        handler.set_name(f"{_FILE_HANDLER_PREFIX}{log_path}")
+        handler.setFormatter(
+            logging.Formatter(
+                "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+            )
+        )
+        root_logger.addHandler(handler)
+    handler.setLevel(level)
     # Set root level to the lowest of current and requested
     if root_logger.level == logging.NOTSET or level < root_logger.level:
         root_logger.setLevel(level)
