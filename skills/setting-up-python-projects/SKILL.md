@@ -9,7 +9,7 @@ description: >-
 
 New projects start with the full safety net configured. The bootstrap flow is local and explicit: promote the template files into their final locations, copy `shared/` and `shared_tests/`, copy the docs references into `docs/`, then customize.
 
-For standalone scripts, use `writing-python-scripts`. For backend/service repos, start with `setting-up-python-backends`. For architecture reshapes inside an existing project, start with `architecting-python-changes` first. Come here when the answer is really about bootstrap, repo shape, or initial scaffolding for a general Python project.
+For standalone scripts, use `writing-python-scripts`. For backend/service repos, start with `setting-up-python-backends`. For architecture shape of the project after bootstrap or updating an existing project, use `architecting-python-changes`. Come here when the answer is really about bootstrap, repo shape, or initial scaffolding for a general Python project.
 
 Make sure to read repo's readme.
 

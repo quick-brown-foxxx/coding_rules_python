@@ -51,6 +51,7 @@ It is both a compact guide and a router to deeper project docs and domain skills
 - Prefer boring popular maintained libraries and frameworks for commodity infrastructure: auth, packaging, builds, queues, caching, deployment, migrations, or orchestration.
 - Do not build ad hoc systems on top of a tiny framework when the domain already implies substantial backend concerns.
 - For tiny one-off helpers or stable details, simple custom code is often better than heavyweight scaffolding.
+- When selecting a library, do web research and compare multiple options, consider how each one fits philosophy and architecture, remember to analyze for typing support.
 
 ### Composition and state
 
