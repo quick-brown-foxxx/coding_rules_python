@@ -19,6 +19,8 @@
 
 **Invariant:** Run `uv run poe lint_full` continuously during development, not just at finalization.
 
+**Command policy:** Run project-local Python tools through `uv`, not system-installed binaries. Use `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, and `uv run pre-commit`.
+
 ---
 
 ### Skills — ALWAYS CHECK, ALWAYS USE
@@ -69,6 +71,8 @@
 | `pytest`        | Testing framework                              |
 | `poethepoet`    | Task runner                                    |
 | `rusty-results` | Result pattern for error handling              |
+
+All commands in this project are assumed to run inside the `uv`-managed environment.
 
 ---
 

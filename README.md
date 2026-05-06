@@ -2,6 +2,8 @@
 
 Personal Python development standards, templates, and AI skills.
 
+Not intended for any third-party use but I will be glad if someone will find it at least inspirational.
+
 ## Structure
 
 ```
@@ -81,6 +83,8 @@ The `reusable/` folder contains copy-paste components — not an installable lib
 7. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
 8. Run `uv sync && uv run pre-commit install`
 
+From this point on, prefer project-local commands through `uv` rather than system-installed tools: `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run python`, `uv run pre-commit`.
+
 ### For AI agents
 
 Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-python-code` skill covers core standards; other skills cover specific domains.
@@ -88,6 +92,7 @@ Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-pyth
 ### Quick reference
 
 - **What tools?** uv, basedpyright (strict), ruff, pytest, poethepoet, msgspec
+- **How to run them?** Through `uv` (`uv run ...`), not global/system binaries.
 - **Error handling?** `Result[T, E]` from rusty-results. Rusty-results is nice for our use case and we will use it, but it is not maintained and may require replacement in future. Exceptions = bugs only.
 - **Data validation?** `msgspec.Struct` for external data (JSON, configs, APIs). Validates at decode time.
 - **CLI?** typer (argparse only for stdlib-only scripts)

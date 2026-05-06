@@ -162,13 +162,15 @@ project/
    ```
 
 6. **Initialize environment:**
-   ```bash
-   git init
-   uv sync --all-extras --group dev
+    ```bash
+    git init
+    uv sync --all-extras --group dev
    uv run pre-commit install
    uv run poe lint_full
-   uv run poe test
-   ```
+    uv run poe test
+    ```
+
+   After setup, keep using project-local commands through `uv` rather than system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`.
 
 7. **Verify everything works:**
    - `uv run poe app` runs the application

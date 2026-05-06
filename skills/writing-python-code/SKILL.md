@@ -9,6 +9,8 @@ description: >
 
 All Python code follows the pit-of-success philosophy: strict types, Result-based error handling, modern tooling.
 
+Run project-local tools through `uv`, not system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`.
+
 ---
 
 ## Type System
