@@ -17,6 +17,7 @@ shared/                Copy-paste reusable code for new projects
   linting/               Custom lint checks (AST-based)
     lint_utils.py          Shared utilities (file collection, ignore handling)
     check_frozen_dataclasses.py  Enforce frozen=True on all dataclasses
+    check_ignored_results.py     Catch common ignored Result-returning calls
     check_module_mutables.py     Ban module-level mutable state
     check_object_annotations.py  Restrict object to boundary positions
     check_type_ignore.py         Require rationale on type:ignore comments
