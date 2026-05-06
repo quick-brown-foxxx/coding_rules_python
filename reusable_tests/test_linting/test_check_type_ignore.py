@@ -59,3 +59,19 @@ class TestTypeIgnore:
         assert "[type-ignore-rationale]" in result.stdout
         # Only the one without rationale should fail; the one with rationale passes
         assert result.stdout.count("[type-ignore-rationale]") == 1
+
+    def test_non_directive_text_does_not_trigger(self, tmp_path: Path) -> None:
+        path = tmp_path / "type_ignore_text_only.py"
+        path.write_text(
+            'MESSAGE = "not a directive"  # type: ignored by docs\n',
+            encoding="utf-8",
+        )
+
+        result = subprocess.run(
+            [sys.executable, "-m", MODULE, str(path)],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, result.stdout
+        assert result.stdout.strip() == ""

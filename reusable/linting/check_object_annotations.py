@@ -86,8 +86,12 @@ def _is_typeis_guard(func: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     ret = func.returns
     if ret is None:
         return False
-    if isinstance(ret, ast.Subscript) and isinstance(ret.value, ast.Name):
+    if not isinstance(ret, ast.Subscript):
+        return False
+    if isinstance(ret.value, ast.Name):
         return ret.value.id in ("TypeIs", "TypeGuard")
+    if isinstance(ret.value, ast.Attribute):
+        return ret.value.attr in ("TypeIs", "TypeGuard")
     return False
 
 

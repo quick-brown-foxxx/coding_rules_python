@@ -53,6 +53,7 @@ packages = ["src/TODO_PACKAGE_NAME"]
 # ============================================================================
 
 [tool.basedpyright]
+# Template default for this repo's primary Linux workflow; downstream projects may need a different platform.
 pythonPlatform = "Linux"
 pythonVersion = "3.14"
 venvPath = "."

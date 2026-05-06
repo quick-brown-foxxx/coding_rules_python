@@ -151,6 +151,7 @@ def check_file(path: Path) -> list[str]:
             _check_mutable_assignment(node, node.value, path, source_lines, violations, line_num_override)
 
         # Handle plain assignments: x = [] or x = dict()
+        # TODO: This currently skips chained assignments like `a = b = []`.
         if isinstance(node, ast.Assign) and len(node.targets) == 1:
             target = node.targets[0]
             # Skip dunder assignments (__all__, __version__, etc.)

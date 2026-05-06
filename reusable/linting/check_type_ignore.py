@@ -22,10 +22,10 @@ from reusable.linting.lint_utils import (
 
 CHECK_NAME = "type-ignore-rationale"
 
-# Matches `# type: ignore` with optional bracket  # lint-ignore[type-ignore-rationale]: pattern docs
+# Matches an actual `# type: ignore` directive, not text like `type: ignored`.
 # Handles: type:ignore, type: ignore, type:  ignore
-_TYPE_IGNORE_RE = re.compile(r"#\s*type:\s*ignore")
-_TYPE_IGNORE_WITH_CODE_RE = re.compile(r"#\s*type:\s*ignore\[([^\]]+)\]")
+_TYPE_IGNORE_RE = re.compile(r"#\s*type:\s*ignore(?:\s|\[|$)")
+_TYPE_IGNORE_WITH_CODE_RE = re.compile(r"#\s*type:\s*ignore\[([^\]]+)\](?:\s|$)")
 
 # After the type:ignore[code] part, check for a rationale comment
 # Must be a `# ...` comment that is NOT a `# lint-ignore[...]`

@@ -106,3 +106,21 @@ class TestObjectAnnotations:
         violations = check_file(path)
 
         assert violations == []
+
+    def test_qualified_type_guards_are_allowed(self, tmp_path: Path) -> None:
+        path = tmp_path / "qualified_type_guards.py"
+        path.write_text(
+            "from typing import TypeGuard\n"
+            "import typing\n\n"
+            "class MyConfig:\n"
+            "    name: str\n\n"
+            "def is_config(value: object) -> typing.TypeGuard[MyConfig]:\n"
+            "    return isinstance(value, MyConfig)\n\n"
+            "def is_config_direct(value: object) -> TypeGuard[MyConfig]:\n"
+            "    return isinstance(value, MyConfig)\n",
+            encoding="utf-8",
+        )
+
+        violations = check_file(path)
+
+        assert violations == []

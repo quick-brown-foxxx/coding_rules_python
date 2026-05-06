@@ -129,7 +129,6 @@ search = ""        # Empty string disables the shortcut
 dependencies = [
     "pyside6>=6.10.1",
     "rusty-results>=1.1.1",
-    "tomli>=2.2.1",
     "tomli-w>=1.2.0",
 ]
 ```
