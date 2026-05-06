@@ -1,15 +1,31 @@
 ---
 name: setting-up-python-projects
-description: >
-  ALWAYS LOAD THIS SKILL WHEN CREATING A NEW PYTHON PROJECT OR SETTING UP PROJECT STRUCTURE. Do not scaffold or bootstrap Python projects directly — use this skill first.
-  Bootstrap new Python projects: directory structure, pyproject.toml, pre-commit, uv sync.
+description: >-
+  ALWAYS LOAD THIS SKILL WHEN CREATING A BRAND-NEW PYTHON PROJECT, BOOTSTRAPPING A REPO, OR CHOOSING ITS INITIAL PROJECT SHAPE. Do not scaffold or bootstrap Python projects directly — use this skill first.
+  Bootstrap new Python projects: choose project shape, directory structure, framework/scaffolding level, pyproject.toml, pre-commit, uv sync.
 ---
 
 # Setting Up Python Projects
 
 New projects start with the full safety net configured. The bootstrap flow is local and explicit: promote the template files into their final locations, copy `shared/` and `shared_tests/`, copy the docs references into `docs/`, then customize.
 
+For architecture reshapes inside an existing project, start with `architecting-python-changes` first. Come here when the answer is really about bootstrap, repo shape, or initial scaffolding.
+
 Make sure to read repo's readme.
+
+---
+
+## Choose the Shape First
+
+Choose structure based on expected change axes and future callers, not aesthetics.
+
+| Situation | Default shape |
+|-----------|---------------|
+| One-off helper or tiny personal automation | Use `writing-python-scripts`; do not force a full project layout |
+| Reusable library or composable tool | Build a package around a clean core API, then add a thin CLI only if needed |
+| CLI app | `src/` package with `core/`, `cli/`, `utils/`, and `wrappers/` as needed |
+| Multi-interface app | Shared domain layer plus separate presentation adapters and one composition root |
+| Backend/service | Thin transport layer plus separate domain/services and infrastructure boundaries |
 
 ---
 
@@ -66,6 +82,15 @@ project/
 
 ---
 
+## Scaffolding and Framework Choice
+
+- Use stronger scaffolding early when the domain clearly needs auth, background jobs, caching, stateful workflows, migrations, or admin concerns.
+- Prefer boring maintained frameworks and libraries for commodity infrastructure instead of growing a custom stack by accident.
+- Do not start from a tiny framework if you already know multiple cross-cutting concerns are coming soon.
+- Do not drag a heavyweight framework into a tiny stable helper or a one-purpose wrapper.
+
+---
+
 ## Setup Checklist
 
 1. **Create directory structure:**
@@ -95,68 +120,30 @@ project/
    - Update import paths after copying if the project package name changes
 
 4. **Create entry points:**
-   ```python
-   # src/APPNAME/__init__.py
-   __version__ = "0.1.0"
+    ```python
+    # src/APPNAME/__init__.py
+    __version__ = "0.1.0"
 
-   # src/APPNAME/__main__.py
-   from __future__ import annotations
+    # src/APPNAME/__main__.py
+    from __future__ import annotations
 
-   import argparse
-   import sys
-   from pathlib import Path
+    import sys
 
-   CLI_WORDS = {"config"}  # Top-level CLI entry words for this app
+    def main() -> int:
+        from APPNAME.bootstrap import create_services
+        from APPNAME.cli import build_cli_app
 
-   def parse_gui_request(argv: list[str]) -> tuple[Path | None, bool] | None:
-       parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
-       parser.add_argument("path", nargs="?")
-       parser.add_argument("--debug", action="store_true")
+        services = create_services(debug=False)
+        app = build_cli_app(services)
+        app(args=sys.argv[1:], prog_name="APPNAME", standalone_mode=False)
+        return 0
 
-       try:
-           ns, unknown = parser.parse_known_args(argv)
-       except SystemExit:
-           return None
+    if __name__ == "__main__":
+        sys.exit(main())
+    ```
+    Keep `__main__.py` thin. Assemble the real presentation layer elsewhere (`APPNAME.cli`, `APPNAME.gui`, API app factory, worker entrypoint, and so on) and let `__main__.py` do only the final handoff.
 
-       if unknown:
-           return None
-
-       path = Path(ns.path).expanduser() if isinstance(ns.path, str) else None
-       return path, bool(ns.debug)
-
-   def main() -> int:
-       argv = sys.argv[1:]
-
-       if argv and (argv[0] in {"-h", "--help"} or argv[0] in CLI_WORDS):
-           from APPNAME.bootstrap import create_services
-           from APPNAME.cli import build_cli_app
-
-           services = create_services(debug=False)
-           app = build_cli_app(services)
-           app(args=argv, prog_name="APPNAME", standalone_mode=False)
-           return 0
-
-       gui_request = parse_gui_request(argv)
-       if gui_request is not None:
-           from APPNAME.gui import run_gui
-
-           path, debug = gui_request
-           return run_gui(path=path, debug=debug)
-
-       from APPNAME.bootstrap import create_services
-       from APPNAME.cli import build_cli_app
-
-       services = create_services(debug=False)
-       app = build_cli_app(services)
-       app(args=argv, prog_name="APPNAME", standalone_mode=False)
-       return 0
-
-   if __name__ == "__main__":
-       sys.exit(main())
-   ```
-   `__main__.py` is the router only. Keep Typer assembly in `APPNAME.cli`, keep GUI startup in `APPNAME.gui`, and avoid `len(sys.argv) > 1` heuristics. The tiny pre-parse only answers “is this a GUI-shaped invocation?” so `APPNAME`, `APPNAME file.txt`, and `APPNAME --debug` can reach the GUI, while `APPNAME -h` and `APPNAME config ...` stay in Typer.
-
-   For GUI's CLI args parsing use argparse (typer poorly works with this roter setup and can't be used with main entrypoint pattern)
+    If the app has both GUI and CLI, or multiple interfaces sharing one core, do not invent a router here ad hoc. Use the dedicated pattern from `building-multi-ui-apps`.
 
 5. **Create initial test:**
    ```python
@@ -262,7 +249,7 @@ except asyncio.CancelledError:
 
 ---
 
-## Local Bootstrap Artifact
+## Bootstrap Script
 
 Use `skills/setting-up-python-projects/bootstrap_downstream_repo.sh` as the canonical local bootstrap artifact. It is intentionally small and terminal-readable: promote template files into place, copy `shared/`, `shared_tests/`, and docs files, create `CLAUDE.md`, then run `uv sync --all-extras --group dev`, `uv run poe lint_full`, and `uv run poe test` in the downstream repo.
 
@@ -270,7 +257,7 @@ Use `skills/setting-up-python-projects/bootstrap_downstream_repo.sh` as the cano
 
 ## Adapt to Tech Stack & Domain
 
-After scaffolding, **adapt everything to the specific project**. The templates are a starting point, not a straitjacket. `docs/PHILOSOPHY.md` is the only ruling constant — everything else bends to fit the project's tech stack, domain, and constraints.
+After scaffolding, **adapt everything to the specific project**. The templates are a starting point, not a straitjacket. Keep the philosophy and core safety model intact, then adapt the surrounding structure to fit the project's tech stack, domain, and constraints.
 
 ### What to adapt
 
@@ -278,7 +265,7 @@ After scaffolding, **adapt everything to the specific project**. The templates a
 |------|--------------|
 | **Directory layout** | Add/remove/rename directories to match the domain. Not every project needs `cli/`, `ui/`, `wrappers/`, `shared/`. A data pipeline might need `pipelines/`, `schemas/`, `extractors/`. A web service might need `routes/`, `middleware/`, `repositories/`. |
 | **Dependencies** | Add domain-specific libraries. Remove unused template defaults. Research current best-in-class libraries for the domain (e.g. SQLAlchemy vs raw asyncpg, Pydantic vs attrs). |
-| **pyproject.toml** | Adjust ruff rules, pytest markers, basedpyright overrides for the domain. Some domains need relaxed rules (e.g. data science may need broader `type: ignore` for numpy interop). |
+| **pyproject.toml** | Adjust ruff rules, pytest markers, plugins, and narrowly-justified overrides for ecosystem gaps. Do not relax strict typing by default; document every real exception. |
 | **AGENTS.md** | Fill TODO sections with project-specific architecture, key decisions, domain vocabulary, and workflows. This is the agent's primary orientation document — make it specific. **Skills section:** remove skills the project won't use (e.g. `building-multi-ui-apps` for a pure CLI), add domain-specific skills (e.g. `building-qt-apps`, `setting-up-shortcuts`). |
 | **coding_rules.md** | Extend or override rules for the domain. Add domain-specific conventions (e.g. database migration rules, API versioning policy, data validation requirements). |
 | **Test structure** | Adjust to match what matters. A CLI tool needs heavy e2e tests. A library needs heavy unit tests. A web service needs API integration tests. |

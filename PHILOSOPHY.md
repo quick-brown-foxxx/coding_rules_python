@@ -63,10 +63,14 @@ Tests exist to prove that features work, not to produce green checkmarks.
 Separate what changes for different reasons. Separate what should be testable independently.
 
 - **Layered dependency flow:** Presentation (UI/CLI) -> Domain (business logic) -> Utilities. Never upward.
+- **Separate by expected change axis.** Split code where domain rules, validation, transport, infrastructure, platform integration, or workflow orchestration will evolve for different reasons.
 - **UI is a plugin.** The same business logic serves Qt GUI, CLI, and potentially API (FastAPI). The core never imports from UI. Adding a new interface should not require changing business logic.
+- **Reusable core, thin adapters.** If CLI, GUI, API, or automation may share behavior, keep a composable core and treat each interface as a presentation adapter.
 - **Data vs. logic.** Domain types (dataclasses) carry data. Services and managers operate on data. Utilities are stateless pure functions. Stateful classes exist for managing lifecycle and continuous state — but their state is explicit, not hidden.
+- **Prefer composition over inheritance.** Favor explicit data flow, small collaborating objects, and protocols over deep class hierarchies. Use inheritance when the hierarchy is genuinely stable and semantic, not just to share code.
 - **Scale-appropriate separation.** In large projects: separate files, directories, layers. In single scripts: separate functions, clear sections within one file. The principle is the same; the implementation scales.
 - **Wrap third-party libraries.** Isolate external dependencies behind typed interfaces. This gives type safety, testability, and the ability to swap implementations. Enforce wrapper usage via linter rules (ruff `banned-api`) where possible.
+- **Transparency over magic.** Important workflows should expose validation, state transitions, logs, and dry-run behavior where practical rather than hiding critical behavior inside opaque helpers.
 
 ## 7. Tooling: Fast, Strict, Modern
 
@@ -98,4 +102,5 @@ Every project, no matter how small, starts with the safety net configured:
 
 - **Single script**: PEP 723 metadata, pyproject.toml for tool config (ruff + basedpyright), shebang for direct execution
 - **Full project**: src layout, AGENTS.md, coding_rules.md, pyproject.toml with all tools, pre-commit hooks, test directory structure
+- **Stronger scaffolding when complexity is real.** If the domain clearly needs auth, background jobs, caching, stateful workflows, migrations, or admin concerns, prefer stronger framework scaffolding early instead of bolting it on later.
 - **The overhead is worth it.** Spending 10 minutes on setup saves hours of debugging implicit failures later. This is the pit of success in action.

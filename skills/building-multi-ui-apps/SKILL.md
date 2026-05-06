@@ -1,13 +1,13 @@
 ---
 name: building-multi-ui-apps
-description: >
-  ALWAYS LOAD THIS SKILL WHEN APP HAS BOTH CLI AND GUI, OR MULTIPLE INTERFACES SHARING LOGIC. Do not architect multi-interface apps directly — use this skill first.
-  Multi-interface Python apps: layered architecture for GUI + CLI + API sharing business logic.
+description: >-
+  ALWAYS LOAD THIS SKILL WHEN A PYTHON APP HAS MULTIPLE INTERFACES SHARING LOGIC, SUCH AS CLI, GUI, API, OR AUTOMATION ENTRY POINTS. Do not architect multi-interface apps directly — use this skill first.
+  Multi-interface Python apps: reusable core, thin adapters, composition root, and layered architecture for GUI + CLI + API sharing business logic.
 ---
 
 # Building Multi-UI Apps
 
-UI is a plugin. Business logic lives in the domain layer. Adding a new interface (CLI, GUI, API) should not change business logic.
+UI is a plugin. Build a reusable core first, then keep each interface as a thin adapter around it. Adding a new interface (CLI, GUI, API) should not change business logic.
 
 ---
 
@@ -33,6 +33,15 @@ Utility Layer (bottom)
 ```
 
 **Dependencies flow downward only.** Domain never imports from presentation.
+
+---
+
+## Reusable Core First
+
+- Build one composable domain API first, then add CLI/GUI/API adapters around it.
+- The first shipped interface may be the only one today; still keep business rules out of commands, routes, and widgets.
+- Presentation layers parse input, call the core, and format output.
+- Framework-specific request objects, CLI contexts, and widgets stay at the edge.
 
 ---
 

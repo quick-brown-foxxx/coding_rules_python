@@ -383,21 +383,42 @@ Utilities (Helpers, Wrappers, Common)
 | Stateless operations         | Pure functions in utils                |
 | Lifecycle & state management | Stateful classes with explicit state   |
 
-### 6.3 Scale-Appropriate
+Transport/request/response models stay at the boundary. Convert them into domain types before business logic runs.
+
+### 6.3 Composition Over Inheritance
+
+- Prefer composition, protocols, and explicit dependencies over deep inheritance trees.
+- Use inheritance when the hierarchy is semantically real and stable, not just to share code.
+- Stateful orchestration belongs in explicit objects with constructor-injected dependencies.
+
+### 6.4 Reusable Core, Thin Adapters
+
+- When CLI, GUI, API, automation, or tests call the same use case, the business operation lives in the domain layer once.
+- Presentation layers parse input, call domain operations, and format output. They do not implement business rules.
+- Do not let framework-specific request objects, widgets, or CLI context leak into the domain layer.
+
+### 6.5 Transparency for Important Workflows
+
+- Multi-step or destructive operations should expose their state clearly in names, return types, logs, or explicit step objects.
+- Add dry-run support when app is a CLI/shell wrapper
+- Group logs and errors by operation boundary so failures can be reconstructed without guesswork.
+- For complex operations prefer state machines with explicit statuses and error handling
+
+### 6.6 Scale-Appropriate
 
 - **Single script**: functions and clear sections within one file
 - **Small project**: few modules, flat structure
 - **Large project**: `src/` layout with `core/`, `ui/`, `cli/`, `utils/`, `wrappers/`
 
-### 6.4 Module-Level State
+### 6.7 Module-Level State
 
 Module-level mutable state is banned. All module globals must be `Final`. Registries, caches, and singletons belong in explicitly constructed objects passed via dependency injection. Exceptions: `logging.getLogger()` and `Final` constants.
 
-### 6.5 Circular Imports
+### 6.8 Circular Imports
 
 Circular imports are architectural bugs — not something to work around with `TYPE_CHECKING`. If two modules import each other, invert the dependency: extract a `Protocol`, move shared types to a common module, or restructure layers. `TYPE_CHECKING` is only for forward references within the same layer. Enforce layer boundaries with ruff `banned-api` where practical.
 
-### 6.6 Graceful Shutdown
+### 6.9 Graceful Shutdown
 
 - **Graceful shutdown:** All apps must handle Ctrl+C without tracebacks or hanging. Scripts: catch `KeyboardInterrupt` at entry point, exit 130. Subprocess wrappers: use `start_new_session=True` and kill process groups on interrupt. Qt apps: install SIGINT handler before event loop. See `setting-up-python-projects` skill for patterns.
 
