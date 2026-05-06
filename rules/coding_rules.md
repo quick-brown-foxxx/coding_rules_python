@@ -440,8 +440,8 @@ Circular imports are architectural bugs — not something to work around with `T
 ### 9.2 Pre-Commit Checklist
 
 Before committing:
-1. `uv run poe lint_full` passes (type check + lint + format)
-2. Tests pass
+1. `uv run poe lint_full` passes (basedpyright + Ruff check/format + custom linters)
+2. `uv run poe test` passes
 3. New code has tests (where appropriate)
 4. Public APIs have docstrings
 5. No hardcoded secrets or debug prints

@@ -17,6 +17,7 @@ from typing import Final
 from shared.linting.lint_utils import collect_files, has_bare_ignore, is_ignored, read_source_lines, report
 
 CHECK_NAME = "restricted-object"
+_COROUTINE_ARG_COUNT = 3
 
 # Container types where object as a type arg is banned
 _BANNED_CONTAINERS: Final = frozenset({"dict", "list", "Sequence", "tuple", "set", "frozenset"})
@@ -46,39 +47,34 @@ def _is_allowed_coroutine_object(node: ast.expr) -> bool:
         return False
 
     slice_node = node.slice
-    if not isinstance(slice_node, ast.Tuple) or len(slice_node.elts) != 3:
+    if not isinstance(slice_node, ast.Tuple) or len(slice_node.elts) != _COROUTINE_ARG_COUNT:
         return False
 
     first_arg, second_arg, _third_arg = slice_node.elts
     return _is_object_name(first_arg) and isinstance(second_arg, ast.Constant) and second_arg.value is None
 
 
+def _child_annotation_nodes(node: ast.expr) -> tuple[ast.expr, ...] | None:
+    """Return child annotation nodes that should be checked recursively."""
+    if isinstance(node, ast.Subscript):
+        if isinstance(node.slice, ast.Tuple):
+            return tuple(node.slice.elts)
+        return (node.slice,)
+    if isinstance(node, ast.Tuple):
+        return tuple(node.elts)
+    if isinstance(node, ast.BinOp):
+        return (node.left, node.right)
+    return None
+
+
 def _annotation_has_banned_object(node: ast.expr) -> bool:
     """Check if a type annotation contains banned object usage."""
     if _is_allowed_coroutine_object(node):
         return False
-
-    # Bare `object`
     if _is_object_name(node):
         return True
-
-    # Subscript: dict[str, object], list[object], etc.
-    if isinstance(node, ast.Subscript):
-        if isinstance(node.value, ast.Name) and node.value.id in _BANNED_CONTAINERS:
-            # Check type args recursively so nested cases are caught.
-            if isinstance(node.slice, ast.Tuple):
-                return any(_annotation_has_banned_object(elt) for elt in node.slice.elts)
-            return _annotation_has_banned_object(node.slice)
-        # Recurse into wrapper subscripts like Required[dict[str, object]]
-        if isinstance(node.slice, ast.Tuple):
-            return any(_annotation_has_banned_object(elt) for elt in node.slice.elts)
-        return _annotation_has_banned_object(node.slice)
-
-    # BinOp: X | Y union syntax
-    if isinstance(node, ast.BinOp):
-        return _annotation_has_banned_object(node.left) or _annotation_has_banned_object(node.right)
-
-    return False
+    child_nodes = _child_annotation_nodes(node)
+    return child_nodes is not None and any(_annotation_has_banned_object(child) for child in child_nodes)
 
 
 def _is_typeis_guard(func: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:

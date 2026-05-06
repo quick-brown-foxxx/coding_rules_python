@@ -32,10 +32,10 @@ For single-file scripts and small projects. See [full version](https://github.co
 ## Tooling
 
 - `uv` for deps and execution
-- `ruff` for linting + formatting
+- `ruff` for strict linting + formatting
 - `basedpyright` for type checking
 - `pytest` for testing
-- Run `uv run poe lint_full` before committing
+- Run `uv run poe lint_full` and `uv run poe test` before committing
 
 ## Commits
 

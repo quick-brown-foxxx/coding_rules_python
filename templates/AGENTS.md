@@ -17,7 +17,7 @@
 1. **New context?** Review this document and `docs/PHILOSOPHY.md` fully.
 2. **Implementation phase?** Consult [coding_rules.md](docs/coding_rules.md) for detailed patterns.
 
-**Invariant:** Run `uv run poe lint_full` continuously during development, not just at finalization.
+**Invariant:** Treat `uv run poe lint_full` + `uv run poe test` as the standard verification flow. Run `uv run poe lint_full` continuously during development, not just at finalization.
 
 **Command policy:** Run project-local Python tools through `uv`, not system-installed binaries. Use `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, and `uv run pre-commit`.
 
@@ -67,7 +67,7 @@
 | Python 3.14+    | Runtime (latest stable, modern type features)  |
 | `uv`            | Package management, script execution           |
 | `basedpyright`  | Type checking (strict mode, `reportAny=error`) |
-| `ruff`          | Linting + formatting (all-in-one)              |
+| `ruff`          | Strict linting + formatting |
 | `pytest`        | Testing framework                              |
 | `poethepoet`    | Task runner                                    |
 | `rusty-results` | Result pattern for error handling              |
@@ -134,12 +134,12 @@ Dependencies flow downward only. UI never imported by lower layers.
 
 <!-- TODO: Document project-specific workflows -->
 
-| Goal                       | Command                                   |
-| -------------------------- | ----------------------------------------- |
-| Lint + type check + format | `uv run poe lint_full`                    |
-| Run tests                  | `uv run poe test`                         |
-| Run application            | `uv run poe app`                          |
-| Pre-commit check           | `uv run poe lint_full && uv run poe test` |
+| Goal                                      | Command                                   |
+| ----------------------------------------- | ----------------------------------------- |
+| Type check + Ruff + custom linters        | `uv run poe lint_full`                    |
+| Run tests                                 | `uv run poe test`                         |
+| Run application                           | `uv run poe app`                          |
+| Pre-commit verification                   | `uv run poe lint_full && uv run poe test` |
 
 ---
 

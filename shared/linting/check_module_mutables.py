@@ -99,29 +99,28 @@ def _type_checking_else_line(node: ast.stmt, tree: ast.Module) -> int | None:
     return None
 
 
-def _check_mutable_assignment(
+def _mutable_assignment_violation(
     node: ast.stmt,
     value: ast.expr,
     path: Path,
     source_lines: list[str],
-    violations: list[str],
     line_num_override: int | None = None,
-) -> None:
-    """Check a module-level assignment for mutable state."""
+) -> str | None:
+    """Return a violation message for mutable module state, if any."""
     if _is_logger_call(value):
-        return
+        return None
     if not _is_mutable_value(value):
-        return
+        return None
 
     source_line_num = node.lineno
     line_num = line_num_override or source_line_num
     source_line = source_lines[source_line_num - 1] if source_line_num <= len(source_lines) else ""
     if has_bare_ignore(source_line, CHECK_NAME):
-        violations.append(report(path, line_num, CHECK_NAME, "lint-ignore requires rationale after ':'"))
-    elif not is_ignored(source_line, CHECK_NAME):
-        violations.append(
-            report(path, line_num, CHECK_NAME, "module-level mutable state — use Final or move into a class/function")
-        )
+        return report(path, line_num, CHECK_NAME, "lint-ignore requires rationale after ':'")
+    if is_ignored(source_line, CHECK_NAME):
+        return None
+
+    return report(path, line_num, CHECK_NAME, "module-level mutable state — use Final or move into a class/function")
 
 
 def check_file(path: Path) -> list[str]:
@@ -148,7 +147,9 @@ def check_file(path: Path) -> list[str]:
         if isinstance(node, ast.AnnAssign) and node.value is not None:
             if is_final_annotation(node.annotation):
                 continue
-            _check_mutable_assignment(node, node.value, path, source_lines, violations, line_num_override)
+            violation = _mutable_assignment_violation(node, node.value, path, source_lines, line_num_override)
+            if violation is not None:
+                violations.append(violation)
 
         # Handle plain assignments: x = [] or x = dict()
         # TODO: This currently skips chained assignments like `a = b = []`.
@@ -157,7 +158,9 @@ def check_file(path: Path) -> list[str]:
             # Skip dunder assignments (__all__, __version__, etc.)
             if isinstance(target, ast.Name) and target.id.startswith("__") and target.id.endswith("__"):
                 continue
-            _check_mutable_assignment(node, node.value, path, source_lines, violations, line_num_override)
+            violation = _mutable_assignment_violation(node, node.value, path, source_lines, line_num_override)
+            if violation is not None:
+                violations.append(violation)
 
     return violations
 

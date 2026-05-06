@@ -45,7 +45,6 @@ project/
 │   ├── fixtures/
 │   └── conftest.py
 ├── scripts/                  # Dev utilities
-│   ├── bootstrap.py          # Setup script
 │   └── check_type_ignore.py
 ├── docs/
 │   ├── coding_rules.md       # Copy from rules/coding_rules.md
@@ -86,7 +85,8 @@ project/
     - Copy `shared/` and `shared_tests/` into the new project root if you need the provided building blocks. The template dependency set already covers a full copy; trim unused shared modules and dependencies afterward if you do not need them.
    - Copy `rules/coding_rules.md` → `docs/coding_rules.md`
    - Copy `PHILOSOPHY.md` → `docs/PHILOSOPHY.md`
-   - Create symlink: `ln -s AGENTS.md CLAUDE.md`
+    - Create symlink: `ln -s AGENTS.md CLAUDE.md`
+    - Canonical local bootstrap artifact: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
 
 3. **Trim copied shared modules (if needed):**
    - Keep only the `shared/` and `shared_tests/` subdirectories you actually use
@@ -170,16 +170,14 @@ project/
     ```bash
     git init
     uv sync --all-extras --group dev
-   uv run pre-commit install
-   uv run poe lint_full
+    uv run poe lint_full
     uv run poe test
     ```
 
-   After setup, keep using project-local commands through `uv` rather than system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`.
+   After setup, keep using project-local commands through `uv` rather than system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`. The default verification flow is `uv run poe lint_full` followed by `uv run poe test`.
 
 7. **Verify everything works:**
-   - `uv run poe app` runs the application
-   - `uv run poe lint_full` passes with 0 errors
+   - `uv run poe lint_full` passes (basedpyright + Ruff check/format + custom linters)
    - `uv run poe test` passes
 
 ---
@@ -255,52 +253,9 @@ except asyncio.CancelledError:
 
 ---
 
-## Local Bootstrap Script
+## Local Bootstrap Artifact
 
-Write a local helper script if you want to automate the explicit promotion/copy step. Keep it in the repo or paste it into your shell history; do not describe this as a remote curl-piped bootstrap.
-
-```python
-# scripts/bootstrap.py
-"""Promote local templates into project files, then initialize the dev environment."""
-
-from pathlib import Path
-import shutil
-import subprocess
-
-
-def copy_tree(src: Path, dst: Path) -> None:
-    if src.exists() and not dst.exists():
-        shutil.copytree(src, dst)
-
-
-def copy_file(src: Path, dst: Path) -> None:
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
-
-
-def main() -> None:
-    source_root = Path("../coding_rules_python").resolve()
-    project_root = Path.cwd()
-
-    copy_tree(source_root / "shared", project_root / "shared")
-    copy_tree(source_root / "shared_tests", project_root / "shared_tests")
-    copy_file(source_root / "templates" / "AGENTS.md", project_root / "AGENTS.md")
-    copy_file(source_root / "templates" / "pyproject.toml", project_root / "pyproject.toml")
-    copy_file(source_root / "templates" / "pre-commit-config.yaml", project_root / ".pre-commit-config.yaml")
-    copy_file(source_root / "templates" / "gitignore", project_root / ".gitignore")
-    copy_file(source_root / "templates" / "vscode_settings.json", project_root / ".vscode" / "settings.json")
-    copy_file(source_root / "templates" / "vscode_extensions.json", project_root / ".vscode" / "extensions.json")
-    copy_file(source_root / "rules" / "coding_rules.md", project_root / "docs" / "coding_rules.md")
-    copy_file(source_root / "PHILOSOPHY.md", project_root / "docs" / "PHILOSOPHY.md")
-    (project_root / "CLAUDE.md").symlink_to("AGENTS.md")
-
-    subprocess.run(["uv", "sync", "--all-extras", "--group", "dev"], check=True)
-    subprocess.run(["uv", "run", "pre-commit", "install"], check=True)
-    print("Local bootstrap complete.")
-
-if __name__ == "__main__":
-    main()
-```
+Use `skills/setting-up-python-projects/bootstrap_downstream_repo.sh` as the canonical local bootstrap artifact. It is intentionally small and terminal-readable: promote template files into place, copy `shared/`, `shared_tests/`, and docs files, create `CLAUDE.md`, then run `uv sync --all-extras --group dev`, `uv run poe lint_full`, and `uv run poe test` in the downstream repo.
 
 ---
 

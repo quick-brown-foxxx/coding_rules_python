@@ -139,7 +139,7 @@ def setup_file_logging(
         root_logger.setLevel(level)
 
 
-def configure_logger_level(logger_name: str, level: int, propagate: bool = True) -> None:
+def configure_logger_level(logger_name: str, level: int, *, propagate: bool = True) -> None:
     """Configure a specific logger's level and propagation.
 
     Args:

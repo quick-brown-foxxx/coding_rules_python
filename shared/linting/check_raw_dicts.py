@@ -45,30 +45,29 @@ def _contains_raw_dict(node: ast.expr) -> bool:
     return False
 
 
-def _check_annotation(
+def _annotation_violation(
     path: Path,
     source_lines: list[str],
     annotation: ast.expr,
-    violations: list[str],
     message: str,
     seen_bare_ignore_lines: set[int],
-) -> None:
-    """Check a single annotation for raw dict usage, respecting ignore comments."""
+) -> str | None:
+    """Return a violation message for a raw dict annotation, if any."""
     if not _contains_raw_dict(annotation):
-        return
+        return None
 
     line_num = annotation.lineno
     source_line = source_lines[line_num - 1] if line_num <= len(source_lines) else ""
 
     if has_bare_ignore(source_line, CHECK_NAME):
         if line_num not in seen_bare_ignore_lines:
-            violations.append(report(path, line_num, CHECK_NAME, "lint-ignore requires rationale after ':'"))
             seen_bare_ignore_lines.add(line_num)
-        return
+            return report(path, line_num, CHECK_NAME, "lint-ignore requires rationale after ':'")
+        return None
     if is_ignored(source_line, CHECK_NAME):
-        return
+        return None
 
-    violations.append(report(path, line_num, CHECK_NAME, message))
+    return report(path, line_num, CHECK_NAME, message)
 
 
 def _check_function(
@@ -86,25 +85,27 @@ def _check_function(
             continue
         if arg.arg == kwarg_name:
             continue
-        _check_annotation(
+        violation = _annotation_violation(
             path,
             source_lines,
             arg.annotation,
-            violations,
             f"raw dict annotation in parameter '{arg.arg}' — use TypedDict or dataclass",
             seen_bare_ignore_lines,
         )
+        if violation is not None:
+            violations.append(violation)
 
     # Check return type
     if func.returns is not None:
-        _check_annotation(
+        violation = _annotation_violation(
             path,
             source_lines,
             func.returns,
-            violations,
             f"raw dict annotation in return type of '{func.name}' — use TypedDict or dataclass",
             seen_bare_ignore_lines,
         )
+        if violation is not None:
+            violations.append(violation)
 
 
 def check_file(path: Path) -> list[str]:
@@ -126,14 +127,15 @@ def check_file(path: Path) -> list[str]:
     for node in tree.body:
         # Module-level annotated assignment
         if isinstance(node, ast.AnnAssign) and node.annotation and not is_final_annotation(node.annotation):
-            _check_annotation(
+            violation = _annotation_violation(
                 path,
                 source_lines,
                 node.annotation,
-                violations,
                 "raw dict annotation at module level — use TypedDict or dataclass",
                 seen_bare_ignore_lines,
             )
+            if violation is not None:
+                violations.append(violation)
 
         # Functions at module level
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
@@ -147,14 +149,15 @@ def check_file(path: Path) -> list[str]:
                     and class_node.annotation
                     and not is_final_annotation(class_node.annotation)
                 ):
-                    _check_annotation(
+                    violation = _annotation_violation(
                         path,
                         source_lines,
                         class_node.annotation,
-                        violations,
                         "raw dict annotation in class attribute — use TypedDict or dataclass",
                         seen_bare_ignore_lines,
                     )
+                    if violation is not None:
+                        violations.append(violation)
                 if isinstance(class_node, ast.FunctionDef | ast.AsyncFunctionDef):
                     _check_function(class_node, path, source_lines, violations, seen_bare_ignore_lines)
 

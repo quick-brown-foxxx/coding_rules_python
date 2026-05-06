@@ -77,13 +77,14 @@ The `shared/` folder contains copy-paste building blocks for new projects, not a
 1. Read `PHILOSOPHY.md` for the mindset
 2. Decide: single script or full project? (see `writing-python-scripts` or `setting-up-python-projects` skills)
 3. Promote template files into place: `AGENTS.md`, `pyproject.toml`, `.pre-commit-config.yaml`, `.gitignore`, and `.vscode/`
+   Shortcut: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
 4. Copy `shared/` and `shared_tests/` into the new project root
 5. Copy `rules/coding_rules.md` (or `_short`) into `docs/` and copy `PHILOSOPHY.md` to `docs/PHILOSOPHY.md`
 6. Create `CLAUDE.md` symlink → `AGENTS.md` (Claude Code reads CLAUDE.md; the `@docs/PHILOSOPHY.md` import in AGENTS.md auto-loads philosophy into context)
 7. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
-8. Run `uv sync && uv run pre-commit install`
+8. Run `uv sync --all-extras --group dev`, then verify with `uv run poe lint_full` and `uv run poe test`
 
-From this point on, prefer project-local commands through `uv` rather than system-installed tools: `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run python`, `uv run pre-commit`.
+From this point on, prefer project-local commands through `uv` rather than system-installed tools: `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run python`, `uv run pre-commit`. In practice, the baseline verification flow is `uv run poe lint_full` (basedpyright + Ruff check/format + custom linters) followed by `uv run poe test`.
 
 ### For AI agents
 
@@ -91,7 +92,7 @@ Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-pyth
 
 ### Quick reference
 
-- **What tools?** uv, basedpyright (strict), ruff, pytest, poethepoet, msgspec
+- **What tools?** uv, basedpyright (strict), Ruff with the stricter profile (`PLR`, `FBT`, plus the core rules), pytest, poethepoet, msgspec
 - **How to run them?** Through `uv` (`uv run ...`), not global/system binaries.
 - **Error handling?** `Result[T, E]` from rusty-results. Rusty-results is nice for our use case and we will use it, but it is not maintained and may require replacement in future. Exceptions = bugs only.
 - **Data validation?** `msgspec.Struct` for external data (JSON, configs, APIs). Validates at decode time.

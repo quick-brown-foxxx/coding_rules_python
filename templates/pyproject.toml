@@ -119,6 +119,12 @@ ignore = [
 "tests/*" = ["S101", "PT018", "FBT001"]
 "shared_tests/*" = ["S101", "PT018"]
 "shared_tests/fixtures/*" = ["C408", "RUF012", "F841", "B018"]
+"shared_tests/test_linting/conftest.py" = ["S603"]
+"shared_tests/test_linting/test_check_frozen_dataclasses.py" = ["PLR2004"]
+"shared_tests/test_linting/test_check_module_mutables.py" = ["S603", "PLR2004"]
+"shared_tests/test_linting/test_check_object_annotations.py" = ["S603", "PLR2004"]
+"shared_tests/test_linting/test_check_raw_dicts.py" = ["S603", "PLR2004"]
+"shared_tests/test_linting/test_check_type_ignore.py" = ["S603", "PLR2004"]
 
 [tool.ruff.lint.pylint]
 max-args = 5

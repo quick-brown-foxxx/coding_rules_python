@@ -9,7 +9,7 @@ description: >
 
 All Python code follows the pit-of-success philosophy: strict types, Result-based error handling, modern tooling.
 
-Run project-local tools through `uv`, not system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`.
+Run project-local tools through `uv`, not system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`. The normal verification pair is `uv run poe lint_full` and `uv run poe test`.
 
 ---
 
@@ -495,7 +495,7 @@ Use when generating text output (HTML, configs, reports, markdown):
 |------|---------|
 | `uv` | Package management, script execution |
 | `basedpyright` | Type checking (strict) |
-| `ruff` | Lint + format |
+| `ruff` | Strict lint + format |
 | `pytest` | Testing |
 | `rusty-results` | Result[T, E] pattern |
 | `typer` | CLI framework (preferred) — always configure `-h` support (see below) |
@@ -511,7 +511,7 @@ Use when generating text output (HTML, configs, reports, markdown):
 app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]})
 ```
 
-**Run `uv run poe lint_full` continuously**, not just at the end.
+**Run `uv run poe lint_full` continuously**, not just at the end. Treat it as the main sweep for basedpyright, Ruff check/format, and custom linters; pair it with `uv run poe test` for verification.
 
 ---
 
@@ -521,4 +521,4 @@ Commit format: `<type>(<scope>): <subject>`
 
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
 
-Pre-commit: `uv run poe lint_full` passes, tests pass, public APIs have docstrings.
+Pre-commit: `uv run poe lint_full` passes, `uv run poe test` passes, public APIs have docstrings.
