@@ -239,15 +239,18 @@ Errors are values, not exceptions. Use `Result[T, E]` from `rusty-results` for e
 ### Pattern
 
 ```python
+import msgspec
 from rusty_results import Result, Ok, Err
+
+class Config(msgspec.Struct):
+    name: str
 
 def load_config(path: Path) -> Result[Config, str]:
     if not path.exists():
         return Err(f"Config not found: {path}")
     try:
-        data = json.loads(path.read_text())
-        return Ok(Config(**data))
-    except (json.JSONDecodeError, OSError) as e:
+        return Ok(msgspec.json.decode(path.read_bytes(), type=Config))
+    except (msgspec.DecodeError, OSError) as e:
         return Err(f"Failed to load: {e}")
 ```
 

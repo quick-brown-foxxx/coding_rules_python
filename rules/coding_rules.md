@@ -170,15 +170,18 @@ def delete_profile(profile_id: ProfileId) -> Result[None, str]: ...
 Use `rusty-results` library. Rusty-results is nice for our use case and we will use it, but it is not maintained and may require replacement in future. Errors are return values, not exceptions.
 
 ```python
+import msgspec
 from rusty_results import Result, Ok, Err
+
+class Config(msgspec.Struct):
+    name: str
 
 def load_config(path: Path) -> Result[Config, str]:
     if not path.exists():
         return Err(f"Config not found: {path}")
     try:
-        data = json.loads(path.read_text())
-        return Ok(Config(**data))
-    except (json.JSONDecodeError, OSError) as e:
+        return Ok(msgspec.json.decode(path.read_bytes(), type=Config))
+    except (msgspec.DecodeError, OSError) as e:
         return Err(f"Failed to load config: {e}")
 ```
 
