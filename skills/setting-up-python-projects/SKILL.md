@@ -159,15 +159,23 @@ project/
 
 5. **Create initial test:**
    ```python
-   # tests/test_main.py
-   from APPNAME.__main__ import main
+    # tests/test_main.py
+    from __future__ import annotations
 
-   def test_main_runs(capsys: pytest.CaptureFixture[str]) -> None:
-       assert main() == 0
-   ```
+    import sys
+
+    import pytest
+
+    from APPNAME.__main__ import main
+
+    def test_main_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(sys, "argv", ["APPNAME"])
+        assert main() == 0
+    ```
+   When testing entrypoints that read `sys.argv`, set the arguments explicitly with `monkeypatch` so the test does not depend on pytest's own command-line arguments.
 
 6. **Initialize environment:**
-    ```bash
+     ```bash
     git init
     uv sync --all-extras --group dev
     uv run poe lint_full
