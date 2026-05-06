@@ -34,9 +34,11 @@
 - `architecting-python-changes` — ALWAYS load when planning a new feature, non-trivial fix, or refactor that may affect structure, layering, wrappers, or library choice, or when deciding where code should live. NEVER make architecture decisions blindly.
 - `writing-python-code` — ALWAYS load when writing/editing Python. NEVER write Python without this.
 - `testing-python` — ALWAYS load when writing tests or fixtures. NEVER write pytest tests without this.
-- `setting-up-python-projects` — ALWAYS load when bootstrapping a new package. NEVER set up pyproject.toml manually.
+- `setting-up-python-projects` — ALWAYS load when bootstrapping a new general package or app. NEVER set up pyproject.toml manually.
+- `setting-up-python-backends` — ALWAYS load when bootstrapping a backend, API service, or worker-oriented repo. Start here for service repos, then borrow generic bootstrap pieces from `setting-up-python-projects` as needed. NEVER scaffold Python backends blindly.
 - `writing-python-scripts` — ALWAYS load when creating standalone scripts. NEVER write single-file CLI tools without this.
 - `setting-up-logging` — DO load when adding or changing logging. DON'T configure logging manually.
+- `building-python-backends` — DO load when shaping backend/service/API/workers architecture. DON'T mix transport, domain, and infrastructure blindly.
 - `building-multi-ui-apps` — DO load when app has both CLI and/or GUI and/or API sharing logic. DON'T duplicate business logic across interfaces.
 
 </EXTREMELY_IMPORTANT>
@@ -102,7 +104,7 @@ def load_item(item_id: str) -> Result[Item, str]:
 ### Type Safety
 
 - Strict mode. No `Any`. No `typing.cast()`.
-- `msgspec.Struct` for external data (JSON, configs, APIs). `dataclass` for domain objects.
+- `msgspec.Struct` for configs and non-framework external data. In FastAPI apps, `pydantic` DTOs should live at the HTTP edge only and must be converted immediately into framework-free typed structures. `dataclass` for domain objects.
 - Wrap untyped third-party libraries with typed interfaces.
 
 ### Async
@@ -118,16 +120,16 @@ def load_item(item_id: str) -> Result[Item, str]:
 <!-- TODO: Update with project-specific architecture -->
 
 ```
-Presentation (UI / CLI)
+Presentation / Adapters (UI / CLI / API / workers)
         |
         v
-Domain (Business Logic, Models)
+Domain / Application (Business Logic, Models, Use Cases)
         |
         v
-Utilities (Helpers, Wrappers)
+Infrastructure / Utilities (DB, clients, wrappers, helpers)
 ```
 
-Dependencies flow downward only. UI never imported by lower layers.
+Dependencies flow downward only. Presentation never imported by lower layers. Backend projects usually make the infrastructure layer explicit.
 
 ---
 
@@ -139,7 +141,7 @@ Dependencies flow downward only. UI never imported by lower layers.
 | ----------------------------------------- | ----------------------------------------- |
 | Type check + Ruff + custom linters        | `uv run poe lint_full`                    |
 | Run tests                                 | `uv run poe test`                         |
-| Run application                           | `uv run poe app`                          |
+| Run primary app or service                | `TODO_PROJECT_RUN_COMMAND`                |
 | Pre-commit verification                   | `uv run poe lint_full && uv run poe test` |
 
 ---

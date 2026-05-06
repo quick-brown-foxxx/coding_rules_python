@@ -74,6 +74,8 @@ config = msgspec.convert(raw_dict, type=UserConfig)
 
 `TypedDict` is still valid when dict compatibility is needed (e.g., `**unpacking`, APIs expecting dicts).
 
+**FastAPI HTTP edge** → `pydantic` DTOs are used at the transport boundary. Convert them immediately into framework-free typed structures and do not let framework models become domain models.
+
 **Domain objects** → `dataclass`:
 
 ```python

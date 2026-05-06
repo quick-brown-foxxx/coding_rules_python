@@ -1,15 +1,15 @@
 ---
 name: setting-up-python-projects
 description: >-
-  ALWAYS LOAD THIS SKILL WHEN CREATING A BRAND-NEW PYTHON PROJECT, BOOTSTRAPPING A REPO, OR CHOOSING ITS INITIAL PROJECT SHAPE. Do not scaffold or bootstrap Python projects directly — use this skill first.
-  Bootstrap new Python projects: choose project shape, directory structure, framework/scaffolding level, pyproject.toml, pre-commit, uv sync.
+  ALWAYS LOAD THIS SKILL WHEN CREATING A BRAND-NEW GENERAL-PURPOSE PYTHON PACKAGE OR APP, BOOTSTRAPPING A NON-BACKEND REPO, OR CHOOSING ITS INITIAL NON-SCRIPT, NON-SERVICE PROJECT SHAPE. Do not scaffold general Python projects directly — use this skill first.
+  Bootstrap general Python projects: choose project shape, directory structure, framework/scaffolding level, pyproject.toml, pre-commit, uv sync.
 ---
 
 # Setting Up Python Projects
 
 New projects start with the full safety net configured. The bootstrap flow is local and explicit: promote the template files into their final locations, copy `shared/` and `shared_tests/`, copy the docs references into `docs/`, then customize.
 
-For architecture reshapes inside an existing project, start with `architecting-python-changes` first. Come here when the answer is really about bootstrap, repo shape, or initial scaffolding.
+For standalone scripts, use `writing-python-scripts`. For backend/service repos, start with `setting-up-python-backends`. For architecture reshapes inside an existing project, start with `architecting-python-changes` first. Come here when the answer is really about bootstrap, repo shape, or initial scaffolding for a general Python project.
 
 Make sure to read repo's readme.
 
@@ -25,7 +25,7 @@ Choose structure based on expected change axes and future callers, not aesthetic
 | Reusable library or composable tool | Build a package around a clean core API, then add a thin CLI only if needed |
 | CLI app | `src/` package with `core/`, `cli/`, `utils/`, and `wrappers/` as needed |
 | Multi-interface app | Shared domain layer plus separate presentation adapters and one composition root |
-| Backend/service | Thin transport layer plus separate domain/services and infrastructure boundaries |
+| Backend/service | Start with `setting-up-python-backends` for service-specific defaults, then keep thin transport plus separate domain/services and infrastructure boundaries |
 
 ---
 
@@ -263,7 +263,7 @@ After scaffolding, **adapt everything to the specific project**. The templates a
 
 | Area | How to adapt |
 |------|--------------|
-| **Directory layout** | Add/remove/rename directories to match the domain. Not every project needs `cli/`, `ui/`, `wrappers/`, `shared/`. A data pipeline might need `pipelines/`, `schemas/`, `extractors/`. A web service might need `routes/`, `middleware/`, `repositories/`. |
+| **Directory layout** | Add/remove/rename directories to match the domain. Not every project needs `cli/`, `ui/`, `wrappers/`, `shared/`. A data pipeline might need `pipelines/`, `schemas/`, `extractors/`. A web service might need `routes/`, `middleware/`, and explicit infrastructure/client modules. |
 | **Dependencies** | Add domain-specific libraries. Remove unused template defaults. Research current best-in-class libraries for the domain (e.g. SQLAlchemy vs raw asyncpg, Pydantic vs attrs). |
 | **pyproject.toml** | Adjust ruff rules, pytest markers, plugins, and narrowly-justified overrides for ecosystem gaps. Do not relax strict typing by default; document every real exception. |
 | **AGENTS.md** | Fill TODO sections with project-specific architecture, key decisions, domain vocabulary, and workflows. This is the agent's primary orientation document — make it specific. **Skills section:** remove skills the project won't use (e.g. `building-multi-ui-apps` for a pure CLI), add domain-specific skills (e.g. `building-qt-apps`, `setting-up-shortcuts`). |

@@ -23,7 +23,7 @@ Everything should be known before runtime. We always know what types and values 
 
 - **Strict type checking is non-negotiable.** basedpyright in strict mode, `reportAny=error`. No `Any`, no `typing.cast()`, no unvalidated `# type: ignore`.
 - **Errors are values, not exceptions.** Use `Result[T, E]` for expected failures. Exceptions are reserved for programming errors (impossible states, invariant violations) — they mean "this is a bug."
-- **Data has shape.** Use `msgspec.Struct` for external data (JSON, configs, APIs) — defines shape and validates at decode time. Use `dataclass` for domain objects. `TypedDict` only when dict compatibility is required. Never pass raw `dict` through business logic.
+- **Data has shape.** Use `msgspec.Struct` for external data such as JSON payloads, configs, and non-framework boundaries — defines shape and validates at decode time. In FastAPI apps, `pydantic` models are used at the HTTP boundary; convert immediately into framework-free typed structures. Use `dataclass` for domain objects. `TypedDict` only when dict compatibility is required. Never pass raw `dict` through business logic.
 - **Dynamic boundaries get wrapped.** Third-party libraries with weak typing get typed wrappers. Untyped data from outside (user input, network, files) gets validated and narrowed immediately at the boundary.
 
 The goal: if the type checker says it's correct, it runs correctly. If something can fail, the type signature says so.

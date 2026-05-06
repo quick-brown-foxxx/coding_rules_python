@@ -10,7 +10,7 @@ For single-file scripts and small projects. See [full version](https://github.co
 - Type annotations on all functions
 - No `Any`, no `typing.cast()`, no blanket `# type: ignore`
 - `object` restricted to boundary positions (TypeIs guards, signal handlers, coroutine params)
-- `msgspec.Struct` for external data (JSON, configs, APIs), `dataclass(frozen=True)` for domain objects
+- `msgspec.Struct` for external data (JSON, configs, non-framework boundaries). In FastAPI apps, `pydantic` DTOs should live at the HTTP edge only and must be converted immediately into framework-free typed structures. `dataclass(frozen=True)` for domain objects
 - `NewType` for domain identifiers (ProfileId, UserId) — prevent mixing
 - Immutable by default: `frozen=True`, `tuple` over `list`, `Sequence` in params
 - Max 5 function parameters; no boolean flag params

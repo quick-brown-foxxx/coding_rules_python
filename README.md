@@ -48,7 +48,7 @@ The `shared/` folder contains copy-paste building blocks for new projects, not a
 ### Starting a new project
 
 1. Read `PHILOSOPHY.md` for the mindset
-2. Decide: single script or full project? (see `writing-python-scripts` or `setting-up-python-projects` skills)
+2. Decide: single script, general Python project, or backend/service repo? (use `writing-python-scripts` for scripts, `setting-up-python-projects` for general packages/apps, and `setting-up-python-backends` for service/API repos)
 3. Promote template files into place: `AGENTS.md`, `pyproject.toml`, `.pre-commit-config.yaml`, `.gitignore`, and `.vscode/`
    Shortcut: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
 4. Copy `shared/` and `shared_tests/` into the new project root
@@ -61,14 +61,14 @@ From this point on, prefer project-local commands through `uv` rather than syste
 
 ### For AI agents
 
-Deploy skills from `skills/` to `~/.claude/skills/`. Load `architecting-python-changes` when a feature, fix, or refactor may require architecture decisions, then follow it to the right existing docs and domain skills. Load `writing-python-code` for the actual Python editing rules.
+Deploy skills from `skills/` to `~/.claude/skills/`. Load `architecting-python-changes` when a feature, fix, or refactor may require architecture decisions, then follow it to the right existing docs and domain skills. For new backend repos, start with `setting-up-python-backends`, then use `setting-up-python-projects` for generic bootstrap pieces as needed. Load `building-python-backends` for backend structure decisions and `writing-python-code` for the actual Python editing rules.
 
 ### Quick reference
 
 - **What tools?** uv, basedpyright (strict), Ruff with strict profile, pytest, poethepoet, msgspec
 - **How to run them?** Through `uv` (`uv run ...`), not global/system binaries.
 - **Error handling?** `Result[T, E]` from rusty-results. Rusty-results is nice for our use case and we will use it, but it is not maintained and may require replacement in future. Exceptions = bugs only.
-- **Data validation?** `msgspec.Struct` for external data (JSON, configs, APIs). Validates at decode time.
+- **Data validation?** `msgspec.Struct` for configs and non-framework external data. In FastAPI apps, use `pydantic` at the HTTP edge and convert immediately into framework-free typed structures.
 - **CLI?** typer (argparse only for stdlib-only scripts)
 - **GUI?** PySide6 + qasync (not QtAsyncio — still in technical preview)
 - **Text output?** Jinja2

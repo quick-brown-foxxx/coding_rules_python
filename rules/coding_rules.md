@@ -40,7 +40,7 @@ Everywhere else, replace `object` with the actual type: `Protocol` for duck typi
 
 ### 1.4 Type Patterns
 
-**External data (JSON, configs, APIs)** → `msgspec.Struct`:
+**External data (JSON, configs, non-framework boundaries)** → `msgspec.Struct`:
 
 ```python
 import msgspec
@@ -58,6 +58,8 @@ config = msgspec.convert(raw_dict, type=UserConfig)
 ```
 
 `TypedDict` is still valid when you need dict compatibility (e.g., `**unpacking`, APIs expecting dicts).
+
+In FastAPI apps, `pydantic` request/response DTOs are used at the HTTP boundary. Convert them immediately into framework-free typed structures and keep them out of domain services.
 
 **Domain objects:**
 
