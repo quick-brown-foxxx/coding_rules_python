@@ -1,6 +1,6 @@
 """Check that type-ignore directives have an error code and rationale.
 
-Usage: python -m reusable.linting.check_type_ignore [file1.py file2.py ...]
+Usage: python -m shared.linting.check_type_ignore [file1.py file2.py ...]
 If no files given, scans current directory recursively.
 
 Ignore with: # lint-ignore[type-ignore-rationale]: <rationale>
@@ -12,7 +12,7 @@ import re
 import sys
 from pathlib import Path
 
-from reusable.linting.lint_utils import (
+from shared.linting.lint_utils import (
     collect_files,
     has_bare_ignore,
     is_ignored,

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from reusable.linting.lint_utils import (
+from shared.linting.lint_utils import (
     collect_files,
     has_bare_ignore,
     is_final_annotation,

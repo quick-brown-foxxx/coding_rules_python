@@ -7,11 +7,11 @@ description: >
 
 # Setting Up Keyboard Shortcuts
 
-Reusable keyboard shortcuts system for PySide6 applications. Provides platform-specific defaults, TOML configuration, and Qt integration.
+Shared keyboard shortcuts system for PySide6 applications. Provides platform-specific defaults, TOML configuration, and Qt integration.
 
-Copy reusable code from `coding_rules_python/reusable/shortcuts/` and tests from `coding_rules_python/reusable_tests/`.
+Copy `shared/shortcuts/` and the matching tests from `shared_tests/`.
 
-See also: `reusable/shortcuts/README.md` for full API reference.
+See also: `shared/shortcuts/README.md` for full API reference.
 
 ---
 
@@ -137,26 +137,26 @@ dependencies = [
 
 ## Files to Copy
 
-From `coding_rules_python/reusable/`:
+From `shared/`:
 - `shortcuts/__init__.py` — public API exports
 - `shortcuts/shortcuts.py` — `ActionShortcut`, `ShortcutConfig`, `ShortcutManager`
 - `shortcuts/README.md` — full API reference
 
-From `coding_rules_python/reusable_tests/` → copy into your `tests/`:
+From `shared_tests/`:
 - `test_shortcuts_base.py` — generic tests for `ActionShortcut`, `ShortcutConfig`, validation
 - `test_shortcuts_manager.py` — generic tests for `ShortcutManager`
 
-Update import paths after copying (e.g., `reusable.shortcuts` → `shared.shortcuts`, `reusable.shortcuts.shortcuts` → `shared.shortcuts.shortcuts` in monkeypatch paths).
+Keep the generic tests in top-level `shared_tests/`. App-specific tests can import from there.
 
 ---
 
 ## Testing
 
-The reusable tests cover all generic behavior. For app-specific tests:
+The shared tests cover generic behavior. For app-specific tests:
 
 ```python
 # tests/test_my_shortcuts.py
-from reusable_tests.test_shortcuts_base import (
+from shared_tests.test_shortcuts_base import (
     TestActionShortcut,
     TestShortcutConfig,
     TestShortcutConfigSave,

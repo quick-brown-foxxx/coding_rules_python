@@ -6,10 +6,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from reusable.linting.check_raw_dicts import check_file
-from reusable_tests.test_linting.conftest import RunLinter
+from shared.linting.check_raw_dicts import check_file
+from shared_tests.test_linting.conftest import RunLinter
 
-MODULE = "reusable.linting.check_raw_dicts"
+MODULE = "shared.linting.check_raw_dicts"
 
 
 class TestRawDicts:
@@ -20,8 +20,8 @@ class TestRawDicts:
                 sys.executable,
                 "-m",
                 MODULE,
-                str(repo_root / "reusable" / "shortcuts" / "shortcuts.py"),
-                str(repo_root / "reusable_tests" / "test_shortcuts_base.py"),
+                str(repo_root / "shared" / "shortcuts" / "shortcuts.py"),
+                str(repo_root / "shared_tests" / "test_shortcuts_base.py"),
             ],
             capture_output=True,
             text=True,

@@ -11,7 +11,7 @@ PHILOSOPHY.md          Core beliefs — every other doc inherits from this
 pyproject.toml         Project config (deps, tooling)
 uv.lock                Locked dependency versions
 
-reusable/              Copy-paste reusable code (shadcn-ui style)
+shared/                Copy-paste reusable code for new projects
   logging/               Logging setup + colored non-log output
   shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
   linting/               Custom lint checks (AST-based)
@@ -22,7 +22,7 @@ reusable/              Copy-paste reusable code (shadcn-ui style)
     check_type_ignore.py         Require rationale on type:ignore comments
     check_raw_dicts.py           Ban raw dict annotations in business code
 
-reusable_tests/        Tests for reusable/ code
+shared_tests/          Tests for shared/ code
   test_shortcuts_base.py   Generic shortcut config tests
   test_shortcuts_manager.py  ShortcutManager tests
   test_linting/            Tests for custom lint checks
@@ -68,17 +68,17 @@ Note: `skills` updates detection has bugs, more reliable is to do force add from
 
 `npx -y skills add quick-brown-foxxx/coding_rules_python -s "*" -a claude-code universal kilo codex opencode -y`
 
-### Reusable code (shadcn-ui style)
+### Shared building blocks
 
-The `reusable/` folder contains copy-paste components — not an installable library. Copy what you need into your project's `shared/` directory and update import paths. Each module is self-contained and documented.
+The `shared/` folder contains copy-paste building blocks for new projects, not an installable library. Copy the directories you need into the new repo's top-level `shared/` and `shared_tests/` directories and update imports if the package name changes. The template `pyproject.toml` includes the dependencies needed for a full `shared/` + `shared_tests/` copy; trim unused modules and deps afterward if you do not need them.
 
 ### Starting a new project
 
 1. Read `PHILOSOPHY.md` for the mindset
 2. Decide: single script or full project? (see `writing-python-scripts` or `setting-up-python-projects` skills)
-3. Copy relevant files from `templates/` into your project
-4. Copy `rules/coding_rules.md` (or `_short`) into `docs/`
-5. Copy `PHILOSOPHY.md` into `docs/` (referenced by AGENTS.md)
+3. Promote template files into place: `AGENTS.md`, `pyproject.toml`, `.pre-commit-config.yaml`, `.gitignore`, and `.vscode/`
+4. Copy `shared/` and `shared_tests/` into the new project root
+5. Copy `rules/coding_rules.md` (or `_short`) into `docs/` and copy `PHILOSOPHY.md` to `docs/PHILOSOPHY.md`
 6. Create `CLAUDE.md` symlink → `AGENTS.md` (Claude Code reads CLAUDE.md; the `@docs/PHILOSOPHY.md` import in AGENTS.md auto-loads philosophy into context)
 7. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
 8. Run `uv sync && uv run pre-commit install`

@@ -6,9 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from reusable_tests.test_linting.conftest import RunLinter
+from shared_tests.test_linting.conftest import RunLinter
 
-MODULE = "reusable.linting.check_type_ignore"
+MODULE = "shared.linting.check_type_ignore"
 
 
 class TestTypeIgnore:
@@ -19,8 +19,8 @@ class TestTypeIgnore:
                 sys.executable,
                 "-m",
                 MODULE,
-                str(repo_root / "reusable_tests" / "test_linting" / "test_check_type_ignore.py"),
-                str(repo_root / "reusable_tests" / "test_linting" / "test_lint_utils.py"),
+                str(repo_root / "shared_tests" / "test_linting" / "test_check_type_ignore.py"),
+                str(repo_root / "shared_tests" / "test_linting" / "test_lint_utils.py"),
             ],
             capture_output=True,
             text=True,

@@ -1,6 +1,6 @@
 """Generic keyboard shortcuts manager for PySide6 apps.
 
-This module provides a reusable shortcuts configuration system that can be
+This module provides a shared shortcuts configuration system that can be
 copied to any PySide6 application.
 
 Usage in your app:

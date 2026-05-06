@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from reusable.logging.logger_setup import setup_file_logging, setup_stdout_logging
+from shared.logging.logger_setup import setup_file_logging, setup_stdout_logging
 
 
 @pytest.fixture
 def isolated_root_logger() -> Iterator[None]:
-    """Temporarily isolate root logger handlers for reusable logging tests."""
+    """Temporarily isolate root logger handlers for shared logging tests."""
     root_logger = logging.getLogger()
     original_handlers = root_logger.handlers.copy()
     original_level = root_logger.level

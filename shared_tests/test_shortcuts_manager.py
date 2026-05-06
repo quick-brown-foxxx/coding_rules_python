@@ -1,6 +1,6 @@
 """Generic tests for ShortcutManager class.
 
-This module provides platform-independent, reusable tests for the ShortcutManager
+This module provides platform-independent, shared tests for the ShortcutManager
 class that can be used across multiple applications.
 
 These tests are generic because ShortcutManager itself is generic - it just takes
@@ -15,7 +15,7 @@ from typing import Final
 
 import pytest
 
-from reusable.shortcuts.shortcuts import ActionShortcut, ShortcutManager
+from shared.shortcuts.shortcuts import ActionShortcut, ShortcutManager
 
 # Define dummy shortcuts for testing - these are generic and not app-specific
 DUMMY_SHORTCUTS: Final = (

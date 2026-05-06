@@ -1,6 +1,6 @@
 """Generic keyboard shortcuts manager for PySide6 apps.
 
-This is a reusable shortcuts manager that can be copied to any PySide6 application.
+This is a shared shortcuts manager that can be copied to any PySide6 application.
 It provides platform-specific default shortcuts and the ability to load custom
 shortcuts from a TOML configuration file.
 

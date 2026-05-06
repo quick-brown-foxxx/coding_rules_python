@@ -9,7 +9,7 @@ description: >
 
 Rotating file logging, colored stdout logging, and colored non-log output. Uses `colorlog` for prefix-only coloring (log prefix is colored, message text stays default).
 
-Copy reusable code from `coding_rules_python/reusable/logging/`.
+Copy `shared/logging/`.
 
 ---
 
@@ -128,13 +128,13 @@ dependencies = [
 
 ## Files to Copy
 
-Copy the entire `coding_rules_python/reusable/logging/` directory into your project's `shared/logging/`:
+Use the top-level `shared/logging/` directory in the new project:
 - `__init__.py` — public API re-exports
 - `logger_setup.py` — `setup_stdout_logging()`, `setup_file_logging()`, `configure_logger_level()`
 - `non_log_stdout_output.py` — `write_info()`, `write_success()`, `write_warning()`, `write_error()`
 - `README.md` — references this skill
 
-Update import paths after copying (e.g., `from shared.logging import ...`).
+Import from it directly: `from shared.logging import ...`.
 
 ---
 

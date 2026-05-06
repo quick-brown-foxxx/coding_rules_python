@@ -6,10 +6,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from reusable.linting.check_module_mutables import check_file
-from reusable_tests.test_linting.conftest import RunLinter
+from shared.linting.check_module_mutables import check_file
+from shared_tests.test_linting.conftest import RunLinter
 
-MODULE = "reusable.linting.check_module_mutables"
+MODULE = "shared.linting.check_module_mutables"
 
 
 class TestModuleMutables:
@@ -20,7 +20,7 @@ class TestModuleMutables:
                 sys.executable,
                 "-m",
                 MODULE,
-                str(repo_root / "reusable" / "logging" / "non_log_stdout_output.py"),
+                str(repo_root / "shared" / "logging" / "non_log_stdout_output.py"),
             ],
             capture_output=True,
             text=True,

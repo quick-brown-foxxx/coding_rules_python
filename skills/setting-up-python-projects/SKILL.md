@@ -7,7 +7,7 @@ description: >
 
 # Setting Up Python Projects
 
-New projects start with the full safety net configured. Templates are in the repo: <https://github.com/quick-brown-foxxx/coding_rules_python/tree/master/templates>`.
+New projects start with the full safety net configured. The bootstrap flow is local and explicit: promote the template files into their final locations, copy `shared/` and `shared_tests/`, copy the docs references into `docs/`, then customize.
 
 Make sure to read repo's readme.
 
@@ -50,9 +50,12 @@ project/
 ├── docs/
 │   ├── coding_rules.md       # Copy from rules/coding_rules.md
 │   └── PHILOSOPHY.md          # Copy from PHILOSOPHY.md
-├── shared/                   # Cross-cutting (copy from coding_rules_python/reusable/)
+├── shared/                   # Cross-cutting shared code copied from this repo
 │   ├── logging/              # Logging + colored output (if needed)
 │   └── shortcuts/            # Keyboard shortcuts (if PySide6 app)
+├── shared_tests/             # Generic tests for copied shared modules
+│   ├── test_shortcuts_base.py
+│   └── test_shortcuts_manager.py
 ├── AGENTS.md                 # Copy from templates/AGENTS.md, customize
 ├── CLAUDE.md                 # Symlink → AGENTS.md
 ├── pyproject.toml            # Copy from templates/pyproject.toml, customize
@@ -72,23 +75,25 @@ project/
    mkdir -p src/APPNAME tests/unit tests/integration tests/fixtures scripts docs .vscode
    ```
 
-2. **Copy template and reference files:**
-   - `templates/pyproject.toml` → `pyproject.toml` (update `[project]` section)
-   - `templates/AGENTS.md` → `AGENTS.md` (fill TODO sections)
-   - `templates/pre-commit-config.yaml` → `.pre-commit-config.yaml`
-   - `templates/gitignore` → `.gitignore`
-   - `templates/vscode_settings.json` → `.vscode/settings.json`
-   - `templates/vscode_extensions.json` → `.vscode/extensions.json`
-   - `rules/coding_rules.md` → `docs/coding_rules.md`
-   - `PHILOSOPHY.md` → `docs/PHILOSOPHY.md`
+2. **Copy baseline files and directories:**
+   - Promote template files into the new project:
+     - `templates/pyproject.toml` → `pyproject.toml` (update `[project]` section)
+     - `templates/AGENTS.md` → `AGENTS.md` (fill TODO sections)
+     - `templates/pre-commit-config.yaml` → `.pre-commit-config.yaml`
+     - `templates/gitignore` → `.gitignore`
+     - `templates/vscode_settings.json` → `.vscode/settings.json`
+     - `templates/vscode_extensions.json` → `.vscode/extensions.json`
+    - Copy `shared/` and `shared_tests/` into the new project root if you need the provided building blocks. The template dependency set already covers a full copy; trim unused shared modules and dependencies afterward if you do not need them.
+   - Copy `rules/coding_rules.md` → `docs/coding_rules.md`
+   - Copy `PHILOSOPHY.md` → `docs/PHILOSOPHY.md`
    - Create symlink: `ln -s AGENTS.md CLAUDE.md`
 
-3. **Copy reusable code (if needed):**
-   - From `coding_rules_python/reusable/` copy modules you need into `shared/`
-   - `logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging` skill)
-   - `shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts` skill)
-   - Also copy matching tests from `coding_rules_python/reusable_tests/` into your `tests/` (e.g., `test_shortcuts_base.py`, `test_shortcuts_manager.py`)
-   - Update import paths after copying (`reusable.` → `shared.` or your package path, `reusable_tests.` → your test package)
+3. **Trim copied shared modules (if needed):**
+   - Keep only the `shared/` and `shared_tests/` subdirectories you actually use
+   - `shared/logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging` skill)
+   - `shared/shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts` skill)
+   - Keep matching generic tests in `shared_tests/` beside the copied shared modules
+   - Update import paths after copying if the project package name changes
 
 4. **Create entry points:**
    ```python
@@ -250,17 +255,48 @@ except asyncio.CancelledError:
 
 ---
 
-## Bootstrap Script
+## Local Bootstrap Script
+
+Write a local helper script if you want to automate the explicit promotion/copy step. Keep it in the repo or paste it into your shell history; do not describe this as a remote curl-piped bootstrap.
 
 ```python
 # scripts/bootstrap.py
-"""Set up development environment."""
+"""Promote local templates into project files, then initialize the dev environment."""
+
+from pathlib import Path
+import shutil
 import subprocess
 
+
+def copy_tree(src: Path, dst: Path) -> None:
+    if src.exists() and not dst.exists():
+        shutil.copytree(src, dst)
+
+
+def copy_file(src: Path, dst: Path) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+
+
 def main() -> None:
+    source_root = Path("../coding_rules_python").resolve()
+    project_root = Path.cwd()
+
+    copy_tree(source_root / "shared", project_root / "shared")
+    copy_tree(source_root / "shared_tests", project_root / "shared_tests")
+    copy_file(source_root / "templates" / "AGENTS.md", project_root / "AGENTS.md")
+    copy_file(source_root / "templates" / "pyproject.toml", project_root / "pyproject.toml")
+    copy_file(source_root / "templates" / "pre-commit-config.yaml", project_root / ".pre-commit-config.yaml")
+    copy_file(source_root / "templates" / "gitignore", project_root / ".gitignore")
+    copy_file(source_root / "templates" / "vscode_settings.json", project_root / ".vscode" / "settings.json")
+    copy_file(source_root / "templates" / "vscode_extensions.json", project_root / ".vscode" / "extensions.json")
+    copy_file(source_root / "rules" / "coding_rules.md", project_root / "docs" / "coding_rules.md")
+    copy_file(source_root / "PHILOSOPHY.md", project_root / "docs" / "PHILOSOPHY.md")
+    (project_root / "CLAUDE.md").symlink_to("AGENTS.md")
+
     subprocess.run(["uv", "sync", "--all-extras", "--group", "dev"], check=True)
     subprocess.run(["uv", "run", "pre-commit", "install"], check=True)
-    print("Development environment ready.")
+    print("Local bootstrap complete.")
 
 if __name__ == "__main__":
     main()

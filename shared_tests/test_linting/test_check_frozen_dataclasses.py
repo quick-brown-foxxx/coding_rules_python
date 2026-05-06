@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from reusable_tests.test_linting.conftest import RunLinter
+from shared_tests.test_linting.conftest import RunLinter
 
-MODULE = "reusable.linting.check_frozen_dataclasses"
+MODULE = "shared.linting.check_frozen_dataclasses"
 
 
 class TestFrozenDataclasses:

@@ -16,20 +16,23 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types: [python]
-        files: ^(reusable|reusable_tests)/
+        files: ^(shared|shared_tests)/
+        exclude: ^shared_tests/fixtures/
 
       - id: ruff-format
         name: ruff-format
         entry: uv run ruff format
         language: system
         types: [python]
-        files: ^(reusable|reusable_tests)/
+        files: ^(shared|shared_tests)/
+        exclude: ^shared_tests/fixtures/
 
       - id: basedpyright
         name: basedpyright
         entry: uv run basedpyright
         language: system
         types: [python]
-        files: ^(reusable|reusable_tests)/
+        files: ^(shared|shared_tests)/
+        exclude: ^shared_tests/fixtures/
         pass_filenames: true
         stages: [pre-commit]

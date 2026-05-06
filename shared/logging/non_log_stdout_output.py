@@ -1,6 +1,6 @@
 """Colored stdout output helpers for CLI and scripts.
 
-Provides simple, reusable functions for printing colored messages to stdout/stderr
+Provides simple, shared functions for printing colored messages to stdout/stderr
 that are NOT logs. Useful for scripts and CLI tools.
 
 Usage:

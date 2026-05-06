@@ -15,11 +15,12 @@ requires-python = ">=3.14"
 dependencies = [
     "rusty-results>=1.1.1",      # Result pattern for error handling
     "colorlog>=6.10.1",          # Colored logging
+    "pyside6>=6.10.1",           # Needed by shared/shortcuts full-copy bootstrap
+    "tomli-w>=1.2.0",            # Needed by shared/shortcuts full-copy bootstrap
     # "httpx>=0.28.1",           # Async HTTP client (uncomment if needed)
     # "python-dotenv>=1.0.1",    # Env vars from .env (uncomment if needed)
     # "msgspec>=0.19.0",         # Struct validation + fast JSON (uncomment if needed)
     # "typer>=0.12.0",           # CLI framework (uncomment if needed)
-    # "pyside6>=6.10.1",         # Qt GUI (uncomment if needed)
     # "qasync>=0.28.0",          # Qt + asyncio (uncomment if needed)
 ]
 
@@ -64,6 +65,7 @@ reportImportCycles = "error"
 reportImplicitStringConcatenation = "none"
 reportUnusedCallResult = "none"
 reportUnnecessaryIsInstance = "none"
+include = ["shared", "shared_tests"]
 exclude = [
     "**/__pycache__",
     "**/node_modules",
@@ -72,6 +74,7 @@ exclude = [
     "build",
     "dist",
     "wrktrs",
+    "shared_tests/fixtures",
 ]
 
 # ============================================================================
@@ -81,10 +84,12 @@ exclude = [
 [tool.ruff]
 line-length = 120
 target-version = "py314"
+include = ["shared/**/*.py", "shared_tests/**/*.py"]
 extend-exclude = [
     "venv", ".venv", "*.egg", "*.egg-info", "**/dist", "**/build",
     "**/__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so", "wrktrs",
     ".git", ".pytest_cache",
+    "shared_tests/fixtures",
 ]
 
 [tool.ruff.lint]
@@ -112,6 +117,8 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101", "PT018", "FBT001"]
+"shared_tests/*" = ["S101", "PT018"]
+"shared_tests/fixtures/*" = ["C408", "RUF012", "F841", "B018"]
 
 [tool.ruff.lint.pylint]
 max-args = 5
@@ -131,7 +138,7 @@ max-args = 5
 # ============================================================================
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "shared_tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -149,10 +156,10 @@ addopts = ["-n", "auto", "--dist", "worksteal"]
 [tool.poe.tasks]
 test = "pytest"
 app = "python -m TODO_PACKAGE_NAME"
-lint_objects = "python reusable/linting/check_object_annotations.py"
-lint_frozen = "python reusable/linting/check_frozen_dataclasses.py"
-lint_mutables = "python reusable/linting/check_module_mutables.py"
-lint_type_ignore = "python reusable/linting/check_type_ignore.py"
-lint_raw_dicts = "python reusable/linting/check_raw_dicts.py"
+lint_objects.shell = "find shared shared_tests -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_object_annotations"
+lint_frozen.shell = "find shared shared_tests -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_frozen_dataclasses"
+lint_mutables.shell = "find shared shared_tests -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_module_mutables"
+lint_type_ignore.shell = "find shared shared_tests -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_type_ignore"
+lint_raw_dicts.shell = "find shared shared_tests -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_raw_dicts"
 lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables", "lint_type_ignore", "lint_raw_dicts"]
-lint_full.shell = "basedpyright . && ruff check --fix . && ruff format . && poe lint_custom_linters"
+lint_full.shell = "basedpyright && ruff check --fix . && ruff format . && poe lint_custom_linters"

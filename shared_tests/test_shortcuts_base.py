@@ -1,6 +1,6 @@
-"""Generic, reusable tests for keyboard shortcuts configuration.
+"""Generic, shared tests for keyboard shortcuts configuration.
 
-This module provides platform-independent, reusable test classes for keyboard
+This module provides platform-independent, shared test classes for keyboard
 shortcuts that can be used across multiple applications.
 
 ADAPTING FOR YOUR APP:
@@ -37,7 +37,7 @@ from typing import Final, TypeGuard
 
 import pytest
 
-from reusable.shortcuts import (
+from shared.shortcuts import (
     ActionShortcut,
     ShortcutConfig,
     validate_key_sequence,
@@ -85,9 +85,9 @@ class TestActionShortcut:
         This test uses a dummy shortcut to verify the platform selection logic.
         """
         # Ensure we're on Linux for this test
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_WINDOWS", False)
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_MACOS", False)
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_LINUX", True)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_WINDOWS", False)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_MACOS", False)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_LINUX", True)
 
         # Create a dummy shortcut with platform-specific defaults
         shortcut = ActionShortcut(
@@ -105,9 +105,9 @@ class TestActionShortcut:
         This test uses a dummy shortcut to verify the platform selection logic.
         """
         # Ensure we're on Windows for this test
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_WINDOWS", True)
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_MACOS", False)
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_LINUX", False)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_WINDOWS", True)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_MACOS", False)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_LINUX", False)
 
         # Create a dummy shortcut with platform-specific defaults
         shortcut = ActionShortcut(
@@ -125,9 +125,9 @@ class TestActionShortcut:
         This test uses a dummy shortcut to verify the platform selection logic.
         """
         # Ensure we're on macOS for this test
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_WINDOWS", False)
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_MACOS", True)
-        monkeypatch.setattr("reusable.shortcuts.shortcuts.IS_LINUX", False)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_WINDOWS", False)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_MACOS", True)
+        monkeypatch.setattr("shared.shortcuts.shortcuts.IS_LINUX", False)
 
         # Create a dummy shortcut with platform-specific defaults
         shortcut = ActionShortcut(
