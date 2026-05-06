@@ -7,6 +7,8 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
+# GNU/Linux-first bootstrap helper: `realpath -m` lets us normalize a target path
+# that may not exist yet. Broaden this when the bootstrap needs other platforms.
 SOURCE_ROOT=$(realpath "$1")
 TARGET_ROOT=$(realpath -m "$2")
 
@@ -61,6 +63,8 @@ copy_directory "$SOURCE_ROOT/shared_tests" "$TARGET_ROOT/shared_tests"
 copy_file "$SOURCE_ROOT/templates/AGENTS.md" "$TARGET_ROOT/AGENTS.md"
 copy_file "$SOURCE_ROOT/templates/pyproject.toml" "$TARGET_ROOT/pyproject.toml"
 copy_file "$SOURCE_ROOT/templates/pre-commit-config.yaml" "$TARGET_ROOT/.pre-commit-config.yaml"
+copy_directory "$SOURCE_ROOT/templates/src" "$TARGET_ROOT/src"
+copy_directory "$SOURCE_ROOT/templates/tests" "$TARGET_ROOT/tests"
 copy_file "$SOURCE_ROOT/templates/gitignore" "$TARGET_ROOT/.gitignore"
 copy_file "$SOURCE_ROOT/templates/vscode_settings.json" "$TARGET_ROOT/.vscode/settings.json"
 copy_file "$SOURCE_ROOT/templates/vscode_extensions.json" "$TARGET_ROOT/.vscode/extensions.json"
