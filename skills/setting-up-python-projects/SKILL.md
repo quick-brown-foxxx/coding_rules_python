@@ -23,8 +23,7 @@ project/
 │   ├── constants.py          # Shared constants
 │   ├── core/                 # Business logic
 │   │   ├── models.py         # Data types (dataclasses)
-│   │   ├── manager.py        # Business operations
-│   │   └── exceptions.py     # Custom exception hierarchy
+│   │   └── manager.py        # Business operations
 │   ├── cli/                  # CLI interface
 │   │   ├── commands.py       # Command implementations
 │   │   ├── parser.py         # Argument parsing
@@ -156,6 +155,8 @@ project/
        sys.exit(main())
    ```
    `__main__.py` is the router only. Keep Typer assembly in `APPNAME.cli`, keep GUI startup in `APPNAME.gui`, and avoid `len(sys.argv) > 1` heuristics. The tiny pre-parse only answers “is this a GUI-shaped invocation?” so `APPNAME`, `APPNAME file.txt`, and `APPNAME --debug` can reach the GUI, while `APPNAME -h` and `APPNAME config ...` stay in Typer.
+
+   For GUI's CLI args parsing use argparse (typer poorly works with this roter setup and can't be used with main entrypoint pattern)
 
 5. **Create initial test:**
    ```python
