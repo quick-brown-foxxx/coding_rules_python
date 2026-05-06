@@ -14,46 +14,65 @@ import ast
 import sys
 from pathlib import Path
 
-from shared.linting.lint_utils import collect_files, has_bare_ignore, is_ignored, read_source_lines, report
+from shared.linting.lint_utils import (
+    collect_files,
+    file_ignore_result,
+    has_bare_ignore,
+    is_ignored,
+    read_source_lines,
+    report,
+)
 
 CHECK_NAME = "ignored-result"
 
 type ResultFunctionCache = dict[Path, set[str]]
-type ModuleCallMap = dict[str, set[str]]
+type ModuleCallMap = dict[tuple[str, ...], set[str]]
 
 
-def _result_type_names(tree: ast.Module) -> set[str]:
-    """Collect local names that refer to rusty_results.Result."""
-    names = {"Result"}
+def _result_type_info(tree: ast.Module) -> tuple[set[str], set[str]]:
+    """Collect local names and module aliases that refer to rusty_results.Result."""
+    type_names: set[str] = set()
+    module_names = {"rusty_results"}
     for node in tree.body:
-        if not isinstance(node, ast.ImportFrom) or node.module != "rusty_results":
+        if isinstance(node, ast.ImportFrom) and node.module == "rusty_results":
+            for alias in node.names:
+                if alias.name == "Result":
+                    type_names.add(alias.asname or alias.name)
+            continue
+        if not isinstance(node, ast.Import):
             continue
         for alias in node.names:
-            if alias.name == "Result":
-                names.add(alias.asname or alias.name)
-    return names
+            if alias.name == "rusty_results":
+                module_names.add(alias.asname or alias.name)
+    return type_names, module_names
 
 
-def _returns_result(annotation: ast.expr | None, result_type_names: set[str]) -> bool:
-    """Return whether an annotation is Result[...] or qualified *.Result[...]."""
-    if not isinstance(annotation, ast.Subscript):
+def _is_result_annotation_base(node: ast.expr, result_type_names: set[str], result_module_names: set[str]) -> bool:
+    """Return whether an annotation base refers to rusty_results.Result."""
+    if isinstance(node, ast.Name):
+        return node.id in result_type_names
+    if not isinstance(node, ast.Attribute) or node.attr != "Result":
         return False
-
-    value = annotation.value
-    if isinstance(value, ast.Name):
-        return value.id in result_type_names
-    if isinstance(value, ast.Attribute):
-        return value.attr == "Result"
-    return False
+    return isinstance(node.value, ast.Name) and node.value.id in result_module_names
 
 
-def _result_function_names(tree: ast.Module, result_type_names: set[str]) -> set[str]:
+def _returns_result(annotation: ast.expr | None, result_type_names: set[str], result_module_names: set[str]) -> bool:
+    """Return whether an annotation is Result, Result[...], or rusty_results.Result[...]."""
+    if annotation is None:
+        return False
+    if isinstance(annotation, ast.Subscript):
+        return _is_result_annotation_base(annotation.value, result_type_names, result_module_names)
+    return _is_result_annotation_base(annotation, result_type_names, result_module_names)
+
+
+def _result_function_names(tree: ast.Module, result_type_names: set[str], result_module_names: set[str]) -> set[str]:
     """Collect module-level function names annotated to return Result."""
     names: set[str] = set()
     for node in tree.body:
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and _returns_result(
             node.returns,
             result_type_names,
+            result_module_names,
         ):
             names.add(node.name)
     return names
@@ -81,7 +100,23 @@ def _resolve_relative_module_path(current_path: Path, module_name: str | None, l
 def _resolve_absolute_module_path(current_path: Path, module_name: str) -> Path | None:
     """Resolve a narrow absolute local module path from the current file location."""
     parts = module_name.split(".")
-    for base_dir in current_path.parents:
+    parent_dir = current_path.parent
+    if (parent_dir / "__init__.py").is_file():
+        base_dir = parent_dir
+        while (base_dir / "__init__.py").is_file():
+            base_dir = base_dir.parent
+        candidate_dirs = (base_dir, base_dir.parent) if base_dir.name in {"src", "tests"} else (base_dir,)
+    else:
+        candidate_dirs = tuple(
+            dict.fromkeys(
+                (
+                    *current_path.parents,
+                    *(parent / "src" for parent in current_path.parents),
+                )
+            )
+        )
+
+    for base_dir in candidate_dirs:
         module_file = base_dir.joinpath(*parts).with_suffix(".py")
         if module_file.is_file():
             return module_file
@@ -131,7 +166,8 @@ def _parse_result_functions(
         visiting.remove(path)
         return cache[path]
 
-    result_functions = _result_function_names(tree, _result_type_names(tree))
+    result_type_names, result_module_names = _result_type_info(tree)
+    result_functions = _result_function_names(tree, result_type_names, result_module_names)
 
     for node in tree.body:
         if not isinstance(node, ast.ImportFrom):
@@ -171,17 +207,28 @@ def _imported_result_symbols(
 
         if isinstance(node, ast.Import):
             for alias in node.names:
-                local_name = alias.asname or alias.name
-                if "." in local_name:
-                    continue
                 module_path = _resolve_module_path(path, alias.name)
                 if module_path is None:
                     continue
                 result_functions = _parse_result_functions(module_path, result_function_cache)
                 if result_functions:
-                    module_calls[local_name] = result_functions
+                    local_name = alias.asname or alias.name
+                    module_key = (local_name,) if alias.asname is not None else tuple(alias.name.split("."))
+                    module_calls[module_key] = result_functions
 
     return direct_calls, module_calls
+
+
+def _attribute_chain(expr: ast.expr) -> tuple[str, ...] | None:
+    """Return the dotted attribute chain for an expression, if any."""
+    if isinstance(expr, ast.Name):
+        return (expr.id,)
+    if not isinstance(expr, ast.Attribute):
+        return None
+    parent_chain = _attribute_chain(expr.value)
+    if parent_chain is None:
+        return None
+    return (*parent_chain, expr.attr)
 
 
 def _called_result_function_name(
@@ -196,13 +243,10 @@ def _called_result_function_name(
         return None
     if isinstance(expr.func, ast.Name) and expr.func.id in direct_calls:
         return expr.func.id
-    if (
-        isinstance(expr.func, ast.Attribute)
-        and isinstance(expr.func.value, ast.Name)
-        and expr.func.value.id in module_calls
-        and expr.func.attr in module_calls[expr.func.value.id]
-    ):
-        return f"{expr.func.value.id}.{expr.func.attr}"
+    if isinstance(expr.func, ast.Attribute):
+        owner_chain = _attribute_chain(expr.func.value)
+        if owner_chain is not None and owner_chain in module_calls and expr.func.attr in module_calls[owner_chain]:
+            return ".".join((*owner_chain, expr.func.attr))
     return None
 
 
@@ -212,13 +256,17 @@ def check_file(path: Path) -> list[str]:
     if not source_lines:
         return []
 
+    early_result = file_ignore_result(path, source_lines, CHECK_NAME)
+    if early_result is not None:
+        return early_result
+
     try:
         tree = ast.parse("\n".join(source_lines), filename=str(path))
     except SyntaxError:
         return []
 
-    result_type_names = _result_type_names(tree)
-    result_functions = _result_function_names(tree, result_type_names)
+    result_type_names, result_module_names = _result_type_info(tree)
+    result_functions = _result_function_names(tree, result_type_names, result_module_names)
     direct_calls, module_calls = _imported_result_symbols(path, tree, result_functions)
     if not direct_calls and not module_calls:
         return []

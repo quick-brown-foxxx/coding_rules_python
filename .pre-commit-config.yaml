@@ -16,23 +16,62 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types: [python]
-        files: ^(shared|shared_tests)/
-        exclude: ^shared_tests/fixtures/
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
 
       - id: ruff-format
         name: ruff-format
         entry: uv run ruff format
         language: system
         types: [python]
-        files: ^(shared|shared_tests)/
-        exclude: ^shared_tests/fixtures/
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
 
       - id: basedpyright
         name: basedpyright
         entry: uv run basedpyright
         language: system
         types: [python]
-        files: ^(shared|shared_tests)/
-        exclude: ^shared_tests/fixtures/
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
         pass_filenames: true
         stages: [pre-commit]
+
+      - id: check-object-annotations
+        name: check-object-annotations
+        entry: uv run python -m shared.linting.check_object_annotations
+        language: system
+        types: [python]
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
+
+      - id: check-frozen-dataclasses
+        name: check-frozen-dataclasses
+        entry: uv run python -m shared.linting.check_frozen_dataclasses
+        language: system
+        types: [python]
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
+
+      - id: check-module-mutables
+        name: check-module-mutables
+        entry: uv run python -m shared.linting.check_module_mutables
+        language: system
+        types: [python]
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
+
+      - id: check-type-ignore
+        name: check-type-ignore
+        entry: uv run python -m shared.linting.check_type_ignore
+        language: system
+        types: [python]
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
+
+      - id: check-raw-dicts
+        name: check-raw-dicts
+        entry: uv run python -m shared.linting.check_raw_dicts
+        language: system
+        types: [python]
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)
+
+      - id: check-ignored-results
+        name: check-ignored-results
+        entry: uv run python -m shared.linting.check_ignored_results
+        language: system
+        types: [python]
+        exclude: ^(templates/|tests/fixtures/|shared_tests/fixtures/)

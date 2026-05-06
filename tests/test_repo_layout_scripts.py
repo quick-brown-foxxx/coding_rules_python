@@ -6,6 +6,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = REPO_ROOT / "skills" / "setting-up-python-projects"
+TEMPLATE_ROOT = REPO_ROOT / "templates"
 
 
 def resolve_bootstrap_script() -> Path:
@@ -28,6 +29,9 @@ def assert_bootstrapped_layout(target_root: Path) -> None:
     assert (target_root / "docs" / "PHILOSOPHY.md").is_file()
     assert (target_root / "CLAUDE.md").is_symlink()
     assert (target_root / "CLAUDE.md").resolve() == (target_root / "AGENTS.md").resolve()
+    assert (target_root / "src" / "todo_package_name" / "__init__.py").is_file()
+    assert (target_root / "src" / "todo_package_name" / "__main__.py").is_file()
+    assert (target_root / "tests" / "test_main.py").is_file()
     assert (target_root / "shared" / "__init__.py").is_file()
     assert (target_root / "shared_tests" / "__init__.py").is_file()
 
@@ -68,6 +72,20 @@ def test_bootstrap_shell_script_supports_stdin_copy_paste_flow(tmp_path: Path) -
     (source_root / "templates" / "AGENTS.md").write_text("@docs/PHILOSOPHY.md\n", encoding="utf-8")
     (source_root / "templates" / "pyproject.toml").write_text("[project]\nname='demo'\n", encoding="utf-8")
     (source_root / "templates" / "pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
+    (source_root / "templates" / "src" / "todo_package_name").mkdir(parents=True)
+    (source_root / "templates" / "src" / "todo_package_name" / "__init__.py").write_text(
+        '__version__ = "0.1.0"\n',
+        encoding="utf-8",
+    )
+    (source_root / "templates" / "src" / "todo_package_name" / "__main__.py").write_text(
+        "def main() -> int:\n    return 0\n",
+        encoding="utf-8",
+    )
+    (source_root / "templates" / "tests").mkdir()
+    (source_root / "templates" / "tests" / "test_main.py").write_text(
+        "def test_main() -> None:\n    assert True\n",
+        encoding="utf-8",
+    )
     (source_root / "templates" / "gitignore").write_text(".venv/\n", encoding="utf-8")
     (source_root / "templates" / "vscode_settings.json").write_text("{}\n", encoding="utf-8")
     (source_root / "templates" / "vscode_extensions.json").write_text("{}\n", encoding="utf-8")
@@ -77,9 +95,7 @@ def test_bootstrap_shell_script_supports_stdin_copy_paste_flow(tmp_path: Path) -
     (source_root / "rules" / "coding_rules.md").write_text("# Rules\n", encoding="utf-8")
 
     (fake_bin / "uv").write_text(
-        "#!/usr/bin/env bash\n"
-        "set -euo pipefail\n"
-        f"printf '%s\\n' \"$*\" >> {uv_log}\n",
+        f"#!/usr/bin/env bash\nset -euo pipefail\nprintf '%s\\n' \"$*\" >> {uv_log}\n",
         encoding="utf-8",
     )
     os.chmod(fake_bin / "uv", 0o755)

@@ -14,6 +14,8 @@ from pathlib import Path
 
 from shared.linting.lint_utils import (
     collect_files,
+    comment_text,
+    file_ignore_result,
     has_bare_ignore,
     is_ignored,
     read_source_lines,
@@ -38,10 +40,15 @@ def check_file(path: Path) -> list[str]:
     if not source_lines:
         return []
 
+    early_result = file_ignore_result(path, source_lines, CHECK_NAME)
+    if early_result is not None:
+        return early_result
+
     violations: list[str] = []
 
     for line_num, line in enumerate(source_lines, start=1):
-        if not _TYPE_IGNORE_RE.search(line):
+        line_comment = comment_text(line)
+        if line_comment is None or not _TYPE_IGNORE_RE.search(line_comment):
             continue
 
         if has_bare_ignore(line, CHECK_NAME):
@@ -52,14 +59,14 @@ def check_file(path: Path) -> list[str]:
             continue
 
         # Check for bare type:ignore (no error code)
-        if not _TYPE_IGNORE_WITH_CODE_RE.search(line):
+        if not _TYPE_IGNORE_WITH_CODE_RE.search(line_comment):
             violations.append(
                 report(path, line_num, CHECK_NAME, "bare 'type: ignore' must specify error code, e.g. [assignment]")
             )
             continue
 
         # Has error code — check for rationale comment after it
-        if not _RATIONALE_RE.search(line):
+        if not _RATIONALE_RE.search(line_comment):
             violations.append(report(path, line_num, CHECK_NAME, "type: ignore[code] must include rationale comment"))
 
     return violations

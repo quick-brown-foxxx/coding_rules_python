@@ -75,3 +75,19 @@ class TestTypeIgnore:
 
         assert result.returncode == 0, result.stdout
         assert result.stdout.strip() == ""
+
+    def test_directive_text_inside_string_literal_does_not_trigger(self, tmp_path: Path) -> None:
+        path = tmp_path / "type_ignore_string_literal.py"
+        path.write_text(
+            'MESSAGE = "# type: ignore[assignment]"\n',
+            encoding="utf-8",
+        )
+
+        result = subprocess.run(
+            [sys.executable, "-m", MODULE, str(path)],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, result.stdout
+        assert result.stdout.strip() == ""

@@ -14,7 +14,14 @@ import sys
 from pathlib import Path
 from typing import Final
 
-from shared.linting.lint_utils import collect_files, has_bare_ignore, is_ignored, read_source_lines, report
+from shared.linting.lint_utils import (
+    collect_files,
+    file_ignore_result,
+    has_bare_ignore,
+    is_ignored,
+    read_source_lines,
+    report,
+)
 
 CHECK_NAME = "restricted-object"
 _COROUTINE_ARG_COUNT = 3
@@ -129,6 +136,10 @@ def check_file(path: Path) -> list[str]:
     source_lines = read_source_lines(path)
     if not source_lines:
         return []
+
+    early_result = file_ignore_result(path, source_lines, CHECK_NAME)
+    if early_result is not None:
+        return early_result
 
     try:
         tree = ast.parse("\n".join(source_lines), filename=str(path))

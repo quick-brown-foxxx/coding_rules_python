@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import ast
+import io
 import re
+import tokenize
 from pathlib import Path
 from typing import Final
 
 # Pattern: # lint-ignore[check-name]: rationale text
 _IGNORE_ENTRY_PATTERN = re.compile(r"#\s*lint-ignore\[([^\]]+)\](?::\s*(.*?))?(?=\s+#\s*lint-ignore\[|$)")
+_FILE_IGNORE_ENTRY_PATTERN = re.compile(
+    r"#\s*lint-ignore-file\[([^\]]+)\](?::\s*(.*?))?(?=\s+#\s*lint-ignore-file\[|$)"
+)
 
 
 def _iter_ignore_entries(line: str) -> list[tuple[str, str | None]]:
@@ -17,7 +22,29 @@ def _iter_ignore_entries(line: str) -> list[tuple[str, str | None]]:
     ``rationale`` is ``None`` when the ignore has no colon, an empty string when
     it has a colon but no text, and non-empty text when a rationale is present.
     """
-    return [(match.group(1), match.group(2)) for match in _IGNORE_ENTRY_PATTERN.finditer(line)]
+    line_comment = comment_text(line)
+    if line_comment is None:
+        return []
+    return [(match.group(1), match.group(2)) for match in _IGNORE_ENTRY_PATTERN.finditer(line_comment)]
+
+
+def _iter_file_ignore_entries(line: str) -> list[tuple[str, str | None]]:
+    """Return file-level lint-ignore entries as ``(check_name, rationale)`` tuples."""
+    line_comment = comment_text(line)
+    if line_comment is None:
+        return []
+    return [(match.group(1), match.group(2)) for match in _FILE_IGNORE_ENTRY_PATTERN.finditer(line_comment)]
+
+
+def comment_text(line: str) -> str | None:
+    """Return the Python comment token text for a source line, if any."""
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(f"{line}\n").readline):
+            if token.type == tokenize.COMMENT:
+                return token.string
+    except IndentationError, tokenize.TokenError:
+        return None
+    return None
 
 
 _EXCLUDED_DIRS: Final = frozenset(
@@ -45,6 +72,33 @@ def is_ignored(line: str, check_name: str) -> bool:
 def has_bare_ignore(line: str, check_name: str) -> bool:
     """Check if a source line has a lint-ignore WITHOUT rationale (error)."""
     return any(name == check_name and not rationale for name, rationale in _iter_ignore_entries(line))
+
+
+def is_file_ignored(source_lines: list[str], check_name: str) -> bool:
+    """Check if a file has a valid file-level lint-ignore for this check."""
+    return any(
+        name == check_name and bool(rationale)
+        for line in source_lines
+        for name, rationale in _iter_file_ignore_entries(line)
+    )
+
+
+def bare_file_ignore_line(source_lines: list[str], check_name: str) -> int | None:
+    """Return the first bare file-level lint-ignore line for this check, if any."""
+    for line_num, line in enumerate(source_lines, start=1):
+        if any(name == check_name and not rationale for name, rationale in _iter_file_ignore_entries(line)):
+            return line_num
+    return None
+
+
+def file_ignore_result(path: Path, source_lines: list[str], check_name: str) -> list[str] | None:
+    """Return an early file-level ignore result for a lint check, if any."""
+    line_num = bare_file_ignore_line(source_lines, check_name)
+    if line_num is not None:
+        return [report(path, line_num, check_name, "lint-ignore-file requires rationale after ':'")]
+    if is_file_ignored(source_lines, check_name):
+        return []
+    return None
 
 
 def read_source_lines(path: Path) -> list[str]:

@@ -4,34 +4,18 @@ Personal Python development standards, templates, and AI skills.
 
 Not intended for any third-party use but I will be glad if someone will find it at least inspirational.
 
-## Structure
+## Most important stuff
 
 ```
 PHILOSOPHY.md          Core beliefs — every other doc inherits from this
-pyproject.toml         Project config (deps, tooling)
-uv.lock                Locked dependency versions
 
 shared/                Copy-paste reusable code for new projects
   logging/               Logging setup + colored non-log output
   shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
   linting/               Custom lint checks (AST-based)
-    lint_utils.py          Shared utilities (file collection, ignore handling)
-    check_frozen_dataclasses.py  Enforce frozen=True on all dataclasses
-    check_ignored_results.py     Catch common ignored Result-returning calls
-    check_module_mutables.py     Ban module-level mutable state
-    check_object_annotations.py  Restrict object to boundary positions
-    check_type_ignore.py         Require rationale on type:ignore comments
-    check_raw_dicts.py           Ban raw dict annotations in business code
 
 shared_tests/          Tests for shared/ code
-  test_shortcuts_base.py   Generic shortcut config tests
-  test_shortcuts_manager.py  ShortcutManager tests
-  test_linting/            Tests for custom lint checks
-    test_check_frozen_dataclasses.py
-    test_check_module_mutables.py
-    test_check_object_annotations.py
-    test_check_raw_dicts.py
-    test_check_type_ignore.py
+ ...
 
 rules/                 Copy-paste rule files for projects
   coding_rules.md        Full coding standards.
@@ -41,22 +25,10 @@ templates/             Copy into new projects, fill TODOs
   AGENTS.md              AI agent guide template
   pyproject.toml         Full tooling config
   pre-commit-config.yaml Git hooks
-  gitignore              Python .gitignore
-  vscode_settings.json   Editor config
-  vscode_extensions.json Recommended extensions
+  ...
 
 skills/                Claude Code skills (deploy to ~/.claude/skills/)
-  writing-python-code/          Core Python: typing, errors, async, style, security
-  writing-python-scripts/       PEP 723 single-file scripts
-  setting-up-python-projects/   New project bootstrap
-  building-qt-apps/             PySide6 desktop apps
-  testing-python/               Pytest setup, fixtures, containerized testing
-  building-multi-ui-apps/       GUI + CLI + API architecture
-  setting-up-logging/           Colored logging with colorlog
-  setting-up-shortcuts/         PySide6 keyboard shortcuts
-
-notes/                Project-specific personal notes
-  other-patterns.md      Localization, config merging + msgspec validation
+ ...
 ```
 
 ## How to Use
@@ -89,11 +61,11 @@ From this point on, prefer project-local commands through `uv` rather than syste
 
 ### For AI agents
 
-Deploy skills from `skills/` to `~/.claude/skills/`. The top-level `writing-python-code` skill covers core standards; other skills cover specific domains.
+Deploy skills from `skills/` to `~/.claude/skills/`. Load `architecting-python-changes` when a feature, fix, or refactor may require architecture decisions, then follow it to the right existing docs and domain skills. Load `writing-python-code` for the actual Python editing rules.
 
 ### Quick reference
 
-- **What tools?** uv, basedpyright (strict), Ruff with the stricter profile (`PLR`, `FBT`, plus the core rules), pytest, poethepoet, msgspec
+- **What tools?** uv, basedpyright (strict), Ruff with strict profile, pytest, poethepoet, msgspec
 - **How to run them?** Through `uv` (`uv run ...`), not global/system binaries.
 - **Error handling?** `Result[T, E]` from rusty-results. Rusty-results is nice for our use case and we will use it, but it is not maintained and may require replacement in future. Exceptions = bugs only.
 - **Data validation?** `msgspec.Struct` for external data (JSON, configs, APIs). Validates at decode time.

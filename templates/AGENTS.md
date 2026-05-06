@@ -31,6 +31,7 @@
 
 #### Python
 
+- `architecting-python-changes` — ALWAYS load when planning a new feature, non-trivial fix, or refactor that may affect structure, layering, wrappers, or library choice, or when deciding where code should live. NEVER make architecture decisions blindly.
 - `writing-python-code` — ALWAYS load when writing/editing Python. NEVER write Python without this.
 - `testing-python` — ALWAYS load when writing tests or fixtures. NEVER write pytest tests without this.
 - `setting-up-python-projects` — ALWAYS load when bootstrapping a new package. NEVER set up pyproject.toml manually.
