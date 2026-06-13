@@ -39,3 +39,6 @@ Thumbs.db
 
 # Claude Code worktrees
 wrktrs/
+
+# Project worktrees
+.worktrees/
