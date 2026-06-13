@@ -1,11 +1,17 @@
 ---
 name: architecting-python-changes
 description: >-
-  ALWAYS LOAD THIS SKILL WHEN A NEW FEATURE, NON-TRIVIAL FIX, REFACTOR, OR PYTHON STRUCTURE CHANGE REQUIRES AN ARCHITECTURE DECISION ABOUT LAYERS, WRAPPERS, COMPOSITION ROOTS, FRAMEWORK CHOICES, REUSABLE CORES, OR WHERE CODE SHOULD LIVE. Do not make Python architecture decisions blindly — use this skill first.
+  Python-specific extension to myai's `architecting-changes`. Load after myai's `architecting-changes` when a Python feature, fix, refactor, or structure change requires architecture decisions about layers, wrappers, composition roots, framework choices, reusable cores, or where code should live.
   Python architecture guide + skill router for boundary placement, reusable core design, composition vs inheritance, framework vs custom choices, backend/service layering, and follow-up docs/skills.
 ---
 
 # Architecting Python Changes
+
+## Prerequisites
+
+This skill extends myai's `architecting-changes`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general architecture decision framework (boundaries, layers, wrappers, reusable cores, composition roots, framework choices), see myai's `architecting-changes`. This skill adds Python-specific routing: which Python skills and docs to consult for different architecture questions, Python-specific heuristics, and common Python architecture mistakes.
 
 This skill is the first stop for non-trivial Python architecture decisions.
 It is both a compact guide and a router to deeper project docs and domain skills.
@@ -14,62 +20,25 @@ It is both a compact guide and a router to deeper project docs and domain skills
 
 ## Default Approach
 
-1. Classify the change:
-   - small local fix
-   - feature adding new behavior or a new caller
-   - refactor moving responsibilities or dependencies
-   - project setup or framework choice
-2. Ask yourself what is actually expected to change later:
-   - business rules
-   - validation or transport
-   - UI or API surface
-   - infrastructure or third-party dependency
-   - platform support
-   - workflow observability or operational controls
-3. Identify the real architecture question:
-   - where should this code live?
-   - what deserves a boundary or wrapper?
-   - should this be reusable from CLI, GUI, API, or automation?
-   - is a boring framework or library better than custom code here?
-   - is inheritance being used where composition would be clearer?
-4. Apply the heuristics below.
-5. Load the matching deeper source, then continue with implementation skills.
+Follow the 6-step flow in myai's `architecting-changes` (classify → find change axis → identify question → choose boundary → route → continue). Then use the Python-specific router below to find the right Python skill for your domain.
 
 ---
 
 ## Core Heuristics
 
+> **For the general architecture heuristics (boundaries, reuse vs custom, composition, reusable cores, transparency), see myai's `architecting-changes`.** Python-specific additions below.
+
 ### Boundaries and layers
 
-- Keep a small fix local unless the bug was caused by the wrong boundary.
-- Extract shared behavior downward into domain/utilities instead of duplicating across entry points or logic/flow branches.
-- Keep business rules separate from validation plumbing, transport shapes, auth/session concerns, and raw infrastructure.
-- Wrap third-party or OS-specific boundaries when typing, exception isolation, portability, or replacement matters.
+- Enforce third-party wrapper usage via ruff `banned-api` in `pyproject.toml`. For the general boundary and layer philosophy, see myai's `architecting-changes`.
 
 ### Reuse versus custom code
 
-- Prefer boring popular maintained libraries and frameworks for commodity infrastructure: auth, packaging, builds, queues, caching, deployment, migrations, or orchestration.
-- Do not build ad hoc systems on top of a tiny framework when the domain already implies substantial backend concerns.
-- For tiny one-off helpers or stable details, simple custom code is often better than heavyweight scaffolding.
-- When selecting a library, do web research and compare multiple options, consider how each one fits philosophy and architecture, remember to analyze for typing support.
-
-### Composition and state
-
-- Prefer composition, explicit data flow, and small protocol-shaped interfaces over deep class hierarchies.
-- Add stateful classes for lifecycle or orchestration, not to manufacture abstractions.
-- Hidden mutable state is a smell. Important state changes should be visible in code.
+- When selecting a library, analyze for typing support (basedpyright strict compatibility). For the general reuse philosophy, see myai's `architecting-changes`.
 
 ### Reusable cores
 
-- If CLI, GUI, API, or automation may share logic, build a reusable core plus thin adapters.
-- Start with one useful implementation, but do not trap business logic inside the first interface.
-- Prefer composable pieces over one giant super-tool.
-
-### Transparency and operations
-
-- Important workflows should be inspectable: clear validation, explicit errors, logs at operation boundaries, and dry-run behavior where practical.
-- For risky multi-step actions, prefer explicit step/state models and machines over opaque helper chains.
-- If a failure would be costly or hard to debug for user, design for traceability early instead of bolting it on later.
+- For the Python-specific multi-UI pattern, see `building-multi-ui-apps`. For the general reusable core philosophy, see myai's `architecting-changes`.
 
 ---
 
@@ -101,18 +70,19 @@ It is both a compact guide and a router to deeper project docs and domain skills
 
 ---
 
-## Common Mistakes
-
-- Extracting layers because the pattern exists, not because responsibilities or change axes differ.
-- Mixing domain rules with request/response models, validation glue, or infrastructure calls.
-- Letting the first UI own logic that later needs to be shared.
-- Introducing inheritance where a couple of collaborating objects would be clearer.
-- Building custom infrastructure in a domain that already has strong boring solutions.
-
----
-
 ## Handoff
 
 - After the architecture direction is clear, continue with `writing-python-code`.
 - If the work is a brand-new project or major re-shape, also consult `setting-up-python-projects`.
 - If the change needs a formal plan, write it in the project's normal planning flow before implementation.
+
+---
+
+## Related myai Skills
+
+- **`architecting-changes`** — Parent skill. Language-agnostic architecture decision framework: boundaries, layers, wrappers, reusable cores, composition roots, framework choices.
+- **`engineering-principles`** — Language-agnostic philosophy backing all architecture decisions.
+- **`api-design`** — For stable API and protocol/interface design.
+- **`brainstorming`** — For technical spec creation when requirements are clear but architecture needs design.
+- **`doubt-early`** — For adversarial review before committing to architecture decisions.
+- **`incremental-implementation`** — For implementing architecture changes in thin, verified slices.

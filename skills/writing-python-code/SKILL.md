@@ -7,7 +7,11 @@ description: >
 
 # Writing Python Code
 
-All Python code follows the pit-of-success philosophy: strict types, Result-based error handling, modern tooling.
+## Prerequisites
+
+This skill extends myai's `engineering-principles`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general engineering philosophy (pit of success, fail fast, error handling as control flow, testing philosophy, architecture separation), see myai's `engineering-principles`. This skill covers only Python-specific tooling, type system configuration, and patterns.
 
 Run project-local tools through `uv`, not system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`. The normal verification pair is `uv run poe lint_full` and `uv run poe test`.
 
@@ -226,7 +230,7 @@ class TranscriptionService:
 
 ## Error Handling
 
-Errors are values, not exceptions. Use `Result[T, E]` from `rusty-results` for expected failures.
+> **For the general principle of error handling as control flow, see myai's `engineering-principles`.** Python-specific: use `Result[T, E]` from `rusty-results` for expected failures. Exceptions are reserved for programming errors (bugs).
 
 ### Decision Table
 
@@ -414,11 +418,13 @@ Google-style docstrings on public APIs. Comments explain **why**, not **what**.
 
 ## Preconditions & Validation
 
-Validate at subsystem entry points. Fail fast. Check permissions, external deps, config validity, complex input arguments or other data or value ranges before proceeding with business logic.
+> **For the general fail-fast principle, see myai's `engineering-principles`.** Python-specific: validate at subsystem entry points using `msgspec.Struct` for data shape, `isinstance`/`TypeIs` for type narrowing, and `Result[T,E]` for expected validation failures. Check permissions, external deps, config validity, and input ranges before proceeding with business logic.
 
 ---
 
 ## Architecture
+
+> **For the general architecture separation principle, see myai's `engineering-principles` and `architecting-changes`.** Python-specific layout:
 
 ```
 Presentation (Qt GUI / CLI / API)
@@ -433,6 +439,7 @@ Utilities (Helpers, Wrappers, Common)
 - Dependencies flow **downward only**
 - UI is a **plugin** — adding CLI, GUI, or API should not change business logic
 - Domain never imports from presentation
+- For architecture decisions, load `architecting-python-changes` (which extends myai's `architecting-changes`)
 
 ---
 
@@ -517,10 +524,8 @@ app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]})
 
 ---
 
-## Git Conventions
+## Related myai Skills
 
-Commit format: `<type>(<scope>): <subject>`
-
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
-
-Pre-commit: `uv run poe lint_full` passes, `uv run poe test` passes, public APIs have docstrings.
+- **`engineering-principles`** — Parent skill. Language-agnostic philosophy: pit of success, fail fast, error handling as control flow, testing philosophy, architecture separation.
+- **`architecting-changes`** — For architecture decisions before writing code. Load `architecting-python-changes` for the Python-specific extension.
+- **`code-simplification`** — For refactoring Python code for clarity.

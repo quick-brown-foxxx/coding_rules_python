@@ -7,6 +7,12 @@ description: >-
 
 # Building Python Backends
 
+## Prerequisites
+
+This skill extends myai's `architecting-changes` and `api-design`. Load those first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general architecture decision framework and API design principles, see myai's `architecting-changes` and `api-design`. This skill covers only Python-specific backend architecture: FastAPI/Django patterns, Result-to-HTTP mapping, SQLAlchemy 2 + Alembic, transaction ownership, auth/session boundaries, workers, and infrastructure separation.
+
 Backends are just another adapter around business logic.
 Keep transport thin, core reusable, infrastructure explicit, and operationally important flows traceable.
 
@@ -102,3 +108,15 @@ In small backends, application and domain code may live close together. Add more
 - Use `building-multi-ui-apps` if API, CLI, and automation share one core.
 - Use `writing-python-code` for implementation details.
 - Use `testing-python` for API/service/worker testing strategy.
+
+---
+
+## Related myai Skills
+
+- **`architecting-changes`** — Parent skill. Language-agnostic architecture decision framework.
+- **`api-design`** — Parent skill. Stable API and protocol/interface design, contract-first boundaries.
+- **`engineering-principles`** — Language-agnostic philosophy backing all architecture decisions.
+- **`security-and-hardening`** — For auth, secrets, rate limits, and boundary hardening in backend services.
+- **`architecting-python-changes`** — Python-specific architecture router for backend decisions.
+- **`setting-up-python-backends`** — Python-specific backend bootstrap and scaffolding.
+- **`testing-python`** — Python-specific API/service/worker testing patterns.

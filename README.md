@@ -1,8 +1,37 @@
-# Python Coding Standards
+# Python Auxiliary Skills for myai
 
-Personal Python development standards, templates, and AI skills.
+**Prerequisite: [myai](https://github.com/quick-brown-foxxx/myai) must be installed first.**
+
+This repo is an **auxiliary skill pack** for the myai agent skill system. myai provides 38 language-agnostic skills covering the full SDLC (engineering principles, planning, implementation, testing, debugging, review, CI/CD, security, performance, agent orchestration). This repo adds the Python-specific layer: tooling choices, library patterns, and Python conventions.
+
+Think of it as: **myai = the engine and chassis; this repo = the Python body kit.** The generic philosophy lives in myai's `engineering-principles` skill. The skills here keep only Python-specific content and reference myai for everything else.
 
 Not intended for any third-party use but I will be glad if someone will find it at least inspirational.
+
+## The Auxiliary Model
+
+Each Python skill here extends one or more myai parent skills. The load order is:
+
+1. `using-my-skills` (myai bootstrap, auto-injected)
+2. `engineering-principles` (myai — language-agnostic philosophy)
+3. Relevant myai workflow skill (e.g., `architecting-changes`, `test-driven-development`)
+4. Python-specific extension from this repo (e.g., `writing-python-code`, `testing-python`)
+
+The 11 Python skills and their myai parents:
+
+| Python Skill | myai Parent(s) |
+|---|---|
+| `writing-python-code` | `engineering-principles` |
+| `writing-python-scripts` | `engineering-principles` |
+| `testing-python` | `high-level-testing-strategy`, `test-driven-development`, `manual-testing` |
+| `architecting-python-changes` | `architecting-changes` |
+| `setting-up-python-projects` | `engineering-principles` |
+| `setting-up-python-backends` | `engineering-principles`, `architecting-changes` |
+| `setting-up-logging` | `engineering-principles` |
+| `setting-up-shortcuts` | `engineering-principles` |
+| `building-python-backends` | `architecting-changes`, `api-design` |
+| `building-multi-ui-apps` | `architecting-changes` |
+| `building-qt-apps` | `architecting-changes`, `engineering-principles` |
 
 ## Most important stuff
 

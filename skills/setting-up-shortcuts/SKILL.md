@@ -7,6 +7,12 @@ description: >
 
 # Setting Up Keyboard Shortcuts
 
+## Prerequisites
+
+This skill extends myai's `engineering-principles`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general engineering philosophy, see myai's `engineering-principles`. This skill covers only Python-specific shortcut setup: PySide6 keyboard shortcut manager with TOML config, platform-specific defaults, and Qt integration.
+
 Shared keyboard shortcuts system for PySide6 applications. Provides platform-specific defaults, TOML configuration, and Qt integration.
 
 Copy `shared/shortcuts/` and the matching tests from `shared_tests/`.
@@ -174,4 +180,14 @@ class TestMyAppShortcuts:
         for shortcut in DEFAULT_SHORTCUTS:
             assert shortcut.action_id
             assert shortcut.display_name
+```
+
+---
+
+## Related myai Skills
+
+- **`engineering-principles`** — Parent skill. Language-agnostic philosophy.
+- **`building-qt-apps`** — For PySide6 app architecture where shortcuts are used.
+- **`setting-up-python-projects`** — For including `shared/shortcuts/` in new project bootstrap.
+- **`testing-python`** — For pytest-qt and shortcut testing patterns.
 ```

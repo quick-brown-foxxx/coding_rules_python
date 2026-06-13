@@ -7,6 +7,12 @@ description: >-
 
 # Setting Up Python Backends
 
+## Prerequisites
+
+This skill extends myai's `engineering-principles` and `architecting-changes`. Load those first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general project setup philosophy and architecture decision framework, see myai's `engineering-principles` and `architecting-changes`. This skill covers only Python-specific backend bootstrap: FastAPI/Django choice, backend repo layout, app factory, migrations, and service-first conventions.
+
 This skill is a backend-specialized extension of `setting-up-python-projects`.
 Use it when the repo is primarily a service, API, or worker-oriented backend. Start here for backend repos, then pull generic bootstrap pieces from `setting-up-python-projects` as needed.
 
@@ -139,3 +145,15 @@ Add those only when the project actually needs them.
 - Use `building-python-backends` for day-2 backend architecture and service/API/worker shaping.
 - Use `building-multi-ui-apps` if API, CLI, and automation share one core.
 - Use `writing-python-code` for implementation rules.
+
+---
+
+## Related myai Skills
+
+- **`engineering-principles`** — Parent skill. Language-agnostic project setup philosophy.
+- **`architecting-changes`** — Parent skill. Architecture decision framework for backend shape. Load `architecting-python-changes` for Python-specific routing.
+- **`api-design`** — For stable API and protocol/interface design at the HTTP boundary.
+- **`security-and-hardening`** — For auth, secrets, and boundary hardening in backend services.
+- **`setting-up-python-projects`** — Python-specific generic bootstrap pieces (templates, shared code, tooling).
+- **`building-python-backends`** — Python-specific backend architecture for day-2 decisions.
+- **`testing-python`** — Python-specific testing setup for API/service tests.
