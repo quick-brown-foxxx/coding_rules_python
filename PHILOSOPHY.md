@@ -1,11 +1,15 @@
 # Python Development Philosophy
 
-This document defines the foundational beliefs that drive all coding decisions.
+> **The canonical language-agnostic engineering philosophy is now in myai's `ENGINEERING-PHILOSOPHY.md` and `engineering-principles` skill.** This document keeps the same 9 principles but adds Python-specific details: basedpyright, msgspec, rusty-results, uv, PySide6, typer, pytest, and other Python tooling choices. For the general reasoning behind each principle, see myai's `engineering-principles`. The content below is the Python-specific application of those principles.
+
+This document defines the foundational beliefs that drive all Python coding decisions.
 Every other document in this collection inherits from and applies these principles to specific domains.
 
 ---
 
 ## 1. The Pit of Success
+
+> **See myai's `engineering-principles` for the language-agnostic version of this principle.** The Python-specific application is below.
 
 Build systems where doing things correctly is the path of least resistance.
 Instead of relying on conventions that developers must remember, construct boundaries that make violations impossible.
@@ -19,6 +23,8 @@ Instead of relying on conventions that developers must remember, construct bound
 
 ## 2. Explicitness Through Types
 
+> **See myai's `engineering-principles` for the language-agnostic version.** Python-specific: basedpyright strict mode, `msgspec.Struct`, `Result[T,E]`, `dataclass`, `Protocol`, `TypeIs`.
+
 Everything should be known before runtime. We always know what types and values we have. We always know whether we are on the error path or the success path.
 
 - **Strict type checking is non-negotiable.** basedpyright in strict mode, `reportAny=error`. No `Any`, no `typing.cast()`, no unvalidated `# type: ignore`.
@@ -30,6 +36,8 @@ The goal: if the type checker says it's correct, it runs correctly. If something
 
 ## 3. Fail Fast, Fail Early
 
+> **See myai's `engineering-principles` for the language-agnostic version.** Python-specific: basedpyright at compile time, pre-commit hooks, validation at subsystem entry points.
+
 Detect problems at the earliest possible moment. Compile time is better than runtime. Startup is better than mid-operation. Explicit error is better than silent corruption.
 
 - **Validate preconditions** at the entry of each subsystem: required permissions, installed dependencies, valid configuration, sane inputs
@@ -38,6 +46,8 @@ Detect problems at the earliest possible moment. Compile time is better than run
 - **Type narrowing over assumptions.** When a value could be multiple types, narrow it with `isinstance`, `TypeIs`, or pattern matching — never assume
 
 ## 4. Error Handling as Control Flow
+
+> **See myai's `engineering-principles` for the language-agnostic version.** Python-specific: `Result[T, E]` from rusty-results, three error boundaries (library/component/global), async task safety nets.
 
 Errors are a normal part of program execution, not exceptional events. The type system should track them.
 
@@ -49,6 +59,8 @@ Errors are a normal part of program execution, not exceptional events. The type 
 
 ## 5. Testing Philosophy
 
+> **See myai's `engineering-principles`, `high-level-testing-strategy`, and `test-driven-development` for the language-agnostic version.** Python-specific: pytest fixtures, CLI/e2e tests as primary safety net, pytest-qt, pytest-httpserver, containerized test environments.
+
 Tests exist to prove that features work, not to produce green checkmarks.
 
 - **Trustworthiness over coverage.** A test that mocks away the thing it's testing proves nothing. Coverage numbers are a guideline, not a goal.
@@ -59,6 +71,8 @@ Tests exist to prove that features work, not to produce green checkmarks.
 - **Two tiers of infrastructure.** Lightweight (pytest, fixtures, markers) for most projects. Heavyweight (containers, mock servers, isolated environments) when the project warrants investment.
 
 ## 6. Architecture: Separation by Responsibility
+
+> **See myai's `engineering-principles` and `architecting-changes` for the language-agnostic version.** Python-specific: src layout, layered dependency flow (Presentation → Domain → Utilities), UI as plugin, composition over inheritance, typed wrappers enforced via ruff `banned-api`.
 
 Separate what changes for different reasons. Separate what should be testable independently.
 
@@ -74,6 +88,8 @@ Separate what changes for different reasons. Separate what should be testable in
 
 ## 7. Tooling: Fast, Strict, Modern
 
+> **See myai's `engineering-principles` for the language-agnostic version.** Python-specific: uv, basedpyright, ruff, pytest, poethepoet, pre-commit, PEP 723 inline metadata, PySide6 over PyQt, latest stable Python.
+
 Use tools that enforce the philosophy automatically. Prefer tools that are fast, opinionated, and all-in-one over legacy alternatives.
 
 - **`uv`** for package management and script execution — fast, handles PEP 723 inline scripts
@@ -88,6 +104,8 @@ Use tools that enforce the philosophy automatically. Prefer tools that are fast,
 
 ## 8. CLI: typer. GUI: PySide6. Text output: Jinja2
 
+> **See myai's `engineering-principles` for the language-agnostic version.** Python-specific: typer for CLI (argparse only for stdlib-only scripts), PySide6 + qasync for GUI, Jinja2 for text generation, httpx for HTTP, colorlog for logging, YAML + msgspec for config.
+
 Standard tools for standard tasks:
 
 - **CLI**: typer for all projects with `uv`. argparse only for stdlib-only scripts without external deps.
@@ -97,6 +115,8 @@ Standard tools for standard tasks:
 - **Async**: for all I/O operations. `asyncio.create_subprocess_exec()` for subprocesses. Never `subprocess.run()` in async context. Never `time.sleep()` in event loops.
 
 ## 9. Project Setup: Invest Early
+
+> **See myai's `engineering-principles` for the language-agnostic version.** Python-specific: PEP 723 for single scripts, src layout + pyproject.toml + pre-commit for full projects, stronger scaffolding when domain complexity is real.
 
 Every project, no matter how small, starts with the safety net configured:
 

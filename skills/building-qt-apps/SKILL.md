@@ -7,6 +7,12 @@ description: >
 
 # Building Qt Apps
 
+## Prerequisites
+
+This skill extends myai's `architecting-changes` and `engineering-principles`. Load those first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general architecture principles and engineering philosophy, see myai's `architecting-changes` and `engineering-principles`. This skill covers only Python-specific Qt patterns: PySide6 + qasync, Manager→Service→Wrapper layering, signals/slots, QML integration, XDG desktop portals, and Qt-specific testing with pytest-qt.
+
 Qt apps use PySide6 with qasync for async integration. Architecture follows Manager → Service → Wrapper layering. Never block the event loop.
 
 ---
@@ -450,3 +456,15 @@ On Linux, file dialogs use XDG Desktop Portals for native system pickers (with f
 **Requirements:** `xdg-desktop-portal` + a desktop backend (`xdg-desktop-portal-kde`, `xdg-desktop-portal-gnome`, etc.).
 
 **No code changes needed** — standard `QFileDialog` calls automatically use portals when the platform theme is set. In Flatpak environments, portals are used transparently without any configuration.
+
+---
+
+## Related myai Skills
+
+- **`architecting-changes`** — Parent skill. Language-agnostic architecture decision framework.
+- **`engineering-principles`** — Parent skill. Language-agnostic philosophy: architecture separation, async patterns.
+- **`building-multi-ui-apps`** — Python-specific multi-interface patterns when Qt GUI shares a core with CLI/API.
+- **`setting-up-shortcuts`** — Python-specific keyboard shortcut setup for PySide6 apps.
+- **`setting-up-logging`** — Python-specific logging setup including QML log routing.
+- **`testing-python`** — Python-specific testing with pytest-qt.
+- **`writing-python-code`** — Python-specific coding rules (type system, error handling, async patterns).

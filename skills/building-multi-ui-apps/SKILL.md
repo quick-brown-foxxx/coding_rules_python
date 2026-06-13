@@ -1,11 +1,17 @@
 ---
 name: building-multi-ui-apps
 description: >-
-  ALWAYS LOAD THIS SKILL WHEN A PYTHON APP HAS MULTIPLE INTERFACES SHARING LOGIC, SUCH AS CLI, GUI, API, OR AUTOMATION ENTRY POINTS. Do not architect multi-interface apps directly — use this skill first.
+  Python-specific extension to myai's `architecting-changes`. Load after myai's `architecting-changes` when a Python app has multiple interfaces sharing logic, such as CLI, GUI, API, or automation entry points.
   Multi-interface Python apps: reusable core, thin adapters, composition root, and layered architecture for GUI + CLI + API sharing business logic.
 ---
 
 # Building Multi-UI Apps
+
+## Prerequisites
+
+This skill extends myai's `architecting-changes`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general architecture principles (reusable cores, thin adapters, composition roots, dependency injection), see myai's `architecting-changes`. This skill covers only Python-specific multi-interface patterns: PySide6 GUI + typer CLI + FastAPI sharing a domain core, entry point routing, platform abstraction, and composition root wiring.
 
 UI is a plugin. Build a reusable core first, then keep each interface as a thin adapter around it. Adding a new interface (CLI, GUI, API) should not change business logic.
 
@@ -297,3 +303,14 @@ async def create_profile(req: CreateProfileRequest) -> ProfileResponse:
 ```
 
 Other presentation layers also possible in specific cases: TUI, python exportable API
+
+---
+
+## Related myai Skills
+
+- **`architecting-changes`** — Parent skill. Language-agnostic architecture decision framework: reusable cores, thin adapters, composition roots.
+- **`engineering-principles`** — Language-agnostic philosophy: architecture separation, UI as plugin.
+- **`architecting-python-changes`** — Python-specific architecture router.
+- **`building-qt-apps`** — Python-specific PySide6 GUI patterns.
+- **`building-python-backends`** — Python-specific backend patterns when adding an API layer.
+- **`writing-python-code`** — Python-specific coding rules for the shared domain core.

@@ -7,6 +7,12 @@ description: >
 
 # Writing Python Scripts
 
+## Prerequisites
+
+This skill extends myai's `engineering-principles`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general engineering philosophy, see myai's `engineering-principles`. This skill covers only Python-specific script patterns: PEP 723 inline metadata, `uv run --script`, typer CLI, and single-file conventions.
+
 Single-file scripts use PEP 723 inline metadata for dependencies, executed via `uv run --script`. All type safety and error handling rules from `writing-python-code` still apply.
 
 ---
@@ -135,3 +141,11 @@ Use typer for all scripts with `uv`. Use argparse only if the script must work w
 Scripts must not dump tracebacks on Ctrl+C. The template entry point above catches `KeyboardInterrupt` and exits with code 130 (Unix convention: 128 + signal 2).
 
 If a script spawns subprocesses, always use `start_new_session=True` so Ctrl+C can kill the entire process tree. See `setting-up-python-projects` skill for subprocess shutdown patterns.
+
+---
+
+## Related myai Skills
+
+- **`engineering-principles`** — Parent skill. Language-agnostic philosophy.
+- **`writing-python-code`** — Python-specific coding rules that apply to scripts too (type system, error handling, async patterns).
+- **`setting-up-python-projects`** — When a script grows beyond ~500 lines and needs a full project layout.

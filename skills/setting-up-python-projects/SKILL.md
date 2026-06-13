@@ -7,6 +7,12 @@ description: >-
 
 # Setting Up Python Projects
 
+## Prerequisites
+
+This skill extends myai's `engineering-principles`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general project setup philosophy (invest early, pit of success, safety net), see myai's `engineering-principles`. This skill covers only Python-specific bootstrap: uv, ruff, basedpyright, pytest, pre-commit, src layout, templates, and the bootstrap script.
+
 New projects start with the full safety net configured. The bootstrap flow is local and explicit: promote the template files into their final locations, copy `shared/` and `shared_tests/`, copy the docs references into `docs/`, then customize.
 
 For standalone scripts, use `writing-python-scripts`. For backend/service repos, start with `setting-up-python-backends`. For architecture shape of the project after bootstrap or updating an existing project, use `architecting-python-changes`. Come here when the answer is really about bootstrap, repo shape, or initial scaffolding for a general Python project.
@@ -302,3 +308,13 @@ When setting up a project in an unfamiliar domain or with unfamiliar libraries:
 - [ ] coding_rules.md has domain-specific additions if needed
 - [ ] Test structure reflects what matters most for this project
 - [ ] basedpyright config accounts for domain-specific library quirks
+
+---
+
+## Related myai Skills
+
+- **`engineering-principles`** — Parent skill. Language-agnostic project setup philosophy: invest early, pit of success, safety net.
+- **`architecting-changes`** — For architecture decisions about project shape and framework choice. Load `architecting-python-changes` for Python-specific routing.
+- **`ci-cd-and-automation`** — For CI/CD pipeline setup after bootstrap.
+- **`writing-python-code`** — Python-specific coding rules for the code you'll write in the new project.
+- **`testing-python`** — Python-specific testing setup after bootstrap.

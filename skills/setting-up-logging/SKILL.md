@@ -1,11 +1,17 @@
 ---
 name: setting-up-logging
 description: >
-  ALWAYS LOAD THIS SKILL WHEN ADDING LOGGING, CONFIGURING LOG OUTPUT, OR SETTING UP COLORLOG. Do not configure Python logging directly — use this skill first.
+  ALWAYS LOAD THIS SKILL WHEN ADDING LOGGING, CONFIGURING LOG OUTPUT, OR SETTING UP COLORLOG IN PYTHON. Do not configure Python logging directly — use this skill first.
   Set up colored logging and stdout output for Python apps and CLI tools using colorlog.
 ---
 
 # Setting Up Logging
+
+## Prerequisites
+
+This skill extends myai's `engineering-principles`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general logging philosophy, see myai's `engineering-principles`. This skill covers only Python-specific logging setup: colorlog configuration, file/stdout logging modes, CLI user output helpers, and QML log routing for PySide6 apps.
 
 Rotating file logging, colored stdout logging, and colored non-log output. Uses `colorlog` for prefix-only coloring (log prefix is colored, message text stays default).
 
@@ -165,3 +171,12 @@ Yellow text to stdout.
 
 ### `write_error(message)`
 Red text to stderr.
+
+---
+
+## Related myai Skills
+
+- **`engineering-principles`** — Parent skill. Language-agnostic philosophy.
+- **`building-qt-apps`** — For QML log routing integration with PySide6 apps.
+- **`writing-python-code`** — Python-specific coding rules for logger usage in application code.
+- **`setting-up-python-projects`** — For including `shared/logging/` in new project bootstrap.

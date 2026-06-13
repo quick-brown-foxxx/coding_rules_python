@@ -1,48 +1,28 @@
 ---
 name: testing-python
 description: >
-  ALWAYS LOAD THIS SKILL WHEN WRITING TESTS, ADDING FIXTURES, OR SETTING UP PYTEST. Do not write Python tests directly — use this skill first.
-  Python testing with pytest: philosophy, fixtures, mock servers, containerized testing.
+  Python-specific extension to myai's `high-level-testing-strategy`, `test-driven-development`, and `manual-testing`. Load after those myai skills when writing Python tests, adding fixtures, or setting up pytest.
+  Python testing with pytest: fixtures, CLI/e2e tests, mock servers, containerized testing, pytest-qt.
 ---
 
 # Testing Python
 
-Tests prove features work. Coverage is secondary. E2e tests beat unit tests. Real beats mocked.
+## Prerequisites
+
+This skill extends myai's `high-level-testing-strategy`, `test-driven-development`, and `manual-testing`. Load those first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+
+For the general testing philosophy (trustworthiness over coverage, e2e over unit, real over mocked, Pareto principle), see myai's `engineering-principles` and `high-level-testing-strategy`. For the TDD red-green-refactor workflow, see myai's `test-driven-development`. For manual verification patterns, see myai's `manual-testing`. This skill covers only Python-specific testing tooling and patterns: pytest fixtures, CLI/e2e test patterns, containerized testing, mock servers, and pytest-qt.
 
 ---
 
-## Philosophy
+## Test Planning & Priority
 
-- **Trustworthiness > coverage.** A test that mocks away the tested thing proves nothing.
-- **5 good e2e tests > 100 unit tests** with heavy mocking.
-- **Pareto principle.** Write the fewest tests that cover 80% of what matters. E2e tests naturally do this.
-- **Unit tests for pure logic only.** Functions that transform data honestly.
-- **Real over mocked.** Real HTTP servers (pytest-httpserver), real tmp dirs, real processes.
+**Python-specific test priority:**
 
----
-
-## Test Planning
-
-When writing new tests, plan before coding:
-
-1. List all potential test cases for the feature
-2. Categorize each as **critical**, **medium**, or **small** importance
-3. Discard small-importance cases — not worth the maintenance cost
-4. Write remaining cases **in plain text** to `docs/plans/test-cases-<feature>.md`
-5. Only then write test code
-
----
-
-## Test Priority
-
-1. **CLI / e2e tests** — run actual commands, check output + exit codes
-2. **Integration tests** — component interaction through public API
+1. **CLI / e2e tests** — run actual commands via `subprocess.run(["uv", "run", "poe", "app", ...])`, check output + exit codes
+2. **Integration tests** — component interaction through public API, real tmp dirs, pytest-httpserver
 3. **Unit tests** — pure data transformation functions
 4. **Skip** — framework glue, UI layout, trivial getters
-
----
-
-## Project Setup
 
 ### Directory Structure
 
@@ -205,21 +185,19 @@ uv run pytest --cov                # With coverage report
 
 ## Test Isolation
 
-**Every test must set up its own state and clean up after itself.** Use `tmp_path` for files, `monkeypatch` for env vars, `yield` fixtures for teardown. Never rely on test ordering or shared mutable state. For heavy setup (containers, DB), isolate between groups — scope fixtures to `session`/`module` and use non-overlapping namespaces.
-
-Tests that pass alone but fail in parallel are **broken tests** — fix isolation, don't disable parallelism.
+Python-specific: use `tmp_path` for files, `monkeypatch` for env vars, `yield` fixtures for teardown.
 
 ---
 
 ## Flaky Tests
 
-A flaky test is worse than a broken one — broken tests block immediately, flaky tests erode trust silently. **Never ignore a flaky test.** Fix it, rewrite it, or if the root cause is complex — file a bug and report to the user. No other options.
+> **For the general approach to flaky tests, see myai's `systematic-debugging`.**
 
 ---
 
 ## Coverage Guidelines
 
-Not targets to chase, but sanity checks:
+> **For the general coverage philosophy (guideline, not target), see myai's `engineering-principles`.** Python-specific sanity checks:
 
 | Area | Guideline |
 |------|-----------|
@@ -228,45 +206,19 @@ Not targets to chase, but sanity checks:
 | UI components | >40% |
 | Utilities | As needed |
 
-If coverage is low but e2e tests cover the workflows, that's fine.
+
 
 ---
 
 ## Test Validation
 
-After all tests are written and passing, dispatch a separate sub-agent to validate test quality. The validation agent must check:
-
-- **Meaningful coverage** — are tests verifying real behavior, or just producing green checkmarks by testing getters/setters/trivial glue?
-- **Correctness** — are assertions actually testing the right thing? No tautologies, no asserting mocks return what they were told to return.
-- **No source code compromises** — was production code incorrectly adjusted just to make tests pass? Logic changes that serve tests rather than users are bugs.
-- **No shortcuts** — no `# type: ignore` to silence test failures, no overly broad exception catching, no tests that pass regardless of input.
-
-This step is mandatory before submitting work as complete.
+> **For the general test quality review process, see myai's `doing-code-review` and `verification-before-completion`.**
 
 ---
 
 ## Heavyweight Testing
 
 When lightweight testing isn't enough. Same philosophy, higher infrastructure complexity.
-
-**Status: Design document. Not yet fully implemented.**
-
-### When to Use
-
-- Project has external dependencies (APIs, databases, system services)
-- Features depend on specific system state (installed binaries, running daemons)
-- Integration failures are costly or hard to debug
-- Project is long-lived and maintained by multiple people
-
-### Investment Decision
-
-Ask before building heavyweight infrastructure:
-
-1. Will this project live long enough to justify the setup time?
-2. Are integration failures actually happening or just theoretical?
-3. Can lightweight testing (real tmp dirs, pytest-httpserver) cover 80% of the risk?
-
-If yes to all three: build it. If not: stick with lightweight.
 
 ### Core Idea
 
@@ -420,4 +372,15 @@ def dbus_session() -> Generator[str, None, None]:
     process.terminate()
     process.wait()
 ```
+
+---
+
+## Related myai Skills
+
+- **`high-level-testing-strategy`** — Parent skill. BDD-first test planning, behavior scenarios, automation scope, mock boundaries.
+- **`test-driven-development`** — Parent skill. Red-green-refactor workflow for automated tests.
+- **`manual-testing`** — Parent skill. Realistic manual verification with environment preflight, isolation, evidence.
+- **`architecting-test-infra`** — For setting up test infrastructure, fixtures, state isolation, seed layers.
+- **`engineering-principles`** — Language-agnostic testing philosophy: trustworthiness over coverage, real over mocked.
+- **`writing-python-code`** — Python-specific coding rules that apply to test code too.
 
