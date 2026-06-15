@@ -127,7 +127,7 @@ Add those only when the project actually needs them.
 
 ## Handoff
 
-- Use `building-python-backends` for day-2 backend architecture and service/API/worker shaping.
+- Use `building-backends` (myai) for day-2 backend architecture and service/API/worker shaping.
 - Use `building-multi-ui-apps` if API, CLI, and automation share one core.
 - Use `writing-python-code` for implementation rules.
 
@@ -139,5 +139,5 @@ Add those only when the project actually needs them.
 - **`api-design`** (myai) — Stable API and protocol design.
 - **`security-and-hardening`** (myai) — Auth, secrets, boundary hardening.
 - **`setting-up-python-projects`** — Generic Python bootstrap pieces (templates, shared code).
-- **`building-python-backends`** — Day-2 backend architecture.
+- **`building-backends`** (myai) — Day-2 backend architecture.
 - **`testing-python`** — Python API/service test setup.

@@ -24,7 +24,7 @@ Also requires `engineering-principles` (via myai bootstrap).
 Use `setting-up-projects` for all project bootstrap decisions, then load this
 extension for Python-specific tooling when the project is Python.
 
-For standalone scripts, use `writing-python-scripts`. For backend/service repos,
+For standalone scripts, use `writing-scripts` (myai). For backend/service repos,
 start with `setting-up-python-backends` (Python-specific) after myai's
 `setting-up-backends`. For architecture shape decisions on existing projects,
 use `architecting-python-changes`.
@@ -286,7 +286,7 @@ When setting up a project in an unfamiliar domain or with unfamiliar libraries:
 - **`setting-up-projects`** (myai) — Parent skill. Load first for project shape decisions and bootstrap philosophy.
 - **`engineering-principles`** (myai) — Foundation. Language-agnostic philosophy.
 - **`architecting-changes`** (myai) — Architecture decisions.
-- **`writing-python-scripts`** — For single-file Python scripts (not full projects).
+- **`writing-scripts`** (myai) — For single-file scripts (Python and TypeScript/Node examples).
 - **`setting-up-python-backends`** — For backend/service repos.
 - **`testing-python`** — Python testing setup.
 - **`writing-python-code`** — Python coding rules.

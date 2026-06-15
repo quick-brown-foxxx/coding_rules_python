@@ -17,19 +17,17 @@ Each Python skill here extends one or more myai parent skills. The load order is
 3. Relevant myai workflow skill (e.g., `architecting-changes`, `test-driven-development`)
 4. Python-specific extension from this repo (e.g., `writing-python-code`, `testing-python`)
 
-The 11 Python skills and their myai parents:
+The 9 Python skills and their myai parents
 
 | Python Skill | myai Parent(s) |
 |---|---|
 | `writing-python-code` | `engineering-principles` |
-| `writing-python-scripts` | `engineering-principles` |
 | `testing-python` | `high-level-testing-strategy`, `test-driven-development`, `manual-testing` |
 | `architecting-python-changes` | `architecting-changes` |
-| `setting-up-python-projects` | `engineering-principles` |
-| `setting-up-python-backends` | `engineering-principles`, `architecting-changes` |
+| `setting-up-python-projects` | `engineering-principles`, `setting-up-projects` |
+| `setting-up-python-backends` | `engineering-principles`, `architecting-changes`, `setting-up-backends` |
 | `setting-up-logging` | `engineering-principles` |
 | `setting-up-shortcuts` | `engineering-principles` |
-| `building-python-backends` | `architecting-changes`, `api-design` |
 | `building-multi-ui-apps` | `architecting-changes` |
 | `building-qt-apps` | `architecting-changes`, `engineering-principles` |
 
@@ -77,7 +75,7 @@ The `shared/` folder contains copy-paste building blocks for new projects, not a
 ### Starting a new project
 
 1. Read `PHILOSOPHY.md` for the mindset
-2. Decide: single script, general Python project, or backend/service repo? (use `writing-python-scripts` for scripts, `setting-up-python-projects` for general packages/apps, and `setting-up-python-backends` for service/API repos)
+2. Decide: single script, general Python project, or backend/service repo? (use `writing-scripts` (myai) for scripts, `setting-up-python-projects` for general packages/apps, and `setting-up-python-backends` for service/API repos)
 3. Promote template files into place: `AGENTS.md`, `pyproject.toml`, `.pre-commit-config.yaml`, `.gitignore`, and `.vscode/`
    Shortcut: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
 4. Copy `shared/` and `shared_tests/` into the new project root
@@ -90,7 +88,7 @@ From this point on, prefer project-local commands through `uv` rather than syste
 
 ### For AI agents
 
-Deploy skills from `skills/` to `~/.claude/skills/`. Load `architecting-python-changes` when a feature, fix, or refactor may require architecture decisions, then follow it to the right existing docs and domain skills. For new backend repos, start with `setting-up-python-backends`, then use `setting-up-python-projects` for generic bootstrap pieces as needed. Load `building-python-backends` for backend structure decisions and `writing-python-code` for the actual Python editing rules.
+Deploy skills from `skills/` to `~/.claude/skills/`. Load `architecting-python-changes` when a feature, fix, or refactor may require architecture decisions, then follow it to the right existing docs and domain skills. For new backend repos, start with `setting-up-python-backends`, then use `setting-up-python-projects` for generic bootstrap pieces as needed. Load `building-backends` (myai) for backend structure decisions and `writing-python-code` for the actual Python editing rules.
 
 ### Quick reference
 

@@ -312,5 +312,5 @@ Other presentation layers also possible in specific cases: TUI, python exportabl
 - **`engineering-principles`** — Language-agnostic philosophy: architecture separation, UI as plugin.
 - **`architecting-python-changes`** — Python-specific architecture router.
 - **`building-qt-apps`** — Python-specific PySide6 GUI patterns.
-- **`building-python-backends`** — Python-specific backend patterns when adding an API layer.
+- **`building-backends`** (myai) — Backend architecture patterns when adding an API layer.
 - **`writing-python-code`** — Python-specific coding rules for the shared domain core.

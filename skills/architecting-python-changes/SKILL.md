@@ -56,8 +56,8 @@ Follow the 6-step flow in myai's `architecting-changes` (classify → find chang
 - `setting-up-python-backends`
   - Use when the repo is primarily a backend, API service, or worker-oriented system and you need backend-specific scaffolding, migrations, health endpoints, app factory choices, or service-first layout defaults.
 
-- `building-python-backends`
-  - Use when the architecture question is about backend/service layering, transport vs domain boundaries, transactions, auth/session edges, workers, or important operation flows.
+- `building-backends` (myai)
+  - Use when the architecture question is about backend/service layering, transport vs domain boundaries, transactions, auth/session edges, workers, or important operation flows. Has Python and TypeScript/Node ecosystem examples.
 
 - `building-multi-ui-apps`
   - Use when CLI, GUI, API, or automation share business logic and you need adapters, a composition root, or interface separation.

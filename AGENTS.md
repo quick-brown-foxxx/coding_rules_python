@@ -12,21 +12,19 @@ Think of it as: **myai = the engine and chassis; this repo = the Python body kit
 
 ## What's Here
 
-### Python Skills (11)
+### Python Skills (9)
 
 Each skill is a Python-specific extension of one or more myai parent skills. Load the myai parent first, then load the Python extension.
 
 | Python Skill | myai Parent(s) | Description |
 |---|---|---|
 | `writing-python-code` | `engineering-principles` | basedpyright strict typing, `Result[T,E]` error handling, async patterns, code style, security |
-| `writing-python-scripts` | `engineering-principles` | PEP 723 inline metadata, `uv run --script`, typer CLI for single-file scripts |
 | `testing-python` | `high-level-testing-strategy`, `test-driven-development`, `manual-testing` | pytest fixtures, CLI/e2e tests, containerized testing, mock servers, pytest-qt |
 | `architecting-python-changes` | `architecting-changes` | Python-specific architecture router: boundaries, wrappers, reusable cores, framework choices |
-| `setting-up-python-projects` | `engineering-principles` | Bootstrap general Python projects: uv, ruff, basedpyright, pre-commit, src layout, templates |
-| `setting-up-python-backends` | `engineering-principles`, `architecting-changes` | Backend/API bootstrap: FastAPI/Django, app factory, migrations, service-first layout |
+| `setting-up-python-projects` | `engineering-principles`, `setting-up-projects` | Bootstrap general Python projects: uv, ruff, basedpyright, pre-commit, src layout, templates |
+| `setting-up-python-backends` | `engineering-principles`, `architecting-changes`, `setting-up-backends` | Backend/API bootstrap: FastAPI/Django, app factory, migrations, service-first layout |
 | `setting-up-logging` | `engineering-principles` | colorlog setup, file/stdout logging modes, CLI user output helpers, QML log routing |
 | `setting-up-shortcuts` | `engineering-principles` | PySide6 keyboard shortcuts with TOML config and platform-specific defaults |
-| `building-python-backends` | `architecting-changes`, `api-design` | Backend architecture: transport/domain boundaries, Result-to-HTTP, transactions, workers, auth |
 | `building-multi-ui-apps` | `architecting-changes` | Multi-interface apps: reusable core, thin CLI/GUI/API adapters, composition root, entry routing |
 | `building-qt-apps` | `architecting-changes`, `engineering-principles` | PySide6 desktop apps: qasync, Manager→Service→Wrapper, signals, QML, XDG portals |
 
@@ -60,7 +58,7 @@ Python-specific philosophy document. The canonical language-agnostic engineering
 
 - Load `architecting-python-changes` when a feature, fix, or refactor requires architecture decisions
 - For new backend repos, start with `setting-up-python-backends`, then pull generic pieces from `setting-up-python-projects`
-- Load `building-python-backends` for backend structure decisions and `writing-python-code` for implementation rules
+- Load `building-backends` (myai) for backend structure decisions and `writing-python-code` for implementation rules
 - Load `building-multi-ui-apps` when CLI, GUI, and API share business logic
 - Load `building-qt-apps` for PySide6-specific architecture, signals, and async integration
 
