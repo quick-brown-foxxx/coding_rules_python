@@ -1,4 +1,4 @@
-THANTHAN---
+---
 name: setting-up-python-projects
 description: >-
   Python-specific extension to myai's `setting-up-projects`.
