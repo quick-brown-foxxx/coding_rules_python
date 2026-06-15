@@ -1,41 +1,35 @@
 ---
 name: setting-up-python-backends
 description: >-
-  ALWAYS LOAD THIS SKILL WHEN BOOTSTRAPPING A NEW PYTHON BACKEND, API SERVICE, OR WEB/WORKER REPO, OR WHEN CHOOSING ITS INITIAL SERVICE-ORIENTED PROJECT SHAPE. Do not scaffold Python backends directly — use this skill first.
-  Backend/API bootstrap for Python: framework choice, backend repo layout, app factory/composition root, config, migrations, workers, API test setup, and service-first project conventions.
+  Python-specific extension to myai's `setting-up-backends`.
+  ALWAYS LOAD `setting-up-backends` FIRST, AND THAN THIS skill for Python backend tooling.
+  Backend/API bootstrap for Python: FastAPI/Django choice, backend repo layout,
+  app factory, SQLAlchemy+Alembic, pydantic at edge, migrations, and service-first conventions.
 ---
 
 # Setting Up Python Backends
 
 ## Prerequisites
 
-This skill extends myai's `engineering-principles` and `architecting-changes`. Load those first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+This is a Python-specific extension to myai's `setting-up-backends`.
+**Load `setting-up-backends` first** for the backend architecture philosophy,
+directory layout patterns, wiring rules, defer-by-default guidance, and
+migrations/operations strategy. This skill provides only Python-specific
+framework choices, library selections, and code patterns.
 
-For the general project setup philosophy and architecture decision framework, see myai's `engineering-principles` and `architecting-changes`. This skill covers only Python-specific backend bootstrap: FastAPI/Django choice, backend repo layout, app factory, migrations, and service-first conventions.
+Also requires `engineering-principles` and `architecting-changes` (via myai bootstrap).
 
 This skill is a backend-specialized extension of `setting-up-python-projects`.
-Use it when the repo is primarily a service, API, or worker-oriented backend. Start here for backend repos, then pull generic bootstrap pieces from `setting-up-python-projects` as needed.
+Start here for backend repos, then pull generic Python bootstrap pieces from
+`setting-up-python-projects` as needed.
 
----
+## Python Framework Choice
 
-## Default Approach
+- **FastAPI** is the default boring choice for most service APIs.
+- **Django** is justified when auth, admin, sessions, and CRUD-heavy backend surface are obviously large from the start.
+- **Starlette** is for deliberate thin-edge builds, not as a default.
 
-1. Choose framework weight:
-   - **FastAPI** is the default boring choice for most service APIs.
-   - **Django** is justified when auth, admin, sessions, and CRUD-heavy backend surface are obviously large from the start.
-   - **Starlette** is for deliberate thin-edge builds, not as a default.
-2. Start with a reusable core and thin transport:
-   - routes, workers, schedulers, CLI hooks, and automation call the same core services
-3. Add infrastructure only when needed:
-   - relational DB -> `SQLAlchemy 2` + `Alembic`
-   - auth/OIDC/JWT -> `Authlib`
-   - outbound HTTP -> `httpx`
-   - cache/jobs -> `Redis`, and optionally `Dramatiq` when durable background work actually exists
-4. Keep one composition root and one app factory.
-
----
-
-## Default Stack
+## Python Default Stack
 
 - `FastAPI` + `uvicorn`
 - `pydantic` models at the FastAPI HTTP edge; `msgspec.Struct` for config and non-framework external payload decoding
@@ -48,9 +42,9 @@ Use it when the repo is primarily a service, API, or worker-oriented backend. St
 
 Keep `pydantic` request/response DTOs at the HTTP boundary and convert immediately into framework-free typed structures.
 
----
+## Python Backend Layout
 
-## Default Layout
+See `setting-up-backends` for the philosophy behind this layout.
 
 ```text
 src/appname/
@@ -83,8 +77,6 @@ migrations/
 
 Omit what you do not need. No DB, no `db/` or `migrations/`. No workers, no `workers/`.
 
----
-
 ## First Files
 
 - `api/app.py` with `create_app()`
@@ -94,8 +86,6 @@ Omit what you do not need. No DB, no `db/` or `migrations/`. No workers, no `wor
 - `infrastructure/config.py` to parse env into typed settings
 - DB files and migrations only if persistence exists
 - one smoke API test and one domain test
-
----
 
 ## Wiring Rules
 
@@ -113,19 +103,16 @@ Omit what you do not need. No DB, no `db/` or `migrations/`. No workers, no `wor
 - Convert request data and auth/session state at the edge.
 - Workers are another adapter, not a separate business-logic stack.
 - CLI/admin scripts should call the same core services when they touch the same workflows.
-
----
-
-## Migrations and Operations
+## Python Migrations and Operations
 
 - If the service owns a relational DB, initialize `Alembic` early.
 - Add health and readiness endpoints early.
 - Keep dev run, lint, test, and migrate commands in Poe tasks.
 - Containerize when needed, but keep v1 Linux-first and boring.
 
----
-
 ## Defer by Default
+
+See `setting-up-backends` for the full defer-by-default philosophy. The list below is the Python ecosystem application:
 
 - queues and background-job stacks
 - caching layers
@@ -138,22 +125,19 @@ Omit what you do not need. No DB, no `db/` or `migrations/`. No workers, no `wor
 
 Add those only when the project actually needs them.
 
----
-
 ## Handoff
 
 - Use `building-python-backends` for day-2 backend architecture and service/API/worker shaping.
 - Use `building-multi-ui-apps` if API, CLI, and automation share one core.
 - Use `writing-python-code` for implementation rules.
 
----
+## Related Skills
 
-## Related myai Skills
-
-- **`engineering-principles`** — Parent skill. Language-agnostic project setup philosophy.
-- **`architecting-changes`** — Parent skill. Architecture decision framework for backend shape. Load `architecting-python-changes` for Python-specific routing.
-- **`api-design`** — For stable API and protocol/interface design at the HTTP boundary.
-- **`security-and-hardening`** — For auth, secrets, and boundary hardening in backend services.
-- **`setting-up-python-projects`** — Python-specific generic bootstrap pieces (templates, shared code, tooling).
-- **`building-python-backends`** — Python-specific backend architecture for day-2 decisions.
-- **`testing-python`** — Python-specific testing setup for API/service tests.
+- **`setting-up-backends`** (myai) — Parent skill. Load first for backend architecture philosophy.
+- **`engineering-principles`** (myai) — Foundation.
+- **`architecting-changes`** (myai) — Architecture decisions.
+- **`api-design`** (myai) — Stable API and protocol design.
+- **`security-and-hardening`** (myai) — Auth, secrets, boundary hardening.
+- **`setting-up-python-projects`** — Generic Python bootstrap pieces (templates, shared code).
+- **`building-python-backends`** — Day-2 backend architecture.
+- **`testing-python`** — Python API/service test setup.

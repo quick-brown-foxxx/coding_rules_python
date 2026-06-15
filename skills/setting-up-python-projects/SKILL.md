@@ -1,41 +1,41 @@
----
+THANTHAN---
 name: setting-up-python-projects
 description: >-
-  ALWAYS LOAD THIS SKILL WHEN CREATING A BRAND-NEW GENERAL-PURPOSE PYTHON PACKAGE OR APP, BOOTSTRAPPING A NON-BACKEND REPO, OR CHOOSING ITS INITIAL NON-SCRIPT, NON-SERVICE PROJECT SHAPE. Do not scaffold general Python projects directly — use this skill first.
-  Bootstrap general Python projects: choose project shape, directory structure, framework/scaffolding level, pyproject.toml, pre-commit, uv sync.
+  Python-specific extension to myai's `setting-up-projects`.
+  ALWAYS LOAD `setting-up-projects` FIRST, THAN THIS skill for Python tooling.
+  Bootstrap general Python projects: uv, ruff, basedpyright, pytest, pre-commit,
+  src layout, pyproject.toml, templates, bootstrap script, graceful shutdown code.
 ---
 
 # Setting Up Python Projects
 
 ## Prerequisites
 
-This skill extends myai's `engineering-principles`. Load that first. `using-my-skills` and `engineering-principles` are assumed already loaded via myai bootstrap.
+This is a Python-specific extension to myai's `setting-up-projects`.
+**Load `setting-up-projects` first** for the project shape decision framework,
+directory layout patterns, bootstrap checklist philosophy, graceful shutdown
+strategy, and domain adaptation guidance. This skill provides only the
+Python-specific tooling, config, and code examples.
 
-For the general project setup philosophy (invest early, pit of success, safety net), see myai's `engineering-principles`. This skill covers only Python-specific bootstrap: uv, ruff, basedpyright, pytest, pre-commit, src layout, templates, and the bootstrap script.
+Also requires `engineering-principles` (via myai bootstrap).
 
-New projects start with the full safety net configured. The bootstrap flow is local and explicit: promote the template files into their final locations, copy `shared/` and `shared_tests/`, copy the docs references into `docs/`, then customize.
+## When to Use This Extension
 
-For standalone scripts, use `writing-python-scripts`. For backend/service repos, start with `setting-up-python-backends`. For architecture shape of the project after bootstrap or updating an existing project, use `architecting-python-changes`. Come here when the answer is really about bootstrap, repo shape, or initial scaffolding for a general Python project.
+Use `setting-up-projects` for all project bootstrap decisions, then load this
+extension for Python-specific tooling when the project is Python.
 
-Make sure to read repo's readme.
+For standalone scripts, use `writing-python-scripts`. For backend/service repos,
+start with `setting-up-python-backends` (Python-specific) after myai's
+`setting-up-backends`. For architecture shape decisions on existing projects,
+use `architecting-python-changes`.
 
----
+## Templates location
 
-## Choose the Shape First
+All templates, rules and docs are available at upstream source of this ruleset <https://github.com/quick-brown-foxxx/coding_rules_python>.
 
-Choose structure based on expected change axes and future callers, not aesthetics.
+## Python Project Layout
 
-| Situation | Default shape |
-|-----------|---------------|
-| One-off helper or tiny personal automation | Use `writing-python-scripts`; do not force a full project layout |
-| Reusable library or composable tool | Build a package around a clean core API, then add a thin CLI only if needed |
-| CLI app | `src/` package with `core/`, `cli/`, `utils/`, and `wrappers/` as needed |
-| Multi-interface app | Shared domain layer plus separate presentation adapters and one composition root |
-| Backend/service | Start with `setting-up-python-backends` for service-specific defaults, then keep thin transport plus separate domain/services and infrastructure boundaries |
-
----
-
-## Project Layout
+See `setting-up-projects` for the philosophy behind this layout.
 
 ```
 project/
@@ -86,18 +86,9 @@ project/
     └── extensions.json       # Copy from templates/vscode_extensions.json
 ```
 
----
+## Python Setup Checklist
 
-## Scaffolding and Framework Choice
-
-- Use stronger scaffolding early when the domain clearly needs auth, background jobs, caching, stateful workflows, migrations, or admin concerns.
-- Prefer boring maintained frameworks and libraries for commodity infrastructure instead of growing a custom stack by accident.
-- Do not start from a tiny framework if you already know multiple cross-cutting concerns are coming soon.
-- Do not drag a heavyweight framework into a tiny stable helper or a one-purpose wrapper.
-
----
-
-## Setup Checklist
+See `setting-up-projects` for the general bootstrap philosophy.
 
 1. **Create directory structure:**
    ```
@@ -112,90 +103,75 @@ project/
      - `templates/gitignore` → `.gitignore`
      - `templates/vscode_settings.json` → `.vscode/settings.json`
      - `templates/vscode_extensions.json` → `.vscode/extensions.json`
-    - Copy `shared/` and `shared_tests/` into the new project root if you need the provided building blocks. The template dependency set already covers a full copy; trim unused shared modules and dependencies afterward if you do not need them.
+   - Copy `shared/` and `shared_tests/` into the new project root if you need the provided building blocks. Trim unused shared modules and dependencies afterward.
    - Copy `rules/coding_rules.md` → `docs/coding_rules.md`
    - Copy `PHILOSOPHY.md` → `docs/PHILOSOPHY.md`
-    - Create symlink: `ln -s AGENTS.md CLAUDE.md`
-    - Canonical local bootstrap artifact: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
+   - Create symlink: `ln -s AGENTS.md CLAUDE.md`
+   - Canonical local bootstrap artifact: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
 
 3. **Trim copied shared modules (if needed):**
    - Keep only the `shared/` and `shared_tests/` subdirectories you actually use
-   - `shared/logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging` skill)
-   - `shared/shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts` skill)
+   - `shared/logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging`)
+   - `shared/shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts`)
    - Keep matching generic tests in `shared_tests/` beside the copied shared modules
    - Update import paths after copying if the project package name changes
 
 4. **Create entry points:**
-    ```python
-    # src/APPNAME/__init__.py
-    __version__ = "0.1.0"
+   ```python
+   # src/APPNAME/__init__.py
+   __version__ = "0.1.0"
 
-    # src/APPNAME/__main__.py
-    from __future__ import annotations
+   # src/APPNAME/__main__.py
+   from __future__ import annotations
 
-    import sys
+   import sys
 
-    def main() -> int:
-        from APPNAME.bootstrap import create_services
-        from APPNAME.cli import build_cli_app
+   def main() -> int:
+       from APPNAME.bootstrap import create_services
+       from APPNAME.cli import build_cli_app
 
-        services = create_services(debug=False)
-        app = build_cli_app(services)
-        app(args=sys.argv[1:], prog_name="APPNAME", standalone_mode=False)
-        return 0
+       services = create_services(debug=False)
+       app = build_cli_app(services)
+       app(args=sys.argv[1:], prog_name="APPNAME", standalone_mode=False)
+       return 0
 
-    if __name__ == "__main__":
-        sys.exit(main())
-    ```
-    Keep `__main__.py` thin. Assemble the real presentation layer elsewhere (`APPNAME.cli`, `APPNAME.gui`, API app factory, worker entrypoint, and so on) and let `__main__.py` do only the final handoff.
-
-    If the app has both GUI and CLI, or multiple interfaces sharing one core, do not invent a router here ad hoc. Use the dedicated pattern from `building-multi-ui-apps`.
+   if __name__ == "__main__":
+       sys.exit(main())
+   ```
+   Keep `__main__.py` thin. Assemble the real presentation layer elsewhere and let `__main__.py` do only the final handoff. For multi-interface apps, use the pattern from `building-multi-ui-apps`.
 
 5. **Create initial test:**
    ```python
-    # tests/test_main.py
-    from __future__ import annotations
+   # tests/test_main.py
+   from __future__ import annotations
 
-    import sys
+   import sys
 
-    import pytest
+   import pytest
 
-    from APPNAME.__main__ import main
+   from APPNAME.__main__ import main
 
-    def test_main_runs(monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(sys, "argv", ["APPNAME"])
-        assert main() == 0
-    ```
-   When testing entrypoints that read `sys.argv`, set the arguments explicitly with `monkeypatch` so the test does not depend on pytest's own command-line arguments.
+   def test_main_runs(monkeypatch: pytest.MonkeyPatch) -> None:
+       monkeypatch.setattr(sys, "argv", ["APPNAME"])
+       assert main() == 0
+   ```
 
 6. **Initialize environment:**
-     ```bash
-    git init
-    uv sync --all-extras --group dev
-    uv run poe lint_full
-    uv run poe test
-    ```
-
-   After setup, keep using project-local commands through `uv` rather than system-installed binaries: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`. The default verification flow is `uv run poe lint_full` followed by `uv run poe test`.
+   ```bash
+   git init
+   uv sync --all-extras --group dev
+   uv run poe lint_full
+   uv run poe test
+   ```
+   After setup, keep using project-local commands through `uv`: `uv run python`, `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run pre-commit`. The default verification flow is `uv run poe lint_full` followed by `uv run poe test`.
 
 7. **Verify everything works:**
    - `uv run poe lint_full` passes (basedpyright + Ruff check/format + custom linters)
    - `uv run poe test` passes
 
----
+## Python Graceful Shutdown
 
-## Graceful Shutdown
-
-Design every app to be interruptible without corruption, hanging, or ugly tracebacks. The shutdown strategy depends on what the app does:
-
-```
-App type                              → Strategy
-─────────────────────────────────────────────────────────────
-Simple script/CLI                     → catch KeyboardInterrupt, exit 130
-CLI wrapping a quick subtask          → kill process group immediately
-CLI wrapping complex tool (vagrant…)  → SIGTERM → wait → SIGKILL
-Qt/async app                          → see building-qt-apps skill
-```
+See `setting-up-projects` for the shutdown strategy decision framework.
 
 ### Scripts and simple CLIs
 
@@ -253,29 +229,19 @@ except asyncio.CancelledError:
     raise
 ```
 
----
-
 ## Bootstrap Script
 
-Use `skills/setting-up-python-projects/bootstrap_downstream_repo.sh` as the canonical local bootstrap artifact. It is intentionally small and terminal-readable: promote template files into place, copy `shared/`, `shared_tests/`, and docs files, create `CLAUDE.md`, then run `uv sync --all-extras --group dev`, `uv run poe lint_full`, and `uv run poe test` in the downstream repo.
+Use `skills/setting-up-python-projects/bootstrap_downstream_repo.sh` as the canonical local bootstrap artifact. It promotes template files into place, copies `shared/`, `shared_tests/`, and docs files, creates `CLAUDE.md`, then runs `uv sync --all-extras --group dev`, `uv run poe lint_full`, and `uv run poe test` in the downstream repo.
 
----
+## Python-Specific Customization
 
-## Adapt to Tech Stack & Domain
-
-After scaffolding, **adapt everything to the specific project**. The templates are a starting point, not a straitjacket. Keep the philosophy and core safety model intact, then adapt the surrounding structure to fit the project's tech stack, domain, and constraints.
-
-### What to adapt
+See `setting-up-projects` for the general domain adaptation framework.
 
 | Area | How to adapt |
 |------|--------------|
-| **Directory layout** | Add/remove/rename directories to match the domain. Not every project needs `cli/`, `ui/`, `wrappers/`, `shared/`. A data pipeline might need `pipelines/`, `schemas/`, `extractors/`. A web service might need `routes/`, `middleware/`, and explicit infrastructure/client modules. |
-| **Dependencies** | Add domain-specific libraries. Remove unused template defaults. Research current best-in-class libraries for the domain (e.g. SQLAlchemy vs raw asyncpg, Pydantic vs attrs). |
 | **pyproject.toml** | Adjust ruff rules, pytest markers, plugins, and narrowly-justified overrides for ecosystem gaps. Do not relax strict typing by default; document every real exception. |
 | **AGENTS.md** | Fill TODO sections with project-specific architecture, key decisions, domain vocabulary, and workflows. This is the agent's primary orientation document — make it specific. **Skills section:** remove skills the project won't use (e.g. `building-multi-ui-apps` for a pure CLI), add domain-specific skills (e.g. `building-qt-apps`, `setting-up-shortcuts`). |
 | **coding_rules.md** | Extend or override rules for the domain. Add domain-specific conventions (e.g. database migration rules, API versioning policy, data validation requirements). |
-| **Test structure** | Adjust to match what matters. A CLI tool needs heavy e2e tests. A library needs heavy unit tests. A web service needs API integration tests. |
-| **CI/CD** | Add domain-appropriate checks (e.g. migration consistency, API schema validation, container builds). |
 
 ### Wrapper enforcement with banned-api
 
@@ -297,7 +263,7 @@ When setting up a project in an unfamiliar domain or with unfamiliar libraries:
 
 1. **Research the domain's conventions** — look up how well-maintained projects in the same space are structured
 2. **Check library compatibility** — verify libraries work together and with basedpyright strict mode (some libraries have poor type stubs; plan wrappers early)
-3. **Identify domain-specific tooling** — some domains have their own linters, formatters, or validation tools that complement the base toolchain
+3. **Identify domain-specific tooling** — some domains have their own linters, formatters, or validation tools
 4. **Check for basedpyright known issues** — some libraries (numpy, pandas, SQLAlchemy) need specific configuration or stub packages to work cleanly in strict mode
 
 ### Quick customization checklist
@@ -309,12 +275,18 @@ When setting up a project in an unfamiliar domain or with unfamiliar libraries:
 - [ ] Test structure reflects what matters most for this project
 - [ ] basedpyright config accounts for domain-specific library quirks
 
----
+## Handoff
 
-## Related myai Skills
+- Use `setting-up-python-backends` for backend repos (after `setting-up-backends`)
+- Use `building-multi-ui-apps` for GUI+CLI sharing a core
+- Use `writing-python-code` for implementation rules
 
-- **`engineering-principles`** — Parent skill. Language-agnostic project setup philosophy: invest early, pit of success, safety net.
-- **`architecting-changes`** — For architecture decisions about project shape and framework choice. Load `architecting-python-changes` for Python-specific routing.
-- **`ci-cd-and-automation`** — For CI/CD pipeline setup after bootstrap.
-- **`writing-python-code`** — Python-specific coding rules for the code you'll write in the new project.
-- **`testing-python`** — Python-specific testing setup after bootstrap.
+## Related Skills
+
+- **`setting-up-projects`** (myai) — Parent skill. Load first for project shape decisions and bootstrap philosophy.
+- **`engineering-principles`** (myai) — Foundation. Language-agnostic philosophy.
+- **`architecting-changes`** (myai) — Architecture decisions.
+- **`writing-python-scripts`** — For single-file Python scripts (not full projects).
+- **`setting-up-python-backends`** — For backend/service repos.
+- **`testing-python`** — Python testing setup.
+- **`writing-python-code`** — Python coding rules.
