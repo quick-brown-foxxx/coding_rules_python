@@ -3,4 +3,3 @@
 - add preference for literal strings instead of None, eg `str | "Error"` return type instead of `str | None`
 - import addiditonal linter scripts like rationale check here, upd skills
 - import typings examples, upd skills
-- do we need local PHILOSOPHY.md?

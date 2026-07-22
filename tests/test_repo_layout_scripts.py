@@ -26,7 +26,6 @@ def assert_bootstrapped_layout(target_root: Path) -> None:
     assert (target_root / ".vscode" / "settings.json").is_file()
     assert (target_root / ".vscode" / "extensions.json").is_file()
     assert (target_root / "docs" / "coding_rules.md").is_file()
-    assert (target_root / "docs" / "PHILOSOPHY.md").is_file()
     assert (target_root / "CLAUDE.md").is_symlink()
     assert (target_root / "CLAUDE.md").resolve() == (target_root / "AGENTS.md").resolve()
     assert (target_root / "src" / "todo_package_name" / "__init__.py").is_file()
@@ -69,7 +68,7 @@ def test_bootstrap_shell_script_supports_stdin_copy_paste_flow(tmp_path: Path) -
     (source_root / "rules").mkdir()
     fake_bin.mkdir()
 
-    (source_root / "templates" / "AGENTS.md").write_text("@docs/PHILOSOPHY.md\n", encoding="utf-8")
+    (source_root / "templates" / "AGENTS.md").write_text("# Agent Guide\n", encoding="utf-8")
     (source_root / "templates" / "pyproject.toml").write_text("[project]\nname='demo'\n", encoding="utf-8")
     (source_root / "templates" / "pre-commit-config.yaml").write_text("repos: []\n", encoding="utf-8")
     (source_root / "templates" / "src" / "todo_package_name").mkdir(parents=True)
@@ -91,7 +90,6 @@ def test_bootstrap_shell_script_supports_stdin_copy_paste_flow(tmp_path: Path) -
     (source_root / "templates" / "vscode_extensions.json").write_text("{}\n", encoding="utf-8")
     (source_root / "shared" / "__init__.py").write_text("", encoding="utf-8")
     (source_root / "shared_tests" / "__init__.py").write_text("", encoding="utf-8")
-    (source_root / "PHILOSOPHY.md").write_text("# Philosophy\n", encoding="utf-8")
     (source_root / "rules" / "coding_rules.md").write_text("# Rules\n", encoding="utf-8")
 
     (fake_bin / "uv").write_text(

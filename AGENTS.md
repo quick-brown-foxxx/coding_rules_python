@@ -8,7 +8,7 @@ This repository is an **auxiliary skill pack** for the [myai](https://github.com
 
 **myai is a prerequisite.** Install myai first, then add these Python skills. myai provides the generic workflows: engineering principles, planning, implementation, testing, debugging, code review, CI/CD, security, performance, and agent orchestration. This repo adds the Python-specific layer on top.
 
-Think of it as: **myai = the engine and chassis; this repo = the Python body kit.** The generic philosophy (pit of success, fail fast, error handling as control flow, testing trustworthiness over coverage, architecture separation by responsibility) lives in myai's `engineering-principles` skill and `ENGINEERING-PHILOSOPHY.md`. The skills here keep only Python-specific tooling, library choices, and patterns.
+Think of it as: **myai = the engine and chassis; this repo = the Python body kit.** The generic philosophy (pit of success, fail fast, error handling as control flow, testing trustworthiness over coverage, architecture separation by responsibility) lives in myai's canonical `engineering-principles` skill. The skills here keep only Python-specific tooling, library choices, and patterns.
 
 ## What's Here
 
@@ -49,10 +49,6 @@ Copy into new projects, fill TODOs, and customize:
 
 - `coding_rules.md` — Full Python coding standards (copy to `docs/` in new projects)
 - `coding_rules_short.md` — Condensed version for scripts
-
-### Philosophy (`PHILOSOPHY.md`)
-
-Python-specific philosophy document. The canonical language-agnostic engineering philosophy is in myai's `ENGINEERING-PHILOSOPHY.md` and `engineering-principles` skill. This document keeps the same 9 principles but adds Python-specific details (basedpyright, msgspec, rusty-results, uv, PySide6, typer, etc.).
 
 ### For AI Agents Working in This Repo
 

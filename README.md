@@ -34,8 +34,6 @@ The 9 Python skills and their myai parents
 ## Most important stuff
 
 ```
-PHILOSOPHY.md          Core beliefs — every other doc inherits from this
-
 shared/                Copy-paste reusable code for new projects
   logging/               Logging setup + colored non-log output
   shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
@@ -74,13 +72,13 @@ The `shared/` folder contains copy-paste building blocks for new projects, not a
 
 ### Starting a new project
 
-1. Read `PHILOSOPHY.md` for the mindset
+1. Read myai's canonical `engineering-principles` skill for the mindset
 2. Decide: single script, general Python project, or backend/service repo? (use `writing-scripts` (myai) for scripts, `setting-up-python-projects` for general packages/apps, and `setting-up-python-backends` for service/API repos)
 3. Promote template files into place: `AGENTS.md`, `pyproject.toml`, `.pre-commit-config.yaml`, `.gitignore`, and `.vscode/`
    Shortcut: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
 4. Copy `shared/` and `shared_tests/` into the new project root
-5. Copy `rules/coding_rules.md` (or `_short`) into `docs/` and copy `PHILOSOPHY.md` to `docs/PHILOSOPHY.md`
-6. Create `CLAUDE.md` symlink → `AGENTS.md` (Claude Code reads CLAUDE.md; the `@docs/PHILOSOPHY.md` import in AGENTS.md auto-loads philosophy into context)
+5. Copy `rules/coding_rules.md` (or `_short`) into `docs/`
+6. Create `CLAUDE.md` symlink → `AGENTS.md` (Claude Code reads `CLAUDE.md`)
 7. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
 8. Run `uv sync --all-extras --group dev`, then verify with `uv run poe lint_full` and `uv run poe test`
 

@@ -68,8 +68,7 @@ project/
 ├── scripts/                  # Dev utilities
 │   └── check_type_ignore.py
 ├── docs/
-│   ├── coding_rules.md       # Copy from rules/coding_rules.md
-│   └── PHILOSOPHY.md          # Copy from PHILOSOPHY.md
+│   └── coding_rules.md       # Copy from rules/coding_rules.md
 ├── shared/                   # Cross-cutting shared code copied from this repo
 │   ├── logging/              # Logging + colored output (if needed)
 │   └── shortcuts/            # Keyboard shortcuts (if PySide6 app)
@@ -105,7 +104,6 @@ See `setting-up-projects` for the general bootstrap philosophy.
      - `templates/vscode_extensions.json` → `.vscode/extensions.json`
    - Copy `shared/` and `shared_tests/` into the new project root if you need the provided building blocks. Trim unused shared modules and dependencies afterward.
    - Copy `rules/coding_rules.md` → `docs/coding_rules.md`
-   - Copy `PHILOSOPHY.md` → `docs/PHILOSOPHY.md`
    - Create symlink: `ln -s AGENTS.md CLAUDE.md`
    - Canonical local bootstrap artifact: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
 

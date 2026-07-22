@@ -4,17 +4,15 @@
 
 ---
 
-## Foundational Philosophy
+## Foundational Principles
 
-**YOU MUST read and internalize `docs/PHILOSOPHY.md` before writing any code.** It defines the non-negotiable principles (pit of success, explicitness through types, fail fast, Result-based errors, testing philosophy, architecture, tooling) that drive every decision in this project. All rules below are applications of those principles.
-
-@docs/PHILOSOPHY.md
+**YOU MUST load and follow myai's canonical `engineering-principles` skill before writing any code.** The rules below apply those principles to Python-specific tooling and patterns.
 
 ---
 
 ## Critical Reading Path
 
-1. **New context?** Review this document and `docs/PHILOSOPHY.md` fully.
+1. **New context?** Review this document fully and load myai's `engineering-principles` skill.
 2. **Implementation phase?** Consult [coding_rules.md](docs/coding_rules.md) for detailed patterns.
 
 **Invariant:** Treat `uv run poe lint_full` + `uv run poe test` as the standard verification flow. Run `uv run poe lint_full` continuously during development, not just at finalization.

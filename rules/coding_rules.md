@@ -1,7 +1,7 @@
 # Coding Rules
 
 Universal Python coding standards.
-Inherits from [PHILOSOPHY.md](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/PHILOSOPHY.md).
+These standards apply myai's canonical `engineering-principles` to Python.
 
 For full guide, see [rules navigation doc](https://github.com/quick-brown-foxxx/coding_rules_python/README.md).
 

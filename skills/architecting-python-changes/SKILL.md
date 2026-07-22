@@ -44,11 +44,11 @@ Follow the 6-step flow in myai's `architecting-changes` (classify → find chang
 
 ## Where To Look
 
-- `docs/PHILOSOPHY.md`
-  - First source for the project's core architecture rules: dependency direction, reusable cores, composition, wrappers at dynamic boundaries, and transparency.
+- `engineering-principles` (myai)
+  - Canonical source for the project's core architecture principles: dependency direction, reusable cores, composition, wrappers at dynamic boundaries, and transparency.
 
 - `docs/coding_rules.md`
-  - Code-facing rules that back the philosophy: wrapper enforcement, circular-import handling, architecture boundaries, error boundaries, and layout expectations.
+  - Code-facing rules that apply those principles: wrapper enforcement, circular-import handling, architecture boundaries, error boundaries, and layout expectations.
 
 - `setting-up-python-projects`
   - Use when the question is high-level repo/package structure, project shape, scaffolding level, framework choice, or generic architecture choices.

@@ -70,7 +70,6 @@ copy_file "$SOURCE_ROOT/templates/vscode_settings.json" "$TARGET_ROOT/.vscode/se
 copy_file "$SOURCE_ROOT/templates/vscode_extensions.json" "$TARGET_ROOT/.vscode/extensions.json"
 
 copy_file "$SOURCE_ROOT/rules/coding_rules.md" "$TARGET_ROOT/docs/coding_rules.md"
-copy_file "$SOURCE_ROOT/PHILOSOPHY.md" "$TARGET_ROOT/docs/PHILOSOPHY.md"
 
 require_missing_path "$TARGET_ROOT/CLAUDE.md"
 ln -s AGENTS.md "$TARGET_ROOT/CLAUDE.md"
