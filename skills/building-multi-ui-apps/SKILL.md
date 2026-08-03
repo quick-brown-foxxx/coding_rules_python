@@ -53,106 +53,63 @@ Utility Layer (bottom)
 
 ## Entry Point Pattern
 
-Do not use `len(sys.argv) > 1` or "any args means CLI" heuristics. They break as soon as the GUI accepts file paths, flags like `--debug`, or OS-opened document invocations.
+Keep it simple: one Typer multi-command app where **every invocation names a command**. GUI-launching commands are just ordinary Typer commands mixed into the same list as the CLI commands. There is no root/default command and no mode-detection logic to maintain.
 
-Use one executable entry point with a tiny top-level router:
-- **GUI-shaped invocations** open the GUI: no args, file paths, app-specific flags like `--debug`
-- **Real CLI help/subcommands** go to Typer: `-h` / `--help`, `config ...`, other explicit CLI words
-- **Lazy-import the GUI** only after routing decides GUI mode
-- **Keep dependency wiring elsewhere**: the router only chooses presentation mode; the composition root still builds the app
+This gives:
+- `myapp -h` / `myapp --help` -> help listing every command
+- `myapp gui FILE [--debug]` -> a GUI command (shows the window)
+- `myapp run foo` / `myapp config get key` -> CLI commands
+
+Deliberately no default/root command: making bare `myapp` do something special (e.g. open the GUI) forces mode-detection heuristics or Typer/Click default-command hacks (`typer.core.TyperGroup` subclassing, `sys.argv` mutation), which are brittle and version-fragile. If you want a GUI shortcut, register an explicit `gui` command and document it — the cost of naming a command is that bare `myapp` shows help instead of launching a GUI.
 
 ```python
 # __main__.py
 from __future__ import annotations
 
-import argparse
-import sys
-from pathlib import Path
-
-GUI_FLAGS = {"--debug"}
-CLI_WORDS = {"config"}  # Top-level CLI entry words for this app
-
-
-def parse_gui_request(argv: list[str]) -> tuple[Path | None, bool] | None:
-    parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
-    parser.add_argument("path", nargs="?")
-    parser.add_argument("--debug", action="store_true")
-
-    try:
-        ns, unknown = parser.parse_known_args(argv)
-    except SystemExit:
-        return None
-
-    if unknown:
-        return None
-
-    path = Path(ns.path).expanduser() if isinstance(ns.path, str) else None
-    return path, bool(ns.debug)
-
-
-def wants_cli(argv: list[str]) -> bool:
-    return bool(argv) and (argv[0] in {"-h", "--help"} or argv[0] in CLI_WORDS)
-
-
-def main() -> int:
-    argv = sys.argv[1:]
-
-    if wants_cli(argv):
-        from myapp.bootstrap import create_services
-        from myapp.cli import build_cli_app
-
-        services = create_services(debug=False)
-        app = build_cli_app(services)
-        app(args=argv, prog_name="myapp", standalone_mode=False)
-        return 0
-
-    gui_request = parse_gui_request(argv)
-    if gui_request is not None:
-        from myapp.gui import run_gui
-
-        path, debug = gui_request
-        return run_gui(path=path, debug=debug)
-
-    from myapp.bootstrap import create_services
-    from myapp.cli import build_cli_app
-
-    services = create_services(debug=False)
-    app = build_cli_app(services)
-    app(args=argv, prog_name="myapp", standalone_mode=False)
-    return 0
-```
-
-This gives the intended behavior:
-- `myapp` -> GUI
-- `myapp file.txt` -> GUI with an open-file request
-- `myapp --debug` -> GUI with a debug flag
-- `myapp -h` -> Typer help
-- `myapp config ...` -> Typer subcommand
-
-The router stays intentionally small: detect GUI-shaped argv, then hand off to the real presentation layer. Build shared dependencies in the composition root and inject them into `run_gui(...)` / the Typer app builder instead of wiring objects inside `__main__.py`.
-
-Your CLI layer should still be normal Typer code:
-
-```python
-# cli.py
 import typer
 
+from myapp.bootstrap import create_services
+from myapp.version import VERSION
 
-def build_cli_app(services: Services) -> typer.Typer:
-    app = typer.Typer(
-        add_completion=False,
-        context_settings={"help_option_names": ["-h", "--help"]},
-    )
+app = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
-    config_app = typer.Typer(add_completion=False)
 
-    @config_app.command("get")
-    def config_get(key: str) -> None:
-        typer.echo(services.config.read_value(key))
+@app.command()
+def gui(path: str, debug: bool = False) -> None:
+    """Open the GUI with this file."""
+    services = create_services(debug=debug)
 
-    app.add_typer(config_app, name="config")
-    return app
+    from myapp.gui import run_gui  # noqa: PLC0415 - lazy so CLI runs stay Qt-free
+
+    run_gui(services=services, path=path, debug=debug)
+
+
+@app.command()
+def run(item: str) -> None:
+    """A plain CLI command."""
+    services = create_services(debug=False)
+    typer.echo(f"run {item}")
+
+
+@app.command()
+def version() -> None:
+    """Print the version — a normal command, no --version magic needed."""
+    typer.echo(VERSION)
+
+
+if __name__ == "__main__":
+    app()
 ```
+
+Notes:
+- **Lazy-import the GUI** inside the GUI command's body so `run`/`config`/`version` never import Qt. The `open` command parses args, builds the core, then `from myapp.gui import run_gui` at call time.
+- **Keep dependency wiring elsewhere**: commands parse input and call the core / `run_gui(...)`; the composition root (`create_services`) still builds the object graph and is injected. Never wire objects inside `__main__.py`.
+- **GUI subcommands** (`myapp show-print-dialog FILE`) are just more `@app.command`s that route into a GUI callables; nested groups via `app.add_typer(...)` work exactly as in any Typer app.
+- Help/version are regular commands, so there is no `--version` flag handling to get wrong (and no `Missing command` edge case).
 
 ---
 
