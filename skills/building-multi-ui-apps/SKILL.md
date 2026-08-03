@@ -108,8 +108,36 @@ if __name__ == "__main__":
 Notes:
 - **Lazy-import the GUI** inside the GUI command's body so `run`/`config`/`version` never import Qt. The `open` command parses args, builds the core, then `from myapp.gui import run_gui` at call time.
 - **Keep dependency wiring elsewhere**: commands parse input and call the core / `run_gui(...)`; the composition root (`create_services`) still builds the object graph and is injected. Never wire objects inside `__main__.py`.
-- **GUI subcommands** (`myapp show-print-dialog FILE`) are just more `@app.command`s that route into a GUI callables; nested groups via `app.add_typer(...)` work exactly as in any Typer app.
+- **GUI subcommands** (`myapp show-print-dialog FILE`) are just more `@app.command`s that route into GUI callables; nested groups via `app.add_typer(...)` work exactly as in any Typer app.
 - Help/version are regular commands, so there is no `--version` flag handling to get wrong (and no `Missing command` edge case).
+
+### Tip: also export a bare GUI binary
+
+Export a second console script that opens the GUI directly (`myapp-gui`), so users and the desktop don't have to type `myapp open`:
+
+```python
+# __main__.py (add alongside `main`)
+def main() -> None:
+    app()  # full CLI, including the `open` GUI command
+
+
+def main_gui() -> None:
+    """Bare GUI entry point: `myapp-gui` just opens the window."""
+    services = create_services(debug=False)
+
+    from myapp.gui import run_gui  # noqa: PLC0415 - lazy: only this binary needs Qt
+
+    run_gui(services=services, path=None, debug=False)
+```
+
+```toml
+# pyproject.toml
+[project.scripts]
+myapp = "myapp.__main__:main"        # full CLI (contains the `open` GUI command)
+myapp-gui = "myapp.__main__:main_gui"  # dedicated GUI entry, for launchers/desktop
+```
+
+Use `myapp-gui` in `.desktop` files, file-manager "Open with" handlers, launchpad/Spotlight-style launchers, and packaging desktop entries — a bare binary that opens the GUI is what those integrations expect. The CLI `myapp` (with the `open`/`show-print-dialog` commands) stays for scripted/terminal use.
 
 ---
 
