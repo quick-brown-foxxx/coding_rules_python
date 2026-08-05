@@ -2,7 +2,7 @@
 name: building-qt-apps
 description: >
   ALWAYS LOAD THIS SKILL WHEN WORKING WITH PYSIDE6, QT, OR DESKTOP GUI CODE. Do not write PySide6 or Qt code directly — use this skill first.
-  PySide6 desktop apps: Manager→Service→Wrapper architecture, qasync integration, signals, system tray, testing.
+  PySide6 desktop apps: Manager→Service→Wrapper architecture, QML View+ViewModel (MVVM) integration, qasync integration, signals, system tray, testing.
 ---
 
 # Building Qt Apps
@@ -360,6 +360,66 @@ class Settings:
     def set(self, key: str, value: str | int | bool) -> None:
         self._settings.setValue(key, value)
 ```
+
+---
+
+## QML Integration: View + ViewModel (MVVM)
+
+For QML-based UIs, treat **QML as a pure, dumb view** and keep all logic in Python so it is unit-testable without launching QML. Use the **View–ViewModel (MVVM)** split:
+
+- **View** = QML only. No business logic in QML: no real work in `function` blocks, no navigation decisions, no rules in bindings. It renders state and emits "user intent" (calls VM slots).
+- **ViewModel** = a `QObject` exposed to QML. Pure state + commands; no Qt widgets. This is the single thing QML binds to, and the only testable-both-ways unit (pytest-qt).
+- **Model** = pure data/logic below the VM. Can be plain Python with no Qt dependency (best testability).
+
+Properties replace MVVM data-binding; `@Slot` methods act as the "commands."
+
+### The Single Bridge
+
+There is exactly one bridge between QML and Qt: a `QObject` handed to the engine context. Expose it once at startup (composition root) — do not scatter `setContextProperty` calls:
+
+```python
+from PySide6.QtCore import QObject, Property, Signal, Slot
+
+class PageViewModel(QObject):
+    pageChanged = Signal(str)
+
+    @Property(str)
+    def currentPage(self) -> str: ...          # read-only state
+    @currentPage.setter
+    def currentPage(self, value: str) -> None: ...
+
+    @Slot(result=str)
+    def title(self) -> str: ...
+
+    @Slot(str)                                  # user intent -> logic
+    def navigate(self, page: str) -> None: ...
+
+# composition root
+engine = QQmlApplicationEngine()
+engine.rootContext().setContextProperty("vm", page_vm)
+engine.load("Main.qml")
+```
+
+**Keep the VM QML-unaware.** It must not touch QML internals — expose typed slots/properties/signals and let QML translate them into UI.
+
+### Multi-Page / Shell (per-page VMs, no mega-seam)
+
+For a multi-page app give **each page its own ViewModel** plus a **root/shell ViewModel** for app-level concerns only (current page, shared state, navigation to a VM or an event bus). Build all VMs in the composition root with **only their own dependencies** so each is constructible in isolation with fakes:
+
+```python
+root = RootViewModel(settings, api)
+root.pageA = PageAVM(settings, api)      # each page gets ONLY its deps
+root.pageB = PageBVM(settings, repo)
+```
+
+Have pages receive **exactly their own VM** (not the whole `root` object) and keep the shell a thin navigator (`StackView`/`Loader`) that only reacts to the root VM's current-page signal. Do not:
+
+- Put every property/slot on one giant `app` object.
+- Pass the whole root VM into every page.
+- Put logic in QML.
+- Let the shell know each page's internals.
+
+For lists/collections, expose a `QAbstractListModel`/`QAbstractItemModel` to QML — QML views (`ListView`, `Repeater`) are driven by models, not by throwing Python iterables around.
 
 ---
 
