@@ -166,6 +166,167 @@ def on_create_clicked(self) -> None:
 
 ---
 
+## Interactive / Long-Running Operations
+
+The `Shared Logic` example above is a **one-shot command**: `() -> Result[T, E]` — call the core, get a result, done. Both CLI and GUI treat it trivially (CLI: `print(result)`; GUI: refresh a view).
+
+Interactive operations are different. They run for a while, **emit progress/errors as they go**, and may **ask the user a question mid-run** (e.g. "this vacancy wants an answer before we submit — what do you say?"). A GUI (Qt MVVM) handles this naturally with signals out and dialogs in. A CLI can too, but only if we do not shape the core around signals.
+
+**Key principle:** MVVM (signals, `@Slot`s, bindings) is *how the Qt adapter implements the operation* — it is never the *shape of the core*. The core must not import Qt, must not know about signals, and must not know about `typer`. Express the operation against a tiny **interaction interface** — an out-channel for events/errors and an in-channel for questions — and let each adapter map that to its own idiom.
+
+### The interaction interface (core, framework-free)
+
+```python
+# core/interaction.py  — no Qt, no typer imports
+from dataclasses import dataclass
+from typing import Protocol
+
+@dataclass(frozen=True)
+class ProgressEvent:
+    vacancy_id: str
+    message: str
+
+@dataclass(frozen=True)
+class Question:
+    vacancy_id: str
+    text: str
+
+class ReplyFlowIO(Protocol):
+    """The only thing the core knows about its user."""
+    async def progress(self, event: ProgressEvent) -> None: ...
+    async def error(self, error: str) -> None: ...
+    async def ask(self, question: Question) -> str: ...  # returns the user's answer
+
+async def run_reply_flow(vacancies: list[Vacancy], io: ReplyFlowIO) -> ReplyResult:
+    """The interactive flow. UI-agnostic: only negotiates through `io`."""
+    for v in vacancies:
+        await io.progress(ProgressEvent(v.id, f"checking {v.title}"))
+        answer: str | None = None
+        if v.requires_answer:
+            answer = await io.ask(Question(v.id, v.text))
+            if not answer:
+                await io.progress(ProgressEvent(v.id, "skipped"))
+                continue
+        result = await submit_reply(v, answer)
+        if result.is_err:
+            await io.error(result.unwrap_err())
+            continue
+        await io.progress(ProgressEvent(v.id, "replied"))
+    return finalize_reply(vacancies)
+```
+
+The flow is a plain `async` function over the protocol. The core decides *what* to do, never *how* events are shown or *how* questions are answered.
+
+### CLI adapter — prints and prompts as it runs
+
+```python
+# cli.py
+import asyncio
+import typer
+
+class CliReplyIO:
+    async def progress(self, event: ProgressEvent) -> None:
+        typer.echo(f"[{event.vacancy_id}] {event.message}")
+
+    async def error(self, error: str) -> None:
+        typer.echo(f"error: {error}", err=True)
+
+    async def ask(self, question: Question) -> str:
+        return typer.prompt(question.text)
+
+@app.command()
+def reply(vacancies: list[Path]) -> int:
+    """One command that happens to be interactive underneath."""
+    result = asyncio.run(run_reply_flow(load_vacancies(vacancies), CliReplyIO()))
+    typer.echo(f"done: {result}")
+    return 0
+```
+
+From the shell's perspective `myapp reply ...` is still a single blocking command: it prints progress lines to a terminal, blocks on a prompt when a vacancy needs an answer, then exits. This is exactly the CLI's "way of life" — the interaction interface makes it possible without polluting the core.
+
+### Qt MVVM adapter — the ViewModel implements the interface
+
+The Qt adapter is where MVVM earns its keep. The **ViewModel implements the same `ReplyFlowIO`**; it is the single bridge between the core and QML. Progress/errors become VM state + signals that QML binds to; `ask()` hands control to a QML dialog and awaits the answer via a pending `asyncio.Future`.
+
+```python
+# gui/reply_viewmodel.py
+from __future__ import annotations
+
+import asyncio
+from PySide6.QtCore import QObject, Signal, Slot
+
+from core.interaction import ProgressEvent, Question, ReplyFlowIO
+
+class ReplyViewModel(QObject, ReplyFlowIO):
+    progress_message = Signal(str)     # -> QML updates a status line / list row
+    error_message = Signal(str)        # -> QML shows an error block
+    question_requested = Signal(str)   # -> QML opens a prompt dialog with `text`
+    reply_finished = Signal(object)    # -> QML knows the flow ended
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._pending: asyncio.Future[str] | None = None
+
+    # --- ReplyFlowIO: turn core events into VM state + signals ---
+    async def progress(self, event: ProgressEvent) -> None:
+        self.progress_message.emit(f"[{event.vacancy_id}] {event.message}")
+
+    async def error(self, error: str) -> None:
+        self.error_message.emit(error)
+
+    async def ask(self, question: Question) -> str:
+        # Defer to the view: emit, present a dialog in QML,
+        # and sleep until QML calls back with the answer.
+        self._pending = asyncio.get_running_loop().create_future()
+        self.question_requested.emit(question.text)
+        return await self._pending
+
+    # --- Called by QML when the prompt dialog is answered ---
+    @Slot(str)
+    def submit_answer(self, text: str) -> None:
+        if self._pending is not None and not self._pending.done():
+            self._pending.set_result(text)
+```
+
+In QML the `question_requested` signal opens a dialog and `submit_answer` is invoked on accept — the dialog is pure view, and the async flow simply resumes with the returned string. Threading note: these callbacks run on the GUI thread (where the qasync loop lives), so `set_result` resumes the coroutine safely. If the flow were doing real blocking I/O it should run on a worker/`ThreadPoolExecutor` and marshal results back via signals — but the core interface shape is unaffected.
+
+### Async-by-contract
+
+The interaction interface is `async` deliberately. The GUI *must* `await` a dialog, so it needs coroutines. The CLI implements the same async protocol and just runs it with `asyncio.run(...)` — CLI's blocking behaviour is preserved, GUI's non-blocking event loop is preserved, and they share one core function. Synchronous one-shot commands stick with `Result`; interactive operations go through an `…IO` interface.
+
+**Summary:** basic commands return `Result`. Interactive operations negotiate through an injected `…IO` interface (events out, questions in). MVVM is only how the Qt adapter implements that interface — it is never the shape of the core.
+
+### Scaling the pattern
+
+The examples above are a **starting shape, not the ceiling**. For real Qt interoperation three gaps appear, and all of them concentrate on the `ask()`/control bridge — the core boundary stays stable.
+
+**1. User-initiated cancellation (the user → core direction).** The flow as drawn is one-directional: the user only answers when asked. A real GUI user wants to stop mid-run. Prefer built-in primitives where they fit, fall back to ad-hoc flags only when they don't:
+
+- **Built-in async cancellation** — run the flow as an `asyncio.Task` and let the VM's "Stop" button call `task.cancel()`; `CancelledError` fires at the next `await` and unwinds through any cleanup. Ideal when the operation is genuinely async (every blocking step is an await) and you want an immediate hard stop. It is abrupt — the core can't intercept at a safety boundary — so it suits "stop the whole job now", not "finish this item then pause".
+- **Cooperative flag / `asyncio.Event`** — the core checks `await should_abort()` (or `evt.is_set()`) between steps and returns a clean `aborted` result. Good for graceful/checkpointed stops (finish the current vacancy, then halt) or when an instant interrupt would be unsafe.
+
+The choice is coupled to how the work runs: `Task.cancel()` only works where there are `await` points in the same event loop. If blocking work runs on a `ThreadPoolExecutor`, a running thread cannot be cancelled — use a cooperative flag checked between blocking calls, or cancel at the process level.
+
+**2. Concurrent / dynamic questions — key the futures.** The example keeps one `self._pending: Future[str]`, which is overwritten if a second `ask` fires before the first resolves. Real apps process tasks concurrently or run a wizard where the next question depends on the last answer. Key futures by question id (or queue them) so each `ask` awaits its own future, and hand the whole `Question` to QML rather than a bare string:
+
+```python
+self._pending: dict[str, asyncio.Future[str]] = {}
+
+async def ask(self, question: Question) -> str:
+    fut = asyncio.get_running_loop().create_future()
+    self._pending[question.id] = fut
+    self.question_requested.emit(question)
+    return await fut
+
+@Slot(str, str)
+def submit_answer(self, question_id: str, text: str) -> None:
+    fut = self._pending.pop(question_id, None)
+    if fut is not None and not fut.done():
+        fut.set_result(text)
+```
+
+---
+
 ## Platform Abstraction
 
 For apps that must run on multiple platforms:
