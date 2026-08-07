@@ -15,8 +15,6 @@ build/
 *.egg-info/
 *.egg
 
-# uv
-uv.lock
 
 # IDE
 .vscode/
