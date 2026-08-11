@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import logging
+import sys
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 
-from shared.logging.logger_setup import setup_file_logging, setup_stdout_logging
+from shared.logging.logger_setup import (
+    setup_file_logging,
+    setup_stdout_logging,
+    silence_noisy_loggers,
+)
 
 
 @pytest.fixture
@@ -35,7 +40,7 @@ def test_stdout_logging_hides_debug_when_level_is_info(
     isolated_root_logger: None,
 ) -> None:
     """Stdout logging should respect its configured level while file logging keeps DEBUG."""
-    setup_file_logging(log_dir=tmp_path, app_name="mockapp")
+    setup_file_logging(log_dir=tmp_path, app_name="mockapp", level=logging.DEBUG)
     setup_stdout_logging(level=logging.INFO)
 
     logger = logging.getLogger("mockapp.validation")
@@ -64,6 +69,46 @@ def test_setup_stdout_logging_is_idempotent(
     captured = capsys.readouterr()
 
     assert captured.out.count("stdout should appear once") == 1
+
+
+def test_stdout_logging_can_target_stderr(
+    capsys: pytest.CaptureFixture[str],
+    isolated_root_logger: None,
+) -> None:
+    """CLI mode: setup_stdout_logging(stream=sys.stderr) keeps stdout clean."""
+    setup_stdout_logging(level=logging.INFO, stream=sys.stderr)
+
+    logger = logging.getLogger("mockapp.cli")
+    logger.info("stderr log line")
+
+    captured = capsys.readouterr()
+    assert "stderr log line" in captured.err
+    assert "stderr log line" not in captured.out
+
+
+def test_stdout_and_stderr_handlers_are_independent(
+    capsys: pytest.CaptureFixture[str],
+    isolated_root_logger: None,
+) -> None:
+    """Setting up stdout and stderr console logging must not duplicate lines."""
+    setup_stdout_logging(level=logging.INFO)
+    setup_stdout_logging(level=logging.INFO, stream=sys.stderr)
+
+    logger = logging.getLogger("mockapp.console")
+    logger.info("console line")
+
+    captured = capsys.readouterr()
+    assert captured.out.count("console line") == 1
+    assert captured.err.count("console line") == 1
+
+
+def test_silence_noisy_loggers_pins_known_loggers(isolated_root_logger: None) -> None:
+    silence_noisy_loggers()
+
+    for name in ("httpx", "httpcore", "openai"):
+        logger = logging.getLogger(name)
+        assert logger.level == logging.WARNING
+        assert logger.propagate is True
 
 
 def test_setup_file_logging_is_idempotent(
