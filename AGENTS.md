@@ -12,7 +12,7 @@ Think of it as: **myai = the engine and chassis; this repo = the Python body kit
 
 ## What's Here
 
-### Python Skills (9)
+### Python Skills (10)
 
 Each skill is a Python-specific extension of one or more myai parent skills. Load the myai parent first, then load the Python extension.
 
@@ -27,6 +27,16 @@ Each skill is a Python-specific extension of one or more myai parent skills. Loa
 | `setting-up-shortcuts` | `engineering-principles` | PySide6 keyboard shortcuts with TOML config and platform-specific defaults |
 | `building-multi-ui-apps` | `architecting-changes` | Multi-interface apps: reusable core, thin CLI/GUI/API adapters, composition root, entry routing |
 | `building-qt-apps` | `architecting-changes`, `engineering-principles` | PySide6 desktop apps: qasync, Manager→Service→Wrapper, signals, QML, XDG portals |
+| `repair-opencode-kilo-python-lsp-diagnostics` | (standalone — no myai parent) | Fix Kilo/opencode LSP (pyright) not resolving third-party imports; only for Kilo/opencode |
+
+### Adding and Editing Skills
+
+When adding, removing, or renaming a skill, keep the skill catalogs in sync. The agent MUST update these docs in the same change:
+
+- `README.md` — the skills table (and the "N Python skills" count)
+- `AGENTS.md` — the skills table, the "(N)" count in the section heading, and the `skills/` mention in `## What's Here`
+
+If the skill is a Python-specific extension of a myai skill, also check whether the new skill should be cross-referenced from the "Related myai Skills" sections of sibling skills in `skills/`.
 
 ### Shared Code Modules (`shared/`)
 

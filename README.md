@@ -17,7 +17,7 @@ Each Python skill here extends one or more myai parent skills. The load order is
 3. Relevant myai workflow skill (e.g., `architecting-changes`, `test-driven-development`)
 4. Python-specific extension from this repo (e.g., `writing-python-code`, `testing-python`)
 
-The 9 Python skills and their myai parents
+The 10 Python skills and their myai parents
 
 | Python Skill | myai Parent(s) |
 |---|---|
@@ -30,6 +30,7 @@ The 9 Python skills and their myai parents
 | `setting-up-shortcuts` | `engineering-principles` |
 | `building-multi-ui-apps` | `architecting-changes` |
 | `building-qt-apps` | `architecting-changes`, `engineering-principles` |
+| `repair-opencode-kilo-python-lsp-diagnostics` | (standalone — no myai parent) Kilo/opencode LSP pyright venv-resolution repair |
 
 ## Most important stuff
 
