@@ -173,4 +173,4 @@ lint_type_ignore.shell = "find src tests shared shared_tests -path tests/fixture
 lint_raw_dicts.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_raw_dicts"
 lint_ignored_results.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_ignored_results"
 lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables", "lint_type_ignore", "lint_raw_dicts", "lint_ignored_results"]
-lint_full.shell = "basedpyright && ruff check --fix . && ruff format . && poe lint_custom_linters"
+lint_full.shell = "basedpyright && ruff format . && ruff check --fix . && poe lint_custom_linters"
