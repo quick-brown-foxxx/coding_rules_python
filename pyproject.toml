@@ -28,7 +28,7 @@ dev = [
 # Type Checking - basedpyright (strict, no Any)
 # ============================================================================
 
-[tool.basedpyright]
+[tool.pyright]
 # This repo targets a Linux-first workflow today; broaden only when the codebase actually needs it.
 pythonPlatform = "Linux"
 pythonVersion = "3.14"

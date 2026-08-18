@@ -53,7 +53,7 @@ packages = ["src/todo_package_name", "shared"]
 # Type Checking - basedpyright (strict, no Any)
 # ============================================================================
 
-[tool.basedpyright]
+[tool.pyright]
 # Template default for this repo's primary Linux workflow; downstream projects may need a different platform.
 pythonPlatform = "Linux"
 pythonVersion = "3.14"

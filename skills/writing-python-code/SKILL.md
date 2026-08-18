@@ -22,7 +22,7 @@ Run project-local tools through `uv`, not system-installed binaries: `uv run pyt
 ### basedpyright Configuration
 
 ```toml
-[tool.basedpyright]
+[tool.pyright]
 pythonVersion = "3.14"
 typeCheckingMode = "strict"
 reportAny = "error"
