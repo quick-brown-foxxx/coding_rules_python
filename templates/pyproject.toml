@@ -47,7 +47,7 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/todo_package_name"]
+packages = ["src/todo_package_name", "shared"]
 
 # ============================================================================
 # Type Checking - basedpyright (strict, no Any)
