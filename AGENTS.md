@@ -62,7 +62,6 @@ Copy into new projects, fill TODOs, and customize:
 ### Rules (`rules/`)
 
 - `coding_rules.md` — Full Python coding standards (copy to `docs/` in new projects)
-- `coding_rules_short.md` — Condensed version for scripts
 
 ### For AI Agents Working in This Repo
 

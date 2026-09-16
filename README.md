@@ -45,7 +45,6 @@ shared_tests/          Tests for shared/ and tools/linting
 
 rules/                 Copy-paste rule files for projects
   coding_rules.md        Full coding standards.
-  coding_rules_short.md  Condensed version for scripts
 
 templates/             Copy into new projects, fill TODOs
   AGENTS.md              AI agent guide template
