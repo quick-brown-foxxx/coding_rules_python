@@ -6,16 +6,29 @@ progress-bar frames, optionally spawns a grandchild that inherits the pipe
 write ends and outlives the parent, then sleeps and exits with a code.
 
 Flags: --stdout TEXT  --stderr TEXT  --progress  --exit-code N
-       --sleep S (hold before exit)  --spawn-pipe-child S (grandchild lifetime)
+       --sleep S (hold before exit)
+       --spawn-pipe-child S (grandchild lifetime; inherits the pipes)
+       --child-pid-file PATH (write the spawned grandchild's pid)
+       --pid-file PATH (write this process's own pid)
+       --huge-output N (write N bytes to stdout)
+       --read-stdin (read stdin to EOF, echo a marker)
+       --ignore-sigterm S (ignore SIGTERM for S seconds; POSIX only)
 """
 
 from __future__ import annotations
 
+import os
+import signal
 import subprocess
 import sys
 import time
+from types import FrameType
 
 _TOTAL = "184.3 MiB"
+
+
+def _ignore_signal(_signum: int, _frame: FrameType | None) -> None:
+    return
 
 
 def _flag_value(name: str) -> str | None:
@@ -27,6 +40,11 @@ def _has_flag(name: str) -> bool:
     return name in sys.argv[1:]
 
 
+def _write_pid(path: str) -> None:
+    with open(path, "w") as handle:
+        handle.write(str(os.getpid()))
+
+
 def _draw_progress() -> None:
     """Mimic installer progress: one carriage-return-drawn bar, flushed per frame."""
     sys.stdout.write(f"downloading chromium {_TOTAL}\r")
@@ -36,6 +54,9 @@ def _draw_progress() -> None:
 
 
 def main() -> int:
+    pid_file = _flag_value("--pid-file")
+    if pid_file is not None:
+        _write_pid(pid_file)
     stdout_text = _flag_value("--stdout")
     stderr_text = _flag_value("--stderr")
     if stdout_text is not None:
@@ -44,10 +65,24 @@ def main() -> int:
         print(stderr_text, file=sys.stderr, flush=True)
     if _has_flag("--progress"):
         _draw_progress()
+    huge_bytes = _flag_value("--huge-output")
+    if huge_bytes is not None:
+        sys.stdout.write("x" * int(huge_bytes))
+        sys.stdout.flush()
+    if _has_flag("--read-stdin"):
+        data = sys.stdin.read()
+        sys.stdout.write(f"stdin-bytes:{len(data)}\n")
+        sys.stdout.flush()
     grandchild_seconds = _flag_value("--spawn-pipe-child")
     if grandchild_seconds is not None:
         # inherits stdout/stderr: holds the pipe write ends past the parent's death
-        subprocess.Popen([sys.executable, "-c", f"import time; time.sleep({grandchild_seconds})"])
+        child = subprocess.Popen([sys.executable, "-c", f"import time; time.sleep({grandchild_seconds})"])
+        child_pid_file = _flag_value("--child-pid-file")
+        if child_pid_file is not None:
+            with open(child_pid_file, "w") as handle:
+                handle.write(str(child.pid))
+    if _has_flag("--ignore-sigterm") and os.name == "posix":
+        signal.signal(signal.SIGTERM, _ignore_signal)
     sleep_seconds = _flag_value("--sleep")
     if sleep_seconds is not None:
         time.sleep(float(sleep_seconds))

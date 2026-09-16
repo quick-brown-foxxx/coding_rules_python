@@ -10,6 +10,7 @@ requires-python = ">=3.14"
 dependencies = [
     "rusty-results>=1.1.1",
     "colorlog>=6.10.1",
+    "psutil>=7.0.0",
     "pyside6>=6.10.1",
     "tomli-w>=1.2.0",
 ]

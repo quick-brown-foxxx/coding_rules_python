@@ -10,7 +10,7 @@ description: >-
 
 This skill extends myai's `engineering-principles`. Load that first. `writing-python-code` is assumed to be already loaded. Start with `writing-python-code` for the baseline subprocess rules (no `shell=True`, `create_subprocess_exec`, handle `TimeoutError`); this skill covers the traps that only show up once a timeout, a kill, or a process tree is involved.
 
-**Ready-made implementation + tests.** this repo ships a self-contained version of the reference pattern at [`shared/subprocess.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared/subprocess.py), with real-process tests at [`shared_tests/test_subprocess_utils.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/test_subprocess_utils.py) and the flag-driven child-process stub they spawn at [`shared_tests/fixtures/tool_stub.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/fixtures/tool_stub.py). Copy them into a project and adapt. The text below explains *why* that code is shaped the way it is, so you can change it on purpose instead of rediscovering the traps.
+**Ready-made implementation + tests.** this repo ships a self-contained version of the reference pattern at [`shared/subprocess.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared/subprocess.py), with real-process tests at [`shared_tests/test_subprocess_utils.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/test_subprocess_utils.py) and the flag-driven child-process stub they spawn at [`shared_tests/fixtures/tool_stub.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/fixtures/tool_stub.py). Copy them into a project and adapt. The shipped runner covers the full set: timeout, process-tree kill, caller-cancellation cleanup, bounded EOF waits on both paths, an output cap, an optional graceful-kill window, optional stderr merging, and DEVNULL stdin. The text below explains *why* that code is shaped the way it is, so you can change it on purpose instead of rediscovering the traps.
 
 **Status: working memo, not a guide.** Everything below came from one real debugging session; treat it as field notes. Verify against your runtime before relying on it, and expect corrections — some of this is version-sensitive behavior of asyncio internals, not documented contracts.
 
@@ -62,9 +62,16 @@ Two lessons:
 - **Never gate the timeout report behind cleanup.** Log/announce "timed out" immediately; do recovery work after.
 - Don't wait for pipe EOF on a killed process tree. Snapshot what you hold and cancel the readers.
 
-Proper tree kill is platform-specific and we deliberately skipped it (revisit if orphaned work ever matters): POSIX `start_new_session=True` + `os.killpg`, Windows Job Objects or `taskkill /T`, or a psutil tree kill (`children(recursive=True)` + kill bottom-up — the one cross-platform option). Cheap partial mitigation: `contextlib.suppress(ProcessLookupError, PermissionError)` around `kill()` — asyncio raises `ProcessLookupError` cross-platform when the process was already reaped, and Windows `TerminateProcess` can surface `PermissionError` (WinError 5) for a dead-but-unreaped child. Both mean "already gone".
+**The shipped module now does the tree kill with `psutil`** (a runtime dependency of the copied module): snapshot `Process(pid).children(recursive=True)`, then signal the parent and the snapshot children. The ppid walk reaches grandchildren that a process-group kill would miss and behaves identically on Windows, where `terminate()`/`kill()` both map to `TerminateProcess`. It is still a **snapshot**: a child spawned after the walk escapes, and only Windows Job Objects close that race. Whatever you use, keep the cheap suppression: `contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess)` around the kill — the process can die or be a zombie between the walk and the signal. For a stdlib-only alternative, POSIX `start_new_session=True` + `os.killpg` and Windows `taskkill /T` work, but need per-OS branches and miss reparented/re-sessioned descendants.
 
 `wait()` is well-behaved though: it survives cancellation and is safe to call again after a kill.
+
+## Third and fourth traps: cancelling the runner, and the success-path hang
+
+Two leaks the shipped module closes that the single-PID/EOF discussion above does not cover:
+
+- **Cancelling the runner itself** (caller `task.cancel()`, not the internal timeout) raises `CancelledError` past the timeout handler. Without a `try/except BaseException` that funnels into a teardown (kill tree → cancel readers → close pipe transports → reap), the child and its readers are simply orphaned. Same for any unexpected exception mid-run.
+- **The success path can hang too.** `process.wait()` returning is not pipe EOF: if the exited child left a pipe-holding grandchild, the final `asyncio.gather(*readers)` blocks until the orphan finishes. Bound that wait on *both* paths (the shipped module waits ~1s then cancels the stragglers), not just after a timeout.
 
 ## Reference pattern: run, capture, timeout, report
 
@@ -126,9 +133,9 @@ async def run_tool_with_capture(argv: list[str], *, timeout_s: float) -> tuple[i
 
 Notes on choices, so future-you can re-argue them:
 
-- The shipped `shared/subprocess.py` packages this pattern as a frozen `SubprocessRun` result (with a `timed_out` flag) plus a `_kill_and_reap` helper for the kill race — read it before adapting this sketch.
+- The shipped `shared/subprocess.py` packages this pattern as a frozen `SubprocessRun` result (`timed_out` and `truncated` flags) plus a psutil tree kill, a bounded settle, and a caller-cancellation teardown — read it before adapting this sketch.
 - Cancelled readers on the timeout path: partial output is "output at timeout" and good enough; the alternative is waiting for the orphan.
-- If the process may spawn pipe-holding children, even the *success* path's `gather` can hang on EOF — see the orphan section. Worth a bounded wait there if that's your situation.
+- If the process may spawn pipe-holding children, even the *success* path's `gather` can hang on EOF — the shipped module bounds that wait too; if you hand-roll this, bound it on both paths.
 - Progress bars: `\r`-redrawn bars turn into one giant line. Normalizing `\r` → `\n` before tailing makes the output usable in logs and error messages.
 
 ## Surfacing captured output
@@ -139,6 +146,7 @@ What worked well as UX, keep or adapt:
 - on failure: full tail into the WARNING log record; last output line appended to the user-facing message (`"...install failed (fatal: disk full)"`) — that last line is usually the actual reason.
 - on success: tail into DEBUG (a durable file log at DEBUG is nice to have).
 - on timeout: say "timed out" plus the last captured line, e.g. "downloaded 55%" — it tells the user it was a download problem, not a tool crash.
+- `output_tail(*streams)` ships with the module: normalizes `\r`, drops blank lines, returns the last N — feed those messages directly.
 
 ## Child-side buffering surprise
 
@@ -153,13 +161,13 @@ Two test-double bugs we created and then had to fix — both look like product b
 
 And a meta-lesson that paid off twice: before trusting asyncio subprocess/cancellation semantics, write a 15-line probe script with `asyncio.timeout` + a sleeping child and *watch* what actually happens. Two of the assumptions above ("second communicate recovers the buffer", "read-after-kill sees buffered bytes") died in 30 seconds when probed.
 
-Doubles cannot cover the platform layer — real pipes, kill semantics, orphan write ends. [`shared_tests/test_subprocess_utils.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/test_subprocess_utils.py) covers that with real processes spawned from the flag-driven [`tool_stub.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/fixtures/tool_stub.py); keep that split (fake the runner in unit tests, spawn real ones for this layer).
+Doubles cannot cover the platform layer — real pipes, kill semantics, orphan write ends. [`shared_tests/test_subprocess_utils.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/test_subprocess_utils.py) covers that with real processes spawned from the flag-driven [`tool_stub.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/fixtures/tool_stub.py); keep that split (fake the runner in unit tests, spawn real ones for this layer). The shipped tests use `psutil` for cross-platform process-liveness checks and a fake reader that yields finite chunks then `b""` for the drain contract.
 
 ## Open questions / not handled yet
 
-- process-tree kill (POSIX killpg / Windows Jobs / psutil) — known gap, see above.
+- Tree kill is a psutil ppid snapshot: a child spawned after the walk escapes, and after a soft-kill reaps the parent its survivors reparent out of reach — so the shipped `_kill_tree` snapshots once and re-signals that same list on the forced pass. **Job Objects** are the race-free Windows upgrade if escapees ever matter.
 - Windows: covered by the shared real-process tests (the Windows CI leg runs them against the Proactor loop, the default there — never install a Selector event-loop override, or subprocess support breaks). macOS has no CI leg; POSIX semantics assumed identical to Linux. Note the *launch* of downloaded browser engines (not this layer) can additionally hit macOS Gatekeeper for unsigned builds.
-- interleaving of stdout+stderr is lost (captured separately); fine for tails.
+- interleaving of stdout+stderr is available via `merge_stderr`; by default they are captured separately, which is fine for tails.
 - live progress streaming to a UI — deliberately not done; capture-only.
 - SIGPIPE behavior when we cancel readers and abandon the pipe: the orphan keeps writing into a pipe we stop reading; assumed harmless, unverified.
 

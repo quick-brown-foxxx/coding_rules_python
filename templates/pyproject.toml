@@ -16,6 +16,7 @@ dependencies = [
     "rusty-results>=1.1.1",      # Result pattern for error handling
     "colorlog>=6.10.1",          # Colored logging
     "platformdirs>=4.0.0",       # Cross-platform user config/data/log dirs
+    "psutil>=7.0.0",             # Needed by the copied src/<package>/shared/subprocess module
     "pyside6>=6.10.1",           # Needed by the copied src/<package>/shared/shortcuts modules
     "tomli-w>=1.2.0",            # Needed by the copied src/<package>/shared/shortcuts modules
     # "httpx>=0.28.1",           # Async HTTP client (uncomment if needed)
