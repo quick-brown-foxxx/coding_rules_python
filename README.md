@@ -39,6 +39,7 @@ The 11 Python skills and their myai parents
 shared/                Runtime copy-paste building blocks
   logging/               Logging setup + colored non-log output
   shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
+  subprocess.py          Cancellation-safe asyncio subprocess runner
 
 tools/linting/         Dev-only AST custom lint checks (never shipped)
 

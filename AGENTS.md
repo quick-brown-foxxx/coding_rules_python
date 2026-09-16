@@ -45,10 +45,11 @@ Copy-paste building blocks for new projects (not an installable library). On boo
 
 - `src/<package>/shared/logging/` — colorlog-based file + stdout logging, colored non-log CLI output (`write_info`, `write_error`, etc.)
 - `src/<package>/shared/shortcuts/` — PySide6 keyboard shortcut manager with TOML config, platform defaults, and Qt integration
+- `src/<package>/shared/subprocess.py` — cancellation-safe asyncio subprocess runner (timeout, kill, captured output)
 - `tools/linting/` — AST-based custom lint checks (dev-only)
 - `shared_tests/` — tests for the copied shared modules and lint checks
 
-Canonical sources live at the repo root: `shared/logging/`, `shared/shortcuts/`, `tools/linting/`, `shared_tests/`. Imports become `<package>.shared.logging` / `<package>.shared.shortcuts` downstream (runtime code uses relative imports so it copies verbatim).
+Canonical sources live at the repo root: `shared/logging/`, `shared/shortcuts/`, `shared/subprocess.py`, `tools/linting/`, `shared_tests/`. Imports become `<package>.shared.logging` / `<package>.shared.shortcuts` / `<package>.shared.subprocess` downstream (runtime code uses relative imports so it copies verbatim).
 
 ### Templates (`templates/`)
 

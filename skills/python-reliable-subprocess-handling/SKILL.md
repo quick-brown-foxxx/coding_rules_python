@@ -10,6 +10,8 @@ description: >-
 
 This skill extends myai's `engineering-principles`. Load that first. `writing-python-code` is assumed to be already loaded. Start with `writing-python-code` for the baseline subprocess rules (no `shell=True`, `create_subprocess_exec`, handle `TimeoutError`); this skill covers the traps that only show up once a timeout, a kill, or a process tree is involved.
 
+**Ready-made implementation + tests.** this repo ships a self-contained version of the reference pattern at [`shared/subprocess.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared/subprocess.py), with real-process tests at [`shared_tests/test_subprocess_utils.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/test_subprocess_utils.py) and the flag-driven child-process stub they spawn at [`shared_tests/fixtures/tool_stub.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/fixtures/tool_stub.py). Copy them into a project and adapt. The text below explains *why* that code is shaped the way it is, so you can change it on purpose instead of rediscovering the traps.
+
 **Status: working memo, not a guide.** Everything below came from one real debugging session; treat it as field notes. Verify against your runtime before relying on it, and expect corrections — some of this is version-sensitive behavior of asyncio internals, not documented contracts.
 
 ## The big trap: `communicate()` loses output when cancelled
@@ -60,9 +62,7 @@ Two lessons:
 - **Never gate the timeout report behind cleanup.** Log/announce "timed out" immediately; do recovery work after.
 - Don't wait for pipe EOF on a killed process tree. Snapshot what you hold and cancel the readers.
 
-Proper tree kill is platform-specific and we deliberately skipped it (revisit if orphaned work ever matters): POSIX `start_new_session=True` + `os.killpg`, Windows Job Objects or `taskkill /T`. Cheap partial mitigation: `contextlib.suppress(ProcessLookupError)` around `kill()` — it races with process exit.
-
-**Cross-platform note:** `start_new_session` + `os.killpg` is POSIX-only. A cross-platform app needs a per-OS tree-kill implementation (see `writing-python-code` cross-platform rules), not a bare `os.killpg` call.
+Proper tree kill is platform-specific and we deliberately skipped it (revisit if orphaned work ever matters): POSIX `start_new_session=True` + `os.killpg`, Windows Job Objects or `taskkill /T`, or a psutil tree kill (`children(recursive=True)` + kill bottom-up — the one cross-platform option). Cheap partial mitigation: `contextlib.suppress(ProcessLookupError, PermissionError)` around `kill()` — asyncio raises `ProcessLookupError` cross-platform when the process was already reaped, and Windows `TerminateProcess` can surface `PermissionError` (WinError 5) for a dead-but-unreaped child. Both mean "already gone".
 
 `wait()` is well-behaved though: it survives cancellation and is safe to call again after a kill.
 
@@ -104,7 +104,7 @@ async def run_tool_with_capture(argv: list[str], *, timeout_s: float) -> tuple[i
                 await process.wait()
         except TimeoutError:
             timed_out = True
-            with contextlib.suppress(ProcessLookupError):
+            with contextlib.suppress(ProcessLookupError, PermissionError):
                 process.kill()
             await process.wait()
         # success path: wait() returned, but EOF isn't guaranteed yet if the
@@ -126,6 +126,7 @@ async def run_tool_with_capture(argv: list[str], *, timeout_s: float) -> tuple[i
 
 Notes on choices, so future-you can re-argue them:
 
+- The shipped `shared/subprocess.py` packages this pattern as a frozen `SubprocessRun` result (with a `timed_out` flag) plus a `_kill_and_reap` helper for the kill race — read it before adapting this sketch.
 - Cancelled readers on the timeout path: partial output is "output at timeout" and good enough; the alternative is waiting for the orphan.
 - If the process may spawn pipe-holding children, even the *success* path's `gather` can hang on EOF — see the orphan section. Worth a bounded wait there if that's your situation.
 - Progress bars: `\r`-redrawn bars turn into one giant line. Normalizing `\r` → `\n` before tailing makes the output usable in logs and error messages.
@@ -152,10 +153,12 @@ Two test-double bugs we created and then had to fix — both look like product b
 
 And a meta-lesson that paid off twice: before trusting asyncio subprocess/cancellation semantics, write a 15-line probe script with `asyncio.timeout` + a sleeping child and *watch* what actually happens. Two of the assumptions above ("second communicate recovers the buffer", "read-after-kill sees buffered bytes") died in 30 seconds when probed.
 
+Doubles cannot cover the platform layer — real pipes, kill semantics, orphan write ends. [`shared_tests/test_subprocess_utils.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/test_subprocess_utils.py) covers that with real processes spawned from the flag-driven [`tool_stub.py`](https://github.com/quick-brown-foxxx/coding_rules_python/blob/master/shared_tests/fixtures/tool_stub.py); keep that split (fake the runner in unit tests, spawn real ones for this layer).
+
 ## Open questions / not handled yet
 
-- process-tree kill (POSIX killpg / Windows Jobs) — known gap, see above.
-- untested on Windows entirely; proactor loop's pipe handling may differ.
+- process-tree kill (POSIX killpg / Windows Jobs / psutil) — known gap, see above.
+- Windows: covered by the shared real-process tests (the Windows CI leg runs them against the Proactor loop, the default there — never install a Selector event-loop override, or subprocess support breaks). macOS has no CI leg; POSIX semantics assumed identical to Linux. Note the *launch* of downloaded browser engines (not this layer) can additionally hit macOS Gatekeeper for unsigned builds.
 - interleaving of stdout+stderr is lost (captured separately); fine for tails.
 - live progress streaming to a UI — deliberately not done; capture-only.
 - SIGPIPE behavior when we cancel readers and abandon the pipe: the orphan keeps writing into a pipe we stop reading; assumed harmless, unverified.

@@ -114,6 +114,7 @@ See `setting-up-projects` for the general bootstrap philosophy.
    - Keep only the `src/<package>/shared/` subdirectories you actually use
    - `src/<package>/shared/logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging`)
    - `src/<package>/shared/shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts`)
+   - `src/<package>/shared/subprocess.py` — cancellation-safe asyncio subprocess runner (see `python-reliable-subprocess-handling`)
    - `tools/linting/` is dev-only and never ships in the wheel; drop it if you do not want the custom checks
    - Keep the matching tests in `shared_tests/` beside the copied modules
 

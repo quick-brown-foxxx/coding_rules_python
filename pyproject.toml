@@ -17,6 +17,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=9.0.1",
+    "pytest-asyncio>=1.3.0",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.6,<0.16",
     "basedpyright>=1.34.0",
@@ -93,6 +94,7 @@ ignore = [
 "tests/test_repo_layout_scripts.py" = ["S103", "S603", "S607"]
 "shared_tests/*" = ["S101", "PT018"]
 "shared_tests/fixtures/*" = ["C408", "RUF012", "F841", "B018"]
+"shared_tests/test_subprocess_utils.py" = ["PLR2004"]
 "shared_tests/test_linting/conftest.py" = ["S603"]
 "shared_tests/test_linting/test_check_frozen_dataclasses.py" = ["PLR2004"]
 "shared_tests/test_linting/test_check_module_mutables.py" = ["S603", "PLR2004"]
@@ -114,6 +116,7 @@ testpaths = ["shared_tests", "tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+asyncio_mode = "auto"
 
 # ============================================================================
 # Task Runner - poethepoet

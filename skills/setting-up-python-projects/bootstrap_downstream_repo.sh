@@ -12,7 +12,7 @@ set -euo pipefail
 #
 # Rendered layout (PACKAGE_NAME defaults to todo_package_name):
 #   src/PACKAGE_NAME/                     product package (shipped in the wheel)
-#   src/PACKAGE_NAME/shared/              runtime building blocks (logging, shortcuts)
+#   src/PACKAGE_NAME/shared/              runtime building blocks (logging, shortcuts, subprocess)
 #   tools/linting/                        dev-only custom lint checks (not shipped)
 #   shared_tests/                         tests for the copied shared/tools code
 #   tests/                                project's own tests
@@ -101,7 +101,8 @@ render_text_files() {
   \) -print0 | xargs -0 sed -E -i \
     -e "s/todo_package_name/$package_name/g" \
     -e "s/(^|[^A-Za-z0-9_.])shared\.logging/\1$package_name.shared.logging/g" \
-    -e "s/(^|[^A-Za-z0-9_.])shared\.shortcuts/\1$package_name.shared.shortcuts/g"
+    -e "s/(^|[^A-Za-z0-9_.])shared\.shortcuts/\1$package_name.shared.shortcuts/g" \
+    -e "s/(^|[^A-Za-z0-9_.])shared\.subprocess/\1$package_name.shared.subprocess/g"
 }
 
 print_usage() {
@@ -209,6 +210,7 @@ fi
 copy_directory "$SOURCE_ROOT/templates/src/todo_package_name" "$TARGET_ROOT/src/$PACKAGE_NAME"
 copy_directory "$SOURCE_ROOT/shared/logging" "$TARGET_ROOT/src/$PACKAGE_NAME/shared/logging"
 copy_directory "$SOURCE_ROOT/shared/shortcuts" "$TARGET_ROOT/src/$PACKAGE_NAME/shared/shortcuts"
+copy_file "$SOURCE_ROOT/shared/subprocess.py" "$TARGET_ROOT/src/$PACKAGE_NAME/shared/subprocess.py"
 copy_file "$SOURCE_ROOT/shared/__init__.py" "$TARGET_ROOT/src/$PACKAGE_NAME/shared/__init__.py"
 
 copy_directory "$SOURCE_ROOT/tools/linting" "$TARGET_ROOT/tools/linting"

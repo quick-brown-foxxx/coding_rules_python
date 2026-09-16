@@ -38,6 +38,7 @@ def assert_bootstrapped_layout(target_root: Path, package_name: str = "todo_pack
     assert (package_root / "shared" / "__init__.py").is_file()
     assert (package_root / "shared" / "logging" / "__init__.py").is_file()
     assert (package_root / "shared" / "shortcuts" / "__init__.py").is_file()
+    assert (package_root / "shared" / "subprocess.py").is_file()
 
     assert (target_root / "tools" / "__init__.py").is_file()
     assert (target_root / "tools" / "linting" / "__init__.py").is_file()
@@ -86,11 +87,16 @@ def write_fake_source(source_root: Path) -> None:
     (source_root / "shared" / "__init__.py").write_text("", encoding="utf-8")
     (source_root / "shared" / "logging" / "__init__.py").write_text("", encoding="utf-8")
     (source_root / "shared" / "shortcuts" / "__init__.py").write_text("", encoding="utf-8")
+    (source_root / "shared" / "subprocess.py").write_text(
+        "def run_subprocess_with_capture() -> None:\n    return None\n",
+        encoding="utf-8",
+    )
     (source_root / "tools" / "__init__.py").write_text("", encoding="utf-8")
     (source_root / "tools" / "linting" / "__init__.py").write_text("", encoding="utf-8")
     (source_root / "shared_tests" / "__init__.py").write_text(
         "from shared.logging import setup_file_logging\n"
         "from shared.shortcuts import ShortcutManager\n"
+        "from shared.subprocess import run_subprocess_with_capture\n"
         "from your_app.shared.shortcuts import keep_as_is\n",
         encoding="utf-8",
     )
@@ -154,6 +160,7 @@ def test_bootstrap_shell_script_supports_stdin_copy_paste_flow(tmp_path: Path) -
     shared_tests_init = (target_root / "shared_tests" / "__init__.py").read_text(encoding="utf-8")
     assert "from todo_package_name.shared.logging import setup_file_logging" in shared_tests_init
     assert "from todo_package_name.shared.shortcuts import ShortcutManager" in shared_tests_init
+    assert "from todo_package_name.shared.subprocess import run_subprocess_with_capture" in shared_tests_init
 
     assert uv_log.read_text(encoding="utf-8").splitlines() == [
         "sync",
@@ -198,6 +205,7 @@ def test_bootstrap_shell_script_renders_package_name_override(tmp_path: Path) ->
     shared_tests_init = (target_root / "shared_tests" / "__init__.py").read_text(encoding="utf-8")
     assert "from acme.shared.logging import setup_file_logging" in shared_tests_init
     assert "from acme.shared.shortcuts import ShortcutManager" in shared_tests_init
+    assert "from acme.shared.subprocess import run_subprocess_with_capture" in shared_tests_init
     assert "from your_app.shared.shortcuts import keep_as_is" in shared_tests_init
     assert "from shared.logging" not in shared_tests_init
 
