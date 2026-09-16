@@ -48,6 +48,35 @@ class TestCollectFiles:
         assert "good.py" in names
         assert "hidden.py" not in names
 
+    def test_directory_arg_expands_recursively(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        pkg = tmp_path / "pkg"
+        (pkg / "sub").mkdir(parents=True)
+        (pkg / "a.py").write_text("# a")
+        (pkg / "sub" / "b.py").write_text("# b")
+        (tmp_path / "outside.py").write_text("# outside")
+        result = collect_files(["pkg"])
+        assert {str(p) for p in result} == {str(Path("pkg/a.py")), str(Path("pkg/sub/b.py"))}
+
+    def test_directory_arg_excludes_fixtures(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        pkg = tmp_path / "pkg"
+        (pkg / "fixtures").mkdir(parents=True)
+        (pkg / "keep.py").write_text("# keep")
+        (pkg / "fixtures" / "hidden.py").write_text("# hidden")
+        result = collect_files(["pkg"])
+        assert [str(p) for p in result] == [str(Path("pkg/keep.py"))]
+
+    def test_mixed_file_and_directory_args(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.chdir(tmp_path)
+        pkg = tmp_path / "pkg"
+        pkg.mkdir()
+        (pkg / "a.py").write_text("# a")
+        (tmp_path / "extra.py").write_text("# extra")
+        (tmp_path / "notes.txt").write_text("# notes")
+        result = collect_files(["pkg", "extra.py", "notes.txt"])
+        assert {str(p) for p in result} == {str(Path("pkg/a.py")), str(Path("extra.py"))}
+
 
 class TestIsIgnored:
     def test_matching_check_name(self) -> None:

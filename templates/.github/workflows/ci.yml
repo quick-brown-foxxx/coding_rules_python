@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+# CI — canonical verification flow on the supported dev platforms (Linux + Windows).
+# Uses non-mutating lint steps: `lint_full` formats/fixes in place, which would
+# silently paper over fixable issues here instead of failing.
+name: ci
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # uv sync installs the pinned Python (requires-python >=3.14) from uv.lock.
+      - name: Sync dependencies
+        run: uv sync
+      - name: Type check (basedpyright)
+        run: uv run basedpyright .
+      - name: Ruff format check
+        run: uv run ruff format --check .
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: Custom linters
+        run: uv run poe lint_custom_linters
+      - name: Tests
+        run: uv run poe test

@@ -111,6 +111,15 @@ def load_item(item_id: str) -> Result[Item, str]:
 - `asyncio.create_subprocess_exec()` for subprocesses (never `shell=True`)
 - For Qt: use `qasync` + `ThreadPoolExecutor` for blocking operations
 
+### Cross-platform (Windows / POSIX)
+
+- Windows, macOS, and Linux are equal runtime targets; code works on all of them.
+- Default to OS-agnostic implementations, eg `pathlib`, no POSIX-only imports/syscalls, use per-OS directories and so on.
+- Small platform differences (a chmod call, an editor default) may be compact `sys.platform` / `os.name` branches inline — kept narrowable so the type checker validates each side.
+- A complex OS-specific subsystem is a distinct service behind a protocol with one implementation per OS — never scattered conditionals. See `building-multi-ui-apps` for the pattern.
+- Dev helpers: `poe` tasks and `pyproject.toml` scripts never shells out to POSIX tools. Use crossplatofrm abstractions or write python helper scripts.
+- Enforcement: basedpyright infers the platform per machine; CI (`.github/workflows/ci.yml`) runs lint + tests on Linux and Windows.
+
 ---
 
 ## Architecture

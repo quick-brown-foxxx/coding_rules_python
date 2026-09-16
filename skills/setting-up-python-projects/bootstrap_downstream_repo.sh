@@ -17,6 +17,7 @@ set -euo pipefail
 #   shared_tests/                         tests for the copied shared/tools code
 #   tests/                                project's own tests
 #   docs/coding_rules.md
+#   .github/workflows/ci.yml              cross-platform CI (Linux + Windows)
 #
 # Top-level `shared` no longer ships as its own wheel package, so wheel-based
 # installs (pip, uv tool install, uvx) do not collide with a generic `shared`.
@@ -222,6 +223,7 @@ copy_directory "$SOURCE_ROOT/templates/tests" "$TARGET_ROOT/tests"
 copy_file "$SOURCE_ROOT/templates/gitignore" "$TARGET_ROOT/.gitignore"
 copy_file "$SOURCE_ROOT/templates/vscode_settings.json" "$TARGET_ROOT/.vscode/settings.json"
 copy_file "$SOURCE_ROOT/templates/vscode_extensions.json" "$TARGET_ROOT/.vscode/extensions.json"
+copy_directory "$SOURCE_ROOT/templates/.github" "$TARGET_ROOT/.github"
 
 copy_file "$SOURCE_ROOT/rules/coding_rules.md" "$TARGET_ROOT/docs/coding_rules.md"
 

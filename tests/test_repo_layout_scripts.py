@@ -28,6 +28,7 @@ def assert_bootstrapped_layout(target_root: Path, package_name: str = "todo_pack
     assert (target_root / ".gitignore").is_file()
     assert (target_root / ".vscode" / "settings.json").is_file()
     assert (target_root / ".vscode" / "extensions.json").is_file()
+    assert (target_root / ".github" / "workflows" / "ci.yml").is_file()
     assert (target_root / "docs" / "coding_rules.md").is_file()
     assert (target_root / "CLAUDE.md").is_symlink()
     assert (target_root / "CLAUDE.md").resolve() == (target_root / "AGENTS.md").resolve()
@@ -50,6 +51,7 @@ def assert_bootstrapped_layout(target_root: Path, package_name: str = "todo_pack
 def write_fake_source(source_root: Path) -> None:
     (source_root / "templates" / "src" / "todo_package_name").mkdir(parents=True)
     (source_root / "templates" / "tests").mkdir(parents=True)
+    (source_root / "templates" / ".github" / "workflows").mkdir(parents=True)
     (source_root / "shared" / "logging").mkdir(parents=True)
     (source_root / "shared" / "shortcuts").mkdir(parents=True)
     (source_root / "tools" / "linting").mkdir(parents=True)
@@ -79,6 +81,7 @@ def write_fake_source(source_root: Path) -> None:
     (source_root / "templates" / "gitignore").write_text(".venv/\n", encoding="utf-8")
     (source_root / "templates" / "vscode_settings.json").write_text("{}\n", encoding="utf-8")
     (source_root / "templates" / "vscode_extensions.json").write_text("{}\n", encoding="utf-8")
+    (source_root / "templates" / ".github" / "workflows" / "ci.yml").write_text("name: ci\n", encoding="utf-8")
 
     (source_root / "shared" / "__init__.py").write_text("", encoding="utf-8")
     (source_root / "shared" / "logging" / "__init__.py").write_text("", encoding="utf-8")

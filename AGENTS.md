@@ -57,6 +57,7 @@ Copy into new projects, fill TODOs, and customize:
 - `pyproject.toml` — Full tooling config: uv, ruff, basedpyright, pytest, poethepoet
 - `pre-commit-config.yaml` — Git hooks for linting, formatting, type checking
 - `.gitignore`, `.vscode/` — Editor and VCS defaults
+- `.github/workflows/ci.yml` — Cross-platform CI (Linux + Windows) rendered into downstream repos
 
 ### Rules (`rules/`)
 
@@ -83,3 +84,12 @@ Copy into new projects, fill TODOs, and customize:
 - **Text output**: Jinja2 templates
 - **Testing**: pytest; e2e/CLI tests as primary safety net; real over mocked
 - **Pre-commit**: `uv run poe lint_full` passes, `uv run poe test` passes before every commit
+
+## Cross-Platform
+
+Shared tooling (`tools/linting/`, `shared/`, `shared_tests/`) targets Linux, macOS, and Windows equally.
+
+- Default to OS-agnostic implementations: `pathlib`, no POSIX-only commands or syscalls.
+- Dev helpers: `poe` tasks and `pyproject.toml` scripts never shells out to POSIX tools. Use crossplatofrm abstractions or write python helper scripts.
+- Small platform differences may be narrow `sys.platform` / `os.name` branches; a complex OS-specific subsystem is a protocol with one implementation per OS. See `building-multi-ui-apps` for the pattern.
+- Enforcement: CI (`.github/workflows/ci.yml`) runs lint + tests on Linux and Windows; `templates/.github/workflows/ci.yml` ships the same to downstream repos.

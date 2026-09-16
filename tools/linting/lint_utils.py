@@ -58,10 +58,22 @@ def _is_excluded(path: Path) -> bool:
 
 
 def collect_files(args: list[str]) -> list[Path]:
-    """Collect Python files from CLI args or scan current directory."""
-    if args:
-        return [Path(a) for a in args if a.endswith(".py")]
-    return sorted(p for p in Path(".").rglob("*.py") if not _is_excluded(p))
+    """Collect Python files: args are files or root dirs scanned recursively.
+
+    Directory args expand via ``rglob`` with the exclusion filter applied
+    (vendored dirs, ``fixtures``) — this is how poe passes wide roots
+    (``src shared shared_tests test``). Explicit file args are taken verbatim
+    (no exclusion) — that is how pre-commit and the linter self-tests target
+    individual files. With no args, scans the current directory.
+    """
+    roots = [Path(arg) for arg in args] or [Path(".")]
+    files: list[Path] = []
+    for root in roots:
+        if root.is_dir():
+            files.extend(path for path in root.rglob("*.py") if not _is_excluded(path))
+        elif root.suffix == ".py":
+            files.append(root)
+    return sorted(files)
 
 
 def is_ignored(line: str, check_name: str) -> bool:
