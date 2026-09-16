@@ -3,7 +3,7 @@
 Flags module-level assignments creating mutable containers (list, dict, set)
 not wrapped in Final. Allows logger assignments and TYPE_CHECKING blocks.
 
-Usage: python -m shared.linting.check_module_mutables [file1.py file2.py ...]
+Usage: python -m tools.linting.check_module_mutables [file1.py file2.py ...]
 Ignore with: # lint-ignore[module-mutable-state]: <rationale>
 """
 
@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from typing import Final
 
-from shared.linting.lint_utils import (
+from .lint_utils import (
     collect_files,
     file_ignore_result,
     has_bare_ignore,

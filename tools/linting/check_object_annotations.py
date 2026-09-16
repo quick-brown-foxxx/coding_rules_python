@@ -3,7 +3,7 @@
 Flags: dict[str, object], list[object], Sequence[object], tuple[object, ...],
 and bare `object` function params (except TypeIs/TypeGuard guards, *args, **kwargs).
 
-Usage: python -m shared.linting.check_object_annotations [file1.py file2.py ...]
+Usage: python -m tools.linting.check_object_annotations [file1.py file2.py ...]
 Ignore with: # lint-ignore[restricted-object]: <rationale>
 """
 
@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from typing import Final
 
-from shared.linting.lint_utils import (
+from .lint_utils import (
     collect_files,
     file_ignore_result,
     has_bare_ignore,

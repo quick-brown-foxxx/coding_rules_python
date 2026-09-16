@@ -6,10 +6,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from shared.linting.check_raw_dicts import check_file
 from shared_tests.test_linting.conftest import RunLinter
+from tools.linting.check_raw_dicts import check_file
 
-MODULE = "shared.linting.check_raw_dicts"
+MODULE = "tools.linting.check_raw_dicts"
 
 
 class TestRawDicts:

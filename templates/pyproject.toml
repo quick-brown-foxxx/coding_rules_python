@@ -15,8 +15,8 @@ requires-python = ">=3.14"
 dependencies = [
     "rusty-results>=1.1.1",      # Result pattern for error handling
     "colorlog>=6.10.1",          # Colored logging
-    "pyside6>=6.10.1",           # Needed by shared/shortcuts full-copy bootstrap
-    "tomli-w>=1.2.0",            # Needed by shared/shortcuts full-copy bootstrap
+    "pyside6>=6.10.1",           # Needed by the copied src/<package>/shared/shortcuts modules
+    "tomli-w>=1.2.0",            # Needed by the copied src/<package>/shared/shortcuts modules
     # "httpx>=0.28.1",           # Async HTTP client (uncomment if needed)
     # "python-dotenv>=1.0.1",    # Env vars from .env (uncomment if needed)
     # "msgspec>=0.19.0",         # Struct validation + fast JSON (uncomment if needed)
@@ -47,7 +47,7 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/todo_package_name", "shared"]
+packages = ["src/todo_package_name"]
 
 # ============================================================================
 # Type Checking - basedpyright (strict, no Any)
@@ -66,7 +66,7 @@ reportImplicitStringConcatenation = "none"
 # basedpyright's generic unused-call rule is noisy here; Result handling is enforced by lint_ignored_results.
 reportUnusedCallResult = "none"
 reportUnnecessaryIsInstance = "none"
-include = ["src", "tests", "shared", "shared_tests"]
+include = ["src", "tests", "shared_tests", "tools"]
 exclude = [
     "**/__pycache__",
     "**/node_modules",
@@ -86,7 +86,7 @@ exclude = [
 [tool.ruff]
 line-length = 120
 target-version = "py314"
-include = ["src/**/*.py", "tests/**/*.py", "shared/**/*.py", "shared_tests/**/*.py"]
+include = ["src/**/*.py", "tests/**/*.py", "shared_tests/**/*.py", "tools/**/*.py"]
 extend-exclude = [
     "venv", ".venv", "*.egg", "*.egg-info", "**/dist", "**/build",
     "**/__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so", "wrktrs",
@@ -166,11 +166,11 @@ addopts = ["-n", "auto", "--dist", "worksteal"]
 test = "pytest"
 app = "python -m todo_package_name"
 # Linux/POSIX-first shell pipeline; adjust later if the downstream project needs non-POSIX support.
-lint_objects.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_object_annotations"
-lint_frozen.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_frozen_dataclasses"
-lint_mutables.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_module_mutables"
-lint_type_ignore.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_type_ignore"
-lint_raw_dicts.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_raw_dicts"
-lint_ignored_results.shell = "find src tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_ignored_results"
+lint_objects.shell = "find src tests shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_object_annotations"
+lint_frozen.shell = "find src tests shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_frozen_dataclasses"
+lint_mutables.shell = "find src tests shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_module_mutables"
+lint_type_ignore.shell = "find src tests shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_type_ignore"
+lint_raw_dicts.shell = "find src tests shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_raw_dicts"
+lint_ignored_results.shell = "find src tests shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_ignored_results"
 lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables", "lint_type_ignore", "lint_raw_dicts", "lint_ignored_results"]
 lint_full.shell = "basedpyright . && ruff format . && ruff check --fix . && poe lint_custom_linters"

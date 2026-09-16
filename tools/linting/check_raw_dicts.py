@@ -5,7 +5,7 @@ return types, class attributes, and module-level variables.
 Allowed: Final[dict[...]], annotations inside function bodies (local
 variables are transient), **kwargs typing, and bare ``dict`` without subscript.
 
-Usage: python -m shared.linting.check_raw_dicts [file1.py file2.py ...]
+Usage: python -m tools.linting.check_raw_dicts [file1.py file2.py ...]
 Ignore with: # lint-ignore[raw-dict]: <rationale>
 """
 
@@ -15,7 +15,7 @@ import ast
 import sys
 from pathlib import Path
 
-from shared.linting.lint_utils import (
+from .lint_utils import (
     collect_files,
     file_ignore_result,
     has_bare_ignore,

@@ -36,7 +36,7 @@ Start here for backend repos, then pull generic Python bootstrap pieces from
 - `dataclass(frozen=True, slots=True)` + `Result[T, E]` in the core
 - `SQLAlchemy 2` + `Alembic` when the service owns relational persistence
 - `httpx` for outbound HTTP
-- existing repo logging setup via `shared/logging`
+- existing repo logging setup via `src/<package>/shared/logging`
 - `pytest`, `pytest-asyncio`, and integration tests through real app wiring
 - `uv`, `poethepoet`, `basedpyright`, and `ruff`
 

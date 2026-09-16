@@ -12,7 +12,7 @@ import ast
 import sys
 from pathlib import Path
 
-from shared.linting.lint_utils import (
+from .lint_utils import (
     collect_files,
     file_ignore_result,
     has_bare_ignore,

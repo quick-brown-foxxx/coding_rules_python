@@ -8,7 +8,7 @@ from pathlib import Path
 
 from shared_tests.test_linting.conftest import RunLinter
 
-MODULE = "shared.linting.check_type_ignore"
+MODULE = "tools.linting.check_type_ignore"
 
 
 class TestTypeIgnore:

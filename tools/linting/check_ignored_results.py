@@ -4,7 +4,7 @@ Current scope is intentionally narrow: it flags bare expression-statement calls
 to Result-returning functions defined in the same file and a few simple local
 import forms that resolve to nearby project files.
 
-Usage: python -m shared.linting.check_ignored_results [file1.py file2.py ...]
+Usage: python -m tools.linting.check_ignored_results [file1.py file2.py ...]
 Ignore with: # lint-ignore[ignored-result]: <rationale>
 """
 
@@ -14,7 +14,7 @@ import ast
 import sys
 from pathlib import Path
 
-from shared.linting.lint_utils import (
+from .lint_utils import (
     collect_files,
     file_ignore_result,
     has_bare_ignore,

@@ -7,7 +7,7 @@ from textwrap import dedent
 
 from shared_tests.test_linting.conftest import RunLinter, RunLinterPath
 
-MODULE = "shared.linting.check_ignored_results"
+MODULE = "tools.linting.check_ignored_results"
 EXPECTED_VIOLATION_COUNT = 2
 EXPECTED_IMPORTED_VIOLATION_COUNT = 6
 

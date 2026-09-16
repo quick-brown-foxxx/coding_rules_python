@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from shared_tests.test_linting.conftest import RunLinter
 
-MODULE = "shared.linting.check_frozen_dataclasses"
+MODULE = "tools.linting.check_frozen_dataclasses"
 
 
 class TestFrozenDataclasses:

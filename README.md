@@ -35,13 +35,13 @@ The 10 Python skills and their myai parents
 ## Most important stuff
 
 ```
-shared/                Copy-paste reusable code for new projects
+shared/                Runtime copy-paste building blocks
   logging/               Logging setup + colored non-log output
   shortcuts/             Keyboard shortcuts manager (PySide6 + TOML)
-  linting/               Custom lint checks (AST-based)
 
-shared_tests/          Tests for shared/ code
- ...
+tools/linting/         Dev-only AST custom lint checks (never shipped)
+
+shared_tests/          Tests for shared/ and tools/linting
 
 rules/                 Copy-paste rule files for projects
   coding_rules.md        Full coding standards.
@@ -69,19 +69,17 @@ Note: `skills` updates detection has bugs, more reliable is to do force add from
 
 ### Shared building blocks
 
-The `shared/` folder contains copy-paste building blocks for new projects, not an installable library. Copy the directories you need into the new repo's top-level `shared/` and `shared_tests/` directories and update imports if the package name changes. The template `pyproject.toml` includes the dependencies needed for a full `shared/` + `shared_tests/` copy; trim unused modules and deps afterward if you do not need them.
+The `shared/` folder contains runtime copy-paste building blocks for new projects, not an installable library. The bootstrap renders them into `src/<package>/shared/`, dev-only lint checks into `tools/linting/`, and their tests into `shared_tests/`. The template `pyproject.toml` already points at the right paths and includes the dependencies needed for a full copy; trim unused modules and deps afterward if you do not need them.
 
 ### Starting a new project
 
 1. Read myai's canonical `engineering-principles` skill for the mindset
 2. Decide: single script, general Python project, or backend/service repo? (use `writing-scripts` (myai) for scripts, `setting-up-python-projects` for general packages/apps, and `setting-up-python-backends` for service/API repos)
 3. Promote template files into place: `AGENTS.md`, `pyproject.toml`, `.pre-commit-config.yaml`, `.gitignore`, and `.vscode/`
-   Shortcut: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
-4. Copy `shared/` and `shared_tests/` into the new project root
-5. Copy `rules/coding_rules.md` (or `_short`) into `docs/`
-6. Create `CLAUDE.md` symlink → `AGENTS.md` (Claude Code reads `CLAUDE.md`)
-7. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
-8. Run `uv sync --all-extras --group dev`, then verify with `uv run poe lint_full` and `uv run poe test`
+   Shortcut: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh [--package-name NAME] SOURCE_REPO TARGET_REPO`
+   The script renders `shared/` into `src/<package>/shared/`, `tools/linting/`, `shared_tests/`, and `docs/`, creates the `CLAUDE.md` symlink, then runs sync/lint/test. `--package-name` defaults to `todo_package_name`.
+4. Fill in TODO sections in `AGENTS.md` and `pyproject.toml`
+5. Run `uv sync`, then verify with `uv run poe lint_full` and `uv run poe test`
 
 From this point on, prefer project-local commands through `uv` rather than system-installed tools: `uv run pytest`, `uv run ruff`, `uv run basedpyright`, `uv run poe`, `uv run python`, `uv run pre-commit`. In practice, the baseline verification flow is `uv run poe lint_full` (basedpyright + Ruff check/format + custom linters) followed by `uv run poe test`.
 

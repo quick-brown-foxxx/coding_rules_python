@@ -15,7 +15,7 @@ For the general logging philosophy, see myai's `engineering-principles`. This sk
 
 Rotating file logging, colored console logging, and colored non-log output. Uses `colorlog` for prefix-only coloring (log prefix is colored, message text stays default). Includes `silence_noisy_loggers()` for pinning noisy third-party loggers at WARNING.
 
-Copy `shared/logging/`.
+Copy `src/<package>/shared/logging/`.
 
 ---
 
@@ -51,7 +51,7 @@ Copy `shared/logging/`.
 ```python
 import logging
 from pathlib import Path
-from shared.logging import setup_file_logging, configure_logger_level, write_info, write_error
+from your_app.shared.logging import setup_file_logging, configure_logger_level, write_info, write_error
 
 # File logs always on
 setup_file_logging(
@@ -78,7 +78,7 @@ from typing import Final
 
 import typer
 
-from shared.logging import setup_file_logging, setup_stdout_logging, silence_noisy_loggers
+from your_app.shared.logging import setup_file_logging, setup_stdout_logging, silence_noisy_loggers
 
 app = typer.Typer(add_completion=False, help="myapp CLI")
 
@@ -116,7 +116,7 @@ def _cli_logging(
 ```python
 import logging
 from pathlib import Path
-from shared.logging import setup_file_logging, setup_stdout_logging, silence_noisy_loggers
+from your_app.shared.logging import setup_file_logging, setup_stdout_logging, silence_noisy_loggers
 
 # File logs always on
 setup_file_logging(
@@ -158,7 +158,7 @@ silence_noisy_loggers()
 For CLI tools — colored messages that are NOT log entries (status messages, results, prompts). This is how CLI tools communicate with the user instead of stdout logging:
 
 ```python
-from shared.logging import write_info, write_success, write_warning, write_error
+from your_app.shared.logging import write_info, write_success, write_warning, write_error
 
 write_info("Starting download...")      # Green → stdout
 write_success("Download complete!")     # Green → stdout
@@ -181,13 +181,13 @@ dependencies = [
 
 ## Files to Copy
 
-Use the top-level `shared/logging/` directory in the new project:
+Use the `src/<package>/shared/logging/` directory in the new project (bootstrap renders it there):
 - `__init__.py` — public API re-exports
 - `logger_setup.py` — `setup_stdout_logging()`, `setup_file_logging()`, `configure_logger_level()`, `silence_noisy_loggers()`
 - `non_log_stdout_output.py` — `write_info()`, `write_success()`, `write_warning()`, `write_error()`
 - `README.md` — references this skill
 
-Import from it directly: `from shared.logging import ...`.
+Import from it directly: `from your_app.shared.logging import ...`.
 
 ---
 
@@ -229,4 +229,4 @@ Red text to stderr.
 - **`engineering-principles`** — Parent skill. Language-agnostic philosophy.
 - **`building-qt-apps`** — For QML log routing integration with PySide6 apps.
 - **`writing-python-code`** — Python-specific coding rules for logger usage in application code.
-- **`setting-up-python-projects`** — For including `shared/logging/` in new project bootstrap.
+- **`setting-up-python-projects`** — For including `src/<package>/shared/logging/` in new project bootstrap.

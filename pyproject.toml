@@ -40,11 +40,12 @@ reportImplicitStringConcatenation = "none"
 # basedpyright's generic unused-call rule is noisy here; Result handling is enforced by lint_ignored_results.
 reportUnusedCallResult = "none"
 reportUnnecessaryIsInstance = "none"
-include = ["shared", "shared_tests", "tests"]
+include = ["shared", "shared_tests", "tests", "tools"]
 exclude = [
     "**/__pycache__",
     ".venv",
     "venv",
+    "templates",
     "tests/fixtures",
     "shared_tests/fixtures",
 ]
@@ -56,7 +57,7 @@ exclude = [
 [tool.ruff]
 line-length = 120
 target-version = "py314"
-include = ["shared/**/*.py", "shared_tests/**/*.py", "tests/**/*.py"]
+include = ["shared/**/*.py", "shared_tests/**/*.py", "tests/**/*.py", "tools/**/*.py"]
 extend-exclude = [
     "venv", ".venv", "*.egg", "*.egg-info", "**/dist", "**/build",
     "**/__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so",
@@ -122,11 +123,11 @@ python_functions = ["test_*"]
 [tool.poe.tasks]
 test = "pytest"
 # Linux/POSIX-first shell pipeline; adjust later if this repo needs broader platform support.
-lint_objects.shell = "find tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_object_annotations"
-lint_frozen.shell = "find tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_frozen_dataclasses"
-lint_mutables.shell = "find tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_module_mutables"
-lint_type_ignore.shell = "find tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_type_ignore"
-lint_raw_dicts.shell = "find tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_raw_dicts"
-lint_ignored_results.shell = "find tests shared shared_tests -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m shared.linting.check_ignored_results"
+lint_objects.shell = "find tests shared shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_object_annotations"
+lint_frozen.shell = "find tests shared shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_frozen_dataclasses"
+lint_mutables.shell = "find tests shared shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_module_mutables"
+lint_type_ignore.shell = "find tests shared shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_type_ignore"
+lint_raw_dicts.shell = "find tests shared shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_raw_dicts"
+lint_ignored_results.shell = "find tests shared shared_tests tools -path tests/fixtures -prune -o -path shared_tests/fixtures -prune -o -name '*.py' -print0 | xargs -0 python -m tools.linting.check_ignored_results"
 lint_custom_linters.sequence = ["lint_objects", "lint_frozen", "lint_mutables", "lint_type_ignore", "lint_raw_dicts", "lint_ignored_results"]
 lint_full.shell = "basedpyright . && ruff format . && ruff check --fix . && poe lint_custom_linters"

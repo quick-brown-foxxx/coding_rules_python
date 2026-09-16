@@ -59,7 +59,10 @@ project/
 │   │   └── logging.py
 │   ├── wrappers/             # Third-party lib wrappers
 │   │   └── some_wrapper.py
-│   └── stubs/                # Type stubs for untyped libs
+│   ├── stubs/                # Type stubs for untyped libs
+│   └── shared/               # Runtime building blocks copied from this repo
+│       ├── logging/          # Logging + colored output (if needed)
+│       └── shortcuts/        # Keyboard shortcuts (if PySide6 app)
 ├── tests/
 │   ├── unit/
 │   ├── integration/
@@ -67,14 +70,14 @@ project/
 │   └── conftest.py
 ├── scripts/                  # Dev utilities
 │   └── check_type_ignore.py
+├── tools/                    # Dev-only tooling (never shipped in the wheel)
+│   └── linting/              # AST custom lint checks copied from this repo
 ├── docs/
 │   └── coding_rules.md       # Copy from rules/coding_rules.md
-├── shared/                   # Cross-cutting shared code copied from this repo
-│   ├── logging/              # Logging + colored output (if needed)
-│   └── shortcuts/            # Keyboard shortcuts (if PySide6 app)
-├── shared_tests/             # Generic tests for copied shared modules
+├── shared_tests/             # Tests for copied shared modules + lint checks
+│   ├── test_logging_reusable.py
 │   ├── test_shortcuts_base.py
-│   └── test_shortcuts_manager.py
+│   └── test_linting/
 ├── AGENTS.md                 # Copy from templates/AGENTS.md, customize
 ├── CLAUDE.md                 # Symlink → AGENTS.md
 ├── pyproject.toml            # Copy from templates/pyproject.toml, customize
@@ -102,17 +105,17 @@ See `setting-up-projects` for the general bootstrap philosophy.
      - `templates/gitignore` → `.gitignore`
      - `templates/vscode_settings.json` → `.vscode/settings.json`
      - `templates/vscode_extensions.json` → `.vscode/extensions.json`
-   - Copy `shared/` and `shared_tests/` into the new project root if you need the provided building blocks. Trim unused shared modules and dependencies afterward.
+   - The bootstrap renders `shared/` into `src/<package>/shared/`, dev lint checks into `tools/linting/`, and tests into `shared_tests/`. Trim unused modules and dependencies afterward.
    - Copy `rules/coding_rules.md` → `docs/coding_rules.md`
    - Create symlink: `ln -s AGENTS.md CLAUDE.md`
-   - Canonical local bootstrap artifact: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh SOURCE_REPO TARGET_REPO`
+   - Canonical local bootstrap artifact: `skills/setting-up-python-projects/bootstrap_downstream_repo.sh [--package-name NAME] SOURCE_REPO TARGET_REPO` (`--package-name` defaults to `todo_package_name`)
 
 3. **Trim copied shared modules (if needed):**
-   - Keep only the `shared/` and `shared_tests/` subdirectories you actually use
-   - `shared/logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging`)
-   - `shared/shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts`)
-   - Keep matching generic tests in `shared_tests/` beside the copied shared modules
-   - Update import paths after copying if the project package name changes
+   - Keep only the `src/<package>/shared/` subdirectories you actually use
+   - `src/<package>/shared/logging/` — colored logging, file rotating logs, CLI output (see `setting-up-logging`)
+   - `src/<package>/shared/shortcuts/` — keyboard shortcuts for PySide6 apps (see `setting-up-shortcuts`)
+   - `tools/linting/` is dev-only and never ships in the wheel; drop it if you do not want the custom checks
+   - Keep the matching tests in `shared_tests/` beside the copied modules
 
 4. **Create entry points:**
    ```python
@@ -157,7 +160,7 @@ See `setting-up-projects` for the general bootstrap philosophy.
 6. **Initialize environment:**
    ```bash
    git init
-   uv sync --all-extras --group dev
+   uv sync
    uv run poe lint_full
    uv run poe test
    ```
@@ -229,7 +232,7 @@ except asyncio.CancelledError:
 
 ## Bootstrap Script
 
-Use `skills/setting-up-python-projects/bootstrap_downstream_repo.sh` as the canonical local bootstrap artifact. It promotes template files into place, copies `shared/`, `shared_tests/`, and docs files, creates `CLAUDE.md`, then runs `uv sync --all-extras --group dev`, `uv run poe lint_full`, and `uv run poe test` in the downstream repo.
+Use `skills/setting-up-python-projects/bootstrap_downstream_repo.sh` as the canonical local bootstrap artifact. It renders runtime building blocks into `src/<package>/shared/`, copies `tools/linting/` (dev-only) and `shared_tests/`, promotes the template files and docs, creates `CLAUDE.md`, then runs `uv sync`, `uv run poe lint_full`, and `uv run poe test` in the downstream repo. The import package name is `--package-name NAME` (default `todo_package_name`).
 
 ## Python-Specific Customization
 

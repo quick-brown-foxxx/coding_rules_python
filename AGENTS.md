@@ -38,13 +38,16 @@ When adding, removing, or renaming a skill, keep the skill catalogs in sync. The
 
 If the skill is a Python-specific extension of a myai skill, also check whether the new skill should be cross-referenced from the "Related myai Skills" sections of sibling skills in `skills/`.
 
-### Shared Code Modules (`shared/`)
+### Shared Code Modules
 
-Copy-paste building blocks for new projects (not an installable library). Copy the directories you need into the new repo's top-level `shared/` and update imports if the package name changes.
+Copy-paste building blocks for new projects (not an installable library). On bootstrap they render into the downstream repo as:
 
-- `shared/logging/` — colorlog-based file + stdout logging, colored non-log CLI output (`write_info`, `write_error`, etc.)
-- `shared/shortcuts/` — PySide6 keyboard shortcut manager with TOML config, platform defaults, and Qt integration
-- `shared/linting/` — AST-based custom lint checks
+- `src/<package>/shared/logging/` — colorlog-based file + stdout logging, colored non-log CLI output (`write_info`, `write_error`, etc.)
+- `src/<package>/shared/shortcuts/` — PySide6 keyboard shortcut manager with TOML config, platform defaults, and Qt integration
+- `tools/linting/` — AST-based custom lint checks (dev-only)
+- `shared_tests/` — tests for the copied shared modules and lint checks
+
+Canonical sources live at the repo root: `shared/logging/`, `shared/shortcuts/`, `tools/linting/`, `shared_tests/`. Imports become `<package>.shared.logging` / `<package>.shared.shortcuts` downstream (runtime code uses relative imports so it copies verbatim).
 
 ### Templates (`templates/`)
 

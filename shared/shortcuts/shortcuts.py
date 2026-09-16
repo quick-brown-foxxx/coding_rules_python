@@ -9,7 +9,7 @@ To use in another app:
 1. Copy the shared/shortcuts/ directory to your app
 2. Define your DEFAULT_SHORTCUTS in your app's config.py:
 
-    from your_app.shared.shortcuts.shortcuts import ActionShortcut
+    from shared.shortcuts.shortcuts import ActionShortcut
 
     DEFAULT_SHORTCUTS = (
         ActionShortcut("new_file", "New File", "Ctrl+N", "Ctrl+N", "Cmd+N"),
@@ -19,7 +19,7 @@ To use in another app:
 
 3. Initialize with your app's config directory and defaults:
 
-    from your_app.shared.shortcuts.shortcuts import ShortcutManager
+    from shared.shortcuts.shortcuts import ShortcutManager
     from pathlib import Path
 
     config_dir = Path("~/.config/your_app").expanduser()

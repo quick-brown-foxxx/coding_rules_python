@@ -4,7 +4,7 @@ Provides simple, shared functions for printing colored messages to stdout/stderr
 that are NOT logs. Useful for scripts and CLI tools.
 
 Usage:
-    from shared.non_log_stdout_output import write_info, write_error, write_success
+    from shared.logging.non_log_stdout_output import write_info, write_error, write_success
 
     write_info("Starting download...")
     write_success("Download complete!")

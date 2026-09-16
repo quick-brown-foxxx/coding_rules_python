@@ -15,9 +15,9 @@ For the general engineering philosophy, see myai's `engineering-principles`. Thi
 
 Shared keyboard shortcuts system for PySide6 applications. Provides platform-specific defaults, TOML configuration, and Qt integration.
 
-Copy `shared/shortcuts/` and the matching tests from `shared_tests/`.
+Copy `src/<package>/shared/shortcuts/` and the matching tests from `shared_tests/`.
 
-See also: `shared/shortcuts/README.md` for full API reference.
+See also: `src/<package>/shared/shortcuts/README.md` for full API reference.
 
 ---
 
@@ -35,7 +35,7 @@ See also: `shared/shortcuts/README.md` for full API reference.
 
 ```python
 # src/myapp/config.py
-from shared.shortcuts import ActionShortcut
+from your_app.shared.shortcuts import ActionShortcut
 
 DEFAULT_SHORTCUTS = (
     ActionShortcut("new_file", "New File", "Ctrl+N", "Ctrl+N", "Cmd+N"),
@@ -48,7 +48,7 @@ DEFAULT_SHORTCUTS = (
 ### 2. Initialize Manager
 
 ```python
-from shared.shortcuts import ShortcutManager
+from your_app.shared.shortcuts import ShortcutManager
 from pathlib import Path
 import platformdirs
 
@@ -143,7 +143,7 @@ dependencies = [
 
 ## Files to Copy
 
-From `shared/`:
+From `src/<package>/shared/shortcuts/`:
 - `shortcuts/__init__.py` — public API exports
 - `shortcuts/shortcuts.py` — `ActionShortcut`, `ShortcutConfig`, `ShortcutManager`
 - `shortcuts/README.md` — full API reference
@@ -188,6 +188,6 @@ class TestMyAppShortcuts:
 
 - **`engineering-principles`** — Parent skill. Language-agnostic philosophy.
 - **`building-qt-apps`** — For PySide6 app architecture where shortcuts are used.
-- **`setting-up-python-projects`** — For including `shared/shortcuts/` in new project bootstrap.
+- **`setting-up-python-projects`** — For including `src/<package>/shared/shortcuts/` in new project bootstrap.
 - **`testing-python`** — For pytest-qt and shortcut testing patterns.
 ```
