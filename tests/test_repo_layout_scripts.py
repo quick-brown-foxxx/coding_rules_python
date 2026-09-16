@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from pathlib import Path
+
+import pytest
+
+# bootstrap_downstream_repo.sh is POSIX shell; Windows runners expose only the
+# WSL stub as `bash` (no distribution installed), so these cannot run there.
+pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="bootstrap script is POSIX shell only")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = REPO_ROOT / "skills" / "setting-up-python-projects"

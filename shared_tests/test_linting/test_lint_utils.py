@@ -179,7 +179,8 @@ class TestIsFinalAnnotation:
 class TestReport:
     def test_output_format(self) -> None:
         result = report(Path("src/main.py"), 42, "my-check", "something is wrong")
-        assert result == "src/main.py:42: [my-check] something is wrong"
+        # report() renders the path natively, so the separator is OS-dependent.
+        assert result == f"{Path('src/main.py')}:42: [my-check] something is wrong"
 
     def test_output_format_line_one(self) -> None:
         result = report(Path("a.py"), 1, "check", "msg")

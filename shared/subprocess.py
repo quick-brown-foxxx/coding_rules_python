@@ -92,10 +92,16 @@ async def run_subprocess_with_capture(argv: Sequence[str], *, timeout_s: float) 
     except TimeoutError:
         await _kill_and_reap(process)
         # Snapshot what we hold and stop draining: an orphaned grandchild may
-        # keep the pipe write ends open, so awaiting the readers could block
-        # until the orphan's whole job finishes.
+        # keep the pipe write ends open, so waiting for pipe EOF would block
+        # until the orphan's whole job finishes. Cancelling the drains is safe —
+        # each already buffered its last chunk before its final await.
         for reader in readers:
             reader.cancel()
+        await asyncio.gather(*readers, return_exceptions=True)
+        # Cancelled drains never reach EOF, so close the pipe transports
+        # explicitly or they linger until GC (`unclosed transport` warnings,
+        # Proactor `closed pipe` noise on Windows).
+        process._transport.close()  # type: ignore[reportPrivateUsage]  # rationale: Process exposes no public close; releases both pipe transports
         assert process.returncode is not None  # reaped by _kill_and_reap
         return SubprocessRun(
             returncode=process.returncode,
