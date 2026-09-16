@@ -86,9 +86,10 @@ Copy into new projects, fill TODOs, and customize:
 
 ## Cross-Platform
 
-Shared tooling (`tools/linting/`, `shared/`, `shared_tests/`) targets Linux, macOS, and Windows equally.
+Default: mature projects (packages, apps, multi-UI, Qt) target Windows, macOS, and Linux equally. A deliberately OS-specific project is the exception; standalone/small scripts may stay OS-specific.
 
-- Default to OS-agnostic implementations: `pathlib`, no POSIX-only commands or syscalls.
-- Dev helpers: `poe` tasks and `pyproject.toml` scripts never shells out to POSIX tools. Use crossplatofrm abstractions or write python helper scripts.
-- Small platform differences may be narrow `sys.platform` / `os.name` branches; a complex OS-specific subsystem is a protocol with one implementation per OS. See `building-multi-ui-apps` for the pattern.
+- Use `pathlib`; `platformdirs` for user config/data/cache/log dirs. Never hardcode `~/.config` or `~/Library/Application Support`.
+- No POSIX-only commands or syscalls in cross-platform code.
+- Tiny OS difference → narrow `sys.platform` / `os.name` branch. Complex OS-specific subsystem → `Protocol` with one impl per OS (see `building-multi-ui-apps`).
+- Dev helpers: `poe` tasks and `pyproject.toml` scripts never shell out to POSIX tools. Use cross-platform abstractions or a python helper.
 - Enforcement: CI (`.github/workflows/ci.yml`) runs lint + tests on Linux and Windows; `templates/.github/workflows/ci.yml` ships the same to downstream repos.

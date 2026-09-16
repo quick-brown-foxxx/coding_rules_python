@@ -20,21 +20,28 @@ Typical usage patterns:
       suppress noisy third-party loggers
 
 Usage:
+    from pathlib import Path
+
+    import platformdirs
+
     from shared.logging.logger_setup import (
         setup_stdout_logging,
         setup_file_logging,
         silence_noisy_loggers,
     )
 
+    # Per-OS user dir via platformdirs (don't hardcode ~/.local/state)
+    log_dir = Path(platformdirs.user_log_dir("myapp"))
+
     # CLI tool — file logging only, user messages via write_info/write_error
-    setup_file_logging(log_dir=Path("~/.local/state/myapp/logs"), app_name="myapp")
+    setup_file_logging(log_dir=log_dir, app_name="myapp")
 
     # CLI tool with optional live logs — file logging + stderr console
-    setup_file_logging(log_dir=Path("~/.local/state/myapp/logs"), app_name="myapp")
+    setup_file_logging(log_dir=log_dir, app_name="myapp")
     setup_stdout_logging(level=logging.INFO, stream=sys.stderr)
 
     # GUI app / server — file logging + stdout logging
-    setup_file_logging(log_dir=Path("~/.local/state/myapp/logs"), app_name="myapp")
+    setup_file_logging(log_dir=log_dir, app_name="myapp")
     setup_stdout_logging(level=logging.INFO)
 
     # Suppress noisy third-party loggers

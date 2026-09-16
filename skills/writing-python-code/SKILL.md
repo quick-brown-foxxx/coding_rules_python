@@ -100,8 +100,10 @@ class Renderable(Protocol):
 **Constants** → `Final`:
 
 ```python
+import platformdirs
+
 MAX_RETRIES: Final = 3
-CONFIG_PATH: Final[Path] = Path("~/.config/app").expanduser()
+CONFIG_PATH: Final[Path] = Path(platformdirs.user_config_dir("app"))
 ```
 
 ### Handling `Any` at Library Boundaries
@@ -416,6 +418,17 @@ Google-style docstrings on public APIs. Comments explain **why**, not **what**.
 
 ---
 
+## Cross-Platform
+
+Mature projects target Windows, macOS, and Linux equally. A deliberately OS-specific project is the exception; standalone/small scripts may stay OS-specific.
+
+- `pathlib` for paths. `platformdirs` for user dirs: `user_config_dir`, `user_data_dir`, `user_cache_dir`, `user_log_dir`, `user_state_dir`.
+- No POSIX-only modules/syscalls: `os.killpg`, `pwd`, `grp`, `fcntl`, `resource`, `signal.SIGKILL`.
+- Tiny OS difference → narrow `sys.platform` / `os.name` branch. Complex OS-specific subsystem → `Protocol` with one impl per OS selected at startup (see `building-multi-ui-apps`). Never branch on platform inside business logic.
+- Subprocess shutdown via `start_new_session` + `os.killpg` is POSIX-only — use it only for POSIX targets; a cross-platform app needs a per-OS shutdown impl.
+
+---
+
 ## Preconditions & Validation
 
 > **For the general fail-fast principle, see myai's `engineering-principles`.** Python-specific: validate at subsystem entry points using `msgspec.Struct` for data shape, `isinstance`/`TypeIs` for type narrowing, and `Result[T,E]` for expected validation failures. Check permissions, external deps, config validity, and input ranges before proceeding with business logic.
@@ -512,6 +525,7 @@ Use when generating text output (HTML, configs, reports, markdown):
 | `PySide6` | GUI (no system deps) |
 | `httpx` | HTTP (async) |
 | `msgspec` | External data validation + parsing |
+| `platformdirs` | Per-OS user config/data/cache/log dirs (cross-platform default) |
 | `Jinja2` | Text output generation |
 
 **Always** enable `-h` for help — typer only supports `--help` by default:

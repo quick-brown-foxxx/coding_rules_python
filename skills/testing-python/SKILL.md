@@ -133,7 +133,7 @@ def app_data_dir(tmp_path: Path) -> Path:
     return data_dir
 ```
 
-### Environment Override
+### Environment Override (Linux/XDG example)
 
 ```python
 @pytest.fixture
@@ -146,6 +146,8 @@ def isolated_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> tuple[Path,
     monkeypatch.setenv("XDG_DATA_HOME", str(data))
     return config, data
 ```
+
+Cross-platform alternative: inject the dirs into the code under test, or monkeypatch your `platformdirs.user_*_dir` calls, instead of XDG env vars.
 
 ### Sample Data
 
@@ -220,6 +222,8 @@ Python-specific: use `tmp_path` for files, `monkeypatch` for env vars, `yield` f
 
 When lightweight testing isn't enough. Same philosophy, higher infrastructure complexity.
 
+**Platform note:** the DBus, docker/container, and POSIX mock-binary patterns below are Linux/host-specific. Gate them with `sys.platform` / `pytest.mark.skipif` so the suite stays green on Windows. Prefer `tmp_path` + `platformdirs` monkeypatching for cross-platform path isolation.
+
 ### Core Idea
 
 | Instead of... | Use... |
@@ -275,12 +279,12 @@ def test_services():
     """Start all test containers, yield, then tear down."""
     compose_file = Path(__file__).parent / "containers" / "docker-compose.test.yml"
     subprocess.run(
-        ["podman-compose", "-f", str(compose_file), "up", "-d", "--wait"],
+        ["docker-compose", "-f", str(compose_file), "up", "-d", "--wait"],
         check=True,
     )
     yield
     subprocess.run(
-        ["podman-compose", "-f", str(compose_file), "down", "-v"],
+        ["docker-compose", "-f", str(compose_file), "down", "-v"],
         check=True,
     )
 ```

@@ -118,10 +118,12 @@ When wrappers are impractical, use type stubs in `src/stubs/`.
 ### 1.6 Constants
 
 ```python
+import platformdirs
+from pathlib import Path
 from typing import Final
 
 MAX_RETRIES: Final = 3
-CONFIG_PATH: Final[Path] = Path("~/.config/app").expanduser()
+CONFIG_PATH: Final[Path] = Path(platformdirs.user_config_dir("app"))
 ```
 
 ### 1.7 Immutability
@@ -422,7 +424,16 @@ Circular imports are architectural bugs — not something to work around with `T
 
 ### 6.9 Graceful Shutdown
 
-- **Graceful shutdown:** All apps must handle Ctrl+C without tracebacks or hanging. Scripts: catch `KeyboardInterrupt` at entry point, exit 130. Subprocess wrappers: use `start_new_session=True` and kill process groups on interrupt. Qt apps: install SIGINT handler before event loop. See `setting-up-python-projects` skill for patterns.
+- **Graceful shutdown:** All apps must handle Ctrl+C without tracebacks or hanging. Scripts: catch `KeyboardInterrupt` at entry point, exit 130. Subprocess wrappers: use `start_new_session=True` and kill process groups on interrupt (POSIX-only — on Windows use `terminate()`/`kill()` or an OS-specific impl). Qt apps: install SIGINT handler before event loop. See `setting-up-python-projects` skill for patterns.
+
+### 6.10 Cross-Platform
+
+Mature projects target Windows, macOS, and Linux equally. A deliberately OS-specific project is the exception; standalone/small scripts may stay OS-specific.
+
+- `pathlib` for paths; `platformdirs` for user config/data/cache/log dirs. Never hardcode `~/.config` or `~/.local/state`.
+- No POSIX-only modules/syscalls in cross-platform code (`os.killpg`, `pwd`, `grp`, `fcntl`, `resource`, `signal.SIGKILL`).
+- Tiny OS difference → narrow `sys.platform` / `os.name` branch. Complex OS-specific subsystem → `Protocol` with one impl per OS selected at startup (see `building-multi-ui-apps`). Never branch on platform in business logic.
+- Dev helpers (`poe` tasks, `pyproject.toml` scripts) never shell out to POSIX tools.
 
 ---
 

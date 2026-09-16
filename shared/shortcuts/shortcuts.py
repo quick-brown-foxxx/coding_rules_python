@@ -19,10 +19,12 @@ To use in another app:
 
 3. Initialize with your app's config directory and defaults:
 
-    from shared.shortcuts.shortcuts import ShortcutManager
+    import platformdirs
     from pathlib import Path
 
-    config_dir = Path("~/.config/your_app").expanduser()
+    from shared.shortcuts.shortcuts import ShortcutManager
+
+    config_dir = Path(platformdirs.user_config_dir("your_app"))
     manager = ShortcutManager(
         config_dir=config_dir,
         app_name="your_app",

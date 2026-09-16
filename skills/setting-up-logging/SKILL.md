@@ -51,11 +51,14 @@ Copy `src/<package>/shared/logging/`.
 ```python
 import logging
 from pathlib import Path
+
+import platformdirs
+
 from your_app.shared.logging import setup_file_logging, configure_logger_level, write_info, write_error
 
-# File logs always on
+# File logs always on (platformdirs -> per-OS user dir; never hardcode ~/.local/state)
 setup_file_logging(
-    log_dir=Path("~/.local/state/myapp/logs").expanduser(),
+    log_dir=Path(platformdirs.user_log_dir("myapp")),
     app_name="myapp",
     level=logging.INFO
 )
@@ -76,6 +79,7 @@ import sys
 from pathlib import Path
 from typing import Final
 
+import platformdirs
 import typer
 
 from your_app.shared.logging import setup_file_logging, setup_stdout_logging, silence_noisy_loggers
@@ -105,7 +109,7 @@ def _cli_logging(
     level = _LOG_LEVELS.get(log_level.lower())
     if level is None:
         raise typer.BadParameter(f"Unknown --log-level {log_level!r}; use one of: debug, info, warning, error")
-    setup_file_logging(log_dir=Path("~/.local/state/myapp/logs").expanduser(), app_name="myapp", level=level)
+    setup_file_logging(log_dir=Path(platformdirs.user_log_dir("myapp")), app_name="myapp", level=level)
     silence_noisy_loggers()
     if log_stderr:
         setup_stdout_logging(level=level, stream=sys.stderr)
@@ -116,11 +120,14 @@ def _cli_logging(
 ```python
 import logging
 from pathlib import Path
+
+import platformdirs
+
 from your_app.shared.logging import setup_file_logging, setup_stdout_logging, silence_noisy_loggers
 
 # File logs always on
 setup_file_logging(
-    log_dir=Path("~/.local/state/myapp/logs").expanduser(),
+    log_dir=Path(platformdirs.user_log_dir("myapp")),
     app_name="myapp",
     level=logging.INFO
 )
@@ -174,6 +181,7 @@ write_error("Failed to connect")       # Red → stderr
 [project]
 dependencies = [
     "colorlog>=6.10.1",
+    "platformdirs>=4.0.0",
 ]
 ```
 

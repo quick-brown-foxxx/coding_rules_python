@@ -329,7 +329,7 @@ def submit_answer(self, question_id: str, text: str) -> None:
 
 ## Platform Abstraction
 
-For apps that must run on multiple platforms:
+For apps that must run on multiple platforms. Default is cross-platform (Windows/macOS/Linux); a deliberately OS-specific project is the exception. Each backend uses `platformdirs` (`user_config_dir`, `user_data_dir`, `user_log_dir`) for its OS's dirs.
 
 ```python
 from abc import ABC, abstractmethod

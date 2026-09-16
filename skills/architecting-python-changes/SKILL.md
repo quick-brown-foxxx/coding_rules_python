@@ -40,6 +40,11 @@ Follow the 6-step flow in myai's `architecting-changes` (classify → find chang
 
 - For the Python-specific multi-UI pattern, see `building-multi-ui-apps`. For the general reusable core philosophy, see myai's `architecting-changes`.
 
+### Platform boundaries
+
+- Default to cross-platform (Windows/macOS/Linux). A deliberately OS-specific project is the exception; standalone scripts may stay OS-specific.
+- Complex OS behavior is a boundary: a `Protocol` with one impl per OS, selected once at startup — never scattered `if sys.platform` in business logic. See `building-multi-ui-apps`.
+
 ---
 
 ## Where To Look

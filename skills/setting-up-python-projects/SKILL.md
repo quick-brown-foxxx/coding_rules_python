@@ -187,6 +187,8 @@ def main() -> int:
 
 ### Subprocess wrappers
 
+**POSIX-only below.** `start_new_session` + `os.killpg` do not exist on Windows. On Windows use `process.terminate()`/`kill()`, or hide the difference behind one impl per OS (see `building-multi-ui-apps`). Standalone scripts may stay POSIX-specific.
+
 Always pass `start_new_session=True` — creates a process group so you can kill the entire tree, not just the parent.
 
 **Quick subtask (immediate kill):**
@@ -229,6 +231,14 @@ except asyncio.CancelledError:
         process.kill()
     raise
 ```
+
+## Cross-Platform
+
+Mature projects target Windows, macOS, and Linux equally; a deliberately OS-specific project is the exception; standalone scripts may stay OS-specific.
+
+- Use `platformdirs` for user dirs (`user_config_dir`, `user_data_dir`, `user_cache_dir`, `user_log_dir`, `user_state_dir`) — never hardcode `~/.config` or `~/.local/state`.
+- The `os.killpg` / `signal.SIGKILL` shutdown patterns above are POSIX-only. Add branches for windows.
+- Dev helpers (`poe` tasks, `pyproject.toml` scripts) never shell out to POSIX tools — write a python helper instead.
 
 ## Bootstrap Script
 

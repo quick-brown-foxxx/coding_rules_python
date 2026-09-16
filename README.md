@@ -94,5 +94,6 @@ Deploy skills from `skills/` to `~/.claude/skills/`. Load `architecting-python-c
 - **Data validation?** `msgspec.Struct` for configs and non-framework external data. In FastAPI apps, use `pydantic` at the HTTP edge and convert immediately into framework-free typed structures.
 - **CLI?** typer (argparse only for stdlib-only scripts)
 - **GUI?** PySide6 + qasync (not QtAsyncio — still in technical preview)
+- **Cross-platform?** Yes by default for mature projects: `pathlib`, `platformdirs`, no POSIX-only syscalls. OS-specific projects exempt; small scripts may stay OS-specific.
 - **Text output?** Jinja2
 - **Tests?** E2e > unit. Real > mocked. Trustworthiness > coverage.

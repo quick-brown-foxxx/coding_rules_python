@@ -335,7 +335,7 @@ DEFAULT_SHORTCUTS = (
 )
 ```
 
-User overrides stored in `~/.config/appname/shortcuts.toml`.
+User overrides stored in `platformdirs.user_config_dir("appname")/shortcuts.toml`.
 
 ---
 
