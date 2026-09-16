@@ -54,8 +54,6 @@ packages = ["src/todo_package_name"]
 # ============================================================================
 
 [tool.pyright]
-# Template default for this repo's primary Linux workflow; downstream projects may need a different platform.
-pythonPlatform = "Linux"
 pythonVersion = "3.14"
 venvPath = "."
 venv = ".venv"
@@ -66,7 +64,7 @@ reportImplicitStringConcatenation = "none"
 # basedpyright's generic unused-call rule is noisy here; Result handling is enforced by lint_ignored_results.
 reportUnusedCallResult = "none"
 reportUnnecessaryIsInstance = "none"
-include = ["src", "tests", "shared_tests", "tools"]
+# We include everything by default
 exclude = [
     "**/__pycache__",
     "**/node_modules",
@@ -75,6 +73,8 @@ exclude = [
     "build",
     "dist",
     "wrktrs",
+    ".worktrees/",
+    ".kilo/",
     "tests/fixtures",
     "shared_tests/fixtures",
 ]
@@ -86,7 +86,8 @@ exclude = [
 [tool.ruff]
 line-length = 120
 target-version = "py314"
-include = ["src/**/*.py", "tests/**/*.py", "shared_tests/**/*.py", "tools/**/*.py"]
+# We include everything except generated/foreign trees; ruff's default excludes cover
+# caches and venvs.
 extend-exclude = [
     "venv", ".venv", "*.egg", "*.egg-info", "**/dist", "**/build",
     "**/__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so", "wrktrs",

@@ -29,8 +29,6 @@ dev = [
 # ============================================================================
 
 [tool.pyright]
-# This repo targets a Linux-first workflow today; broaden only when the codebase actually needs it.
-pythonPlatform = "Linux"
 pythonVersion = "3.14"
 venvPath = "."
 venv = ".venv"
@@ -40,7 +38,6 @@ reportImplicitStringConcatenation = "none"
 # basedpyright's generic unused-call rule is noisy here; Result handling is enforced by lint_ignored_results.
 reportUnusedCallResult = "none"
 reportUnnecessaryIsInstance = "none"
-include = ["shared", "shared_tests", "tests", "tools"]
 exclude = [
     "**/__pycache__",
     ".venv",
@@ -48,6 +45,9 @@ exclude = [
     "templates",
     "tests/fixtures",
     "shared_tests/fixtures",
+    ".kilo",
+    "wrktrs",
+    ".worktrees",
 ]
 
 # ============================================================================
@@ -57,7 +57,6 @@ exclude = [
 [tool.ruff]
 line-length = 120
 target-version = "py314"
-include = ["shared/**/*.py", "shared_tests/**/*.py", "tests/**/*.py", "tools/**/*.py"]
 extend-exclude = [
     "venv", ".venv", "*.egg", "*.egg-info", "**/dist", "**/build",
     "**/__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so",

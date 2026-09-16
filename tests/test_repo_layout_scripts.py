@@ -153,7 +153,7 @@ def test_bootstrap_shell_script_supports_stdin_copy_paste_flow(tmp_path: Path) -
     assert "from todo_package_name.shared.shortcuts import ShortcutManager" in shared_tests_init
 
     assert uv_log.read_text(encoding="utf-8").splitlines() == [
-        "sync --all-extras --group dev",
+        "sync",
         "run poe lint_full",
         "run poe test",
     ]
