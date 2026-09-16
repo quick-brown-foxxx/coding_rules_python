@@ -17,11 +17,12 @@ Each Python skill here extends one or more myai parent skills. The load order is
 3. Relevant myai workflow skill (e.g., `architecting-changes`, `test-driven-development`)
 4. Python-specific extension from this repo (e.g., `writing-python-code`, `testing-python`)
 
-The 10 Python skills and their myai parents
+The 11 Python skills and their myai parents
 
 | Python Skill | myai Parent(s) |
 |---|---|
 | `writing-python-code` | `engineering-principles` |
+| `python-reliable-subprocess-handling` | `engineering-principles` |
 | `testing-python` | `high-level-testing-strategy`, `test-driven-development`, `manual-testing` |
 | `architecting-python-changes` | `architecting-changes` |
 | `setting-up-python-projects` | `engineering-principles`, `setting-up-projects` |

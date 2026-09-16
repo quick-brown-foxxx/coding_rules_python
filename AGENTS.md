@@ -12,13 +12,14 @@ Think of it as: **myai = the engine and chassis; this repo = the Python body kit
 
 ## What's Here
 
-### Python Skills (10)
+### Python Skills (11)
 
 Each skill is a Python-specific extension of one or more myai parent skills. Load the myai parent first, then load the Python extension.
 
 | Python Skill | myai Parent(s) | Description |
 |---|---|---|
 | `writing-python-code` | `engineering-principles` | basedpyright strict typing, `Result[T,E]` error handling, async patterns, code style, security |
+| `python-reliable-subprocess-handling` | `engineering-principles` | asyncio subprocess timeout/cancel output loss, orphaned children holding pipes, output tails, test doubles |
 | `testing-python` | `high-level-testing-strategy`, `test-driven-development`, `manual-testing` | pytest fixtures, CLI/e2e tests, containerized testing, mock servers, pytest-qt |
 | `architecting-python-changes` | `architecting-changes` | Python-specific architecture router: boundaries, wrappers, reusable cores, framework choices |
 | `setting-up-python-projects` | `engineering-principles`, `setting-up-projects` | Bootstrap general Python projects: uv, ruff, basedpyright, pre-commit, src layout, templates |

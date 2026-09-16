@@ -349,6 +349,8 @@ async def fetch_data(url: str) -> Result[bytes, str]:
 
 ### Subprocess Execution
 
+> **For advanced cases: timeouts, kills, and reliably recovering output, see `python-reliable-subprocess-handling`.** `communicate()` under `asyncio.timeout()` throws away already-drained bytes on cancel, and `kill()` does not kill a child's children — both are covered there. The pattern below is only safe for the simple, fast, no-timeout case.
+
 ```python
 async def run_command(args: list[str]) -> Result[str, str]:
     try:
@@ -541,5 +543,6 @@ app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]})
 ## Related myai Skills
 
 - **`engineering-principles`** — Parent skill. Language-agnostic philosophy: pit of success, fail fast, error handling as control flow, testing philosophy, architecture separation.
+- **`python-reliable-subprocess-handling`** — Refines the async subprocess rules above: timeout-safe output capture, orphaned children and pipes, test doubles.
 - **`architecting-changes`** — For architecture decisions before writing code. Load `architecting-python-changes` for the Python-specific extension.
 - **`code-simplification`** — For refactoring Python code for clarity.
